@@ -1,4 +1,4 @@
-#include "scanner.h"
+#include "automat.h"
 
 AutomatState transition(AutomatState current, char edge, unsigned int *counter)
 {
@@ -9,6 +9,7 @@ AutomatState transition(AutomatState current, char edge, unsigned int *counter)
         // Error, Start, Ls, Gt, ExlPoint, Assign, Comma, Colon, RPar, LPar, SingleQmark, Id, BeginString, IntLit, Plus, Minus, Asterisk, Slash, Space, NewLine
         //##############################
         case Error:
+            fprintf(stderr, "Error: automat.c - should have created a token already");
             return Error;
 
         case Start:
