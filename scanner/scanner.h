@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include "automat.h"
 
 typedef struct Lexeme
 {
@@ -45,3 +46,6 @@ typedef struct Lexeme
         double DoubleValue;
     }   extra_data;
 } Lexeme;
+
+Lexeme make_lexeme(AutomatState current);
+Lexeme get_lexeme(void);

@@ -1,7 +1,6 @@
 #include "scanner.h"
-#include "automat.h"
 
-Lexeme get_lexeme()
+Lexeme get_lexeme(void)
 {
     AutomatState current = Start;
     unsigned int counter = 0;   // helper variable for nested multiline comments
@@ -77,8 +76,17 @@ Lexeme make_lexeme(AutomatState current)
         case EndStringLit:
             lexeme.kind = STRING;
             break;
+        case EmptyString:
+            lexeme.kind = STRING;
+            break;
+        case MltLnStringLit:
+            lexeme.kind = MULTILINE_STRING;
+            break;
         case IntLit:
             lexeme.kind = INTEGER;
+            break;
+        case DoubleLit:
+            lexeme.kind = DOUBLE;
             break;
         case Plus:
             lexeme.kind = PLUS;
@@ -98,14 +106,20 @@ Lexeme make_lexeme(AutomatState current)
         case NewLine:
             lexeme.kind = NEWLINE;
             break;
+        case Comment:
+            lexeme.kind = COMMENT;
+            break;
+        case BlockComment:
+            lexeme.kind = BLOCK_COMMENT;
+            break;
         case Error:
             fprintf(stderr, "Error: scanner.c - should have created a token already");
             exit(1);
         case Start:
-            fprintf(stderr, "Error: scanner.c - should have created a token already");
+            fprintf(stderr, "Error: scanner.c - invalid Start transition character");
             exit(1);
-        case LEX_EOF:
-            fprintf(stderr, "Error: scanner.c - should have created a token already");
+        default:
+            fprintf(stderr, "Error: scanner.c - not in a final state");
             exit(1);
     }
     return lexeme;
