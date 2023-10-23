@@ -6,8 +6,11 @@ AutomatState transition(AutomatState current, char edge, unsigned int *counter)
     {
         //##############################
         // First level states
-        // Start, Ls, Gt, ExlPoint, Assign, Comma, Colon, RPar, LPar, SingleQmark, Id, BeginString, IntLit, Plus, Minus, Asterisk, Slash, Space, NewLine
+        // Error, Start, Ls, Gt, ExlPoint, Assign, Comma, Colon, RPar, LPar, SingleQmark, Id, BeginString, IntLit, Plus, Minus, Asterisk, Slash, Space, NewLine
         //##############################
+        case Error:
+            return Error;
+
         case Start:
             if (edge == '<') return Ls;
             if (edge == '>') return Gt;
@@ -233,6 +236,9 @@ AutomatState transition(AutomatState current, char edge, unsigned int *counter)
             return Error;
 
         case EndMltLnStringLit:
+            return Error;
+
+        default:
             return Error;
     }
 }
