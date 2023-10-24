@@ -1,16 +1,19 @@
 CC=gcc
 CFLAGS=-std=c99 -Wall -Wextra -pedantic
 
-all: scanner
+all: test
 
-scanner: scanner.o automat.o
-	$(CC) $(CFLAGS) -o scanner scanner.o automat.o
-
-scanner.o: scanner.c scanner.h
+scanner.o: scanner.c scanner.h automat.h
 	$(CC) $(CFLAGS) -c scanner.c
 
 automat.o: automat.c automat.h
 	$(CC) $(CFLAGS) -c automat.c
 
+test: test.o scanner.o automat.o
+	$(CC) $(CFLAGS) -o test test.o scanner.o automat.o
+
+test.o: test.c scanner.h automat.h
+	$(CC) $(CFLAGS) -c test.c
+
 clean:
-	rm -f scanner scanner.o automat.o
+	rm -f test.o scanner.o automat.o
