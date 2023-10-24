@@ -2,9 +2,14 @@
 
 Lexeme get_lexeme(void)
 {
+    Lexeme lexeme;              // the lexeme we are going to return
     AutomatState current = Start;
     unsigned int counter = 0;   // helper variable for nested multiline comments
-    Lexeme lexeme;
+    
+    bool storing_data = false;  // helper variable for storing extra data
+    char *str = NULL;           // helper variable for storing extra data
+    size_t len = 0;             // helper variable for storing extra data
+
     while(true)
     {
         char edge = getchar();
@@ -12,18 +17,61 @@ Lexeme get_lexeme(void)
         {
             return (Lexeme) { .kind = LEX_EOF };
         }
+
         AutomatState next = transition(current, edge, &counter);
+
+        // if we are in the first state and we need to extra data
+        if (current == Start && (next == IntLit || next == BeginString || next == Id)) storing_data = true; 
+        
+        if (storing_data == true)
+        {
+            add_to_string(str, &len, edge, current, next);
+            if (str == NULL)
+            {
+                fprintf(stderr, "Error: scanner.c - realloc failed");
+                exit (99);      // EXIT CODE 99 - failed to allocate memory
+            }
+        }
+
         if (next == Error)
         {
             ungetc(edge, stdin);
-            lexeme = make_lexeme(current);
+            lexeme = make_lexeme(current, str);
+            if (lexeme.kind == ERROR) 
+            {
+                fprintf(stderr, "Error: scanner.c - wrong lexeme structure");
+                exit (1);       // EXIT CODE 1 - wrong lexeme structure
+            }
             return lexeme;
         }
         current = next;
     }
 }
 
-Lexeme make_lexeme(AutomatState current)
+// helper function for storing extra data, 
+void add_to_string(char *str, size_t *len, char edge, AutomatState current, AutomatState next)
+{
+    str = realloc(str, sizeof(char) * (*len + 1));
+    if (str == NULL)
+    {
+        return;
+    }
+
+    // add string terminator, if exiting a final state
+    if (next == Error && 
+       (current == EndStringLit || current == EndMltLnStringLit || current == EmptyString || 
+        current == IntLit || current == DoubleLit ||current == Id || current == IdTypeNil))
+    {
+        str[*len] = '\0';
+        (*len)++;
+        return;
+    }
+    str[*len] = edge;
+    (*len)++;
+}
+
+// generates lexeme from the current state
+Lexeme make_lexeme(AutomatState current, char *str)
 {
     Lexeme lexeme;
     switch (current)
@@ -69,24 +117,31 @@ Lexeme make_lexeme(AutomatState current)
             break;
         case Id:
             lexeme.kind = IDENTIFIER;
+            lexeme.extra_data.string = str;
             break;
         case IdTypeNil:
             lexeme.kind = IDENTIFIER_TYPE_NIL;
+            lexeme.extra_data.string = str;
             break;
         case EndStringLit:
             lexeme.kind = STRING;
+            lexeme.extra_data.string = str;
             break;
         case EmptyString:
             lexeme.kind = STRING;
+            lexeme.extra_data.string = str;
             break;
         case MltLnStringLit:
             lexeme.kind = MULTILINE_STRING;
+            lexeme.extra_data.string = str;
             break;
         case IntLit:
             lexeme.kind = INTEGER;
+            lexeme.extra_data.IntValue = atoi(str);
             break;
         case DoubleLit:
             lexeme.kind = DOUBLE;
+            lexeme.extra_data.DoubleValue = atof(str);
             break;
         case Plus:
             lexeme.kind = PLUS;
@@ -112,15 +167,9 @@ Lexeme make_lexeme(AutomatState current)
         case BlockComment:
             lexeme.kind = BLOCK_COMMENT;
             break;
-        case Error:
-            fprintf(stderr, "Error: scanner.c - should have created a token already");
-            exit(1);
-        case Start:
-            fprintf(stderr, "Error: scanner.c - invalid Start transition character");
-            exit(1);
         default:
-            fprintf(stderr, "Error: scanner.c - not in a final state");
-            exit(1);
+            lexeme.kind = ERROR;
+            break;
     }
     return lexeme;
 }

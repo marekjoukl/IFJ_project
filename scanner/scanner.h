@@ -11,6 +11,7 @@ typedef struct Lexeme
 {
     enum kind
     {
+        ERROR,
         LESS,
         LESS_EQUAL,
         GREATER,
@@ -49,5 +50,6 @@ typedef struct Lexeme
     }   extra_data;
 } Lexeme;
 
-Lexeme make_lexeme(AutomatState current);
+Lexeme make_lexeme(AutomatState current, char *str);
 Lexeme get_lexeme(void);
+void add_to_string(char *str, size_t *len, char edge, AutomatState current, AutomatState next);
