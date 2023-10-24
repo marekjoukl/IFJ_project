@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-std=c99 -Wall -Wextra -pedantic
 
-all: test
+all: test clean
 
 scanner.o: scanner.c scanner.h automat.h
 	$(CC) $(CFLAGS) -c scanner.c
