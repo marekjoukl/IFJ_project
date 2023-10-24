@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include "automat.h"
 
+char* keywords[] = { "Double", "else", "func", "if", "Int", "let", "nil", "return", "String", "var", "while"};
+
 typedef struct Lexeme
 {
     enum kind
