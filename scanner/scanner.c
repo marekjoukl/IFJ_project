@@ -45,6 +45,12 @@ Lexeme get_lexeme(void)
                 fprintf(stderr, "Error: scanner.c - wrong lexeme structure");
                 exit (1);       // EXIT CODE 1 - wrong lexeme structure
             }
+
+            if (lexeme.kind == IDENTIFIER)
+            {
+                // TODO: check if the identifier is a keyword
+            }
+            
             return lexeme;
         }
         current = next;
