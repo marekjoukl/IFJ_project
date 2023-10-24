@@ -1,3 +1,6 @@
+#ifndef AUTOMAT_H
+#define AUTOMAT_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -56,3 +59,5 @@ typedef enum AutomatState
 } AutomatState;
 
 AutomatState transition(AutomatState current, char edge, unsigned int *counter);
+
+#endif // AUTOMAT_H

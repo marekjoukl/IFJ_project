@@ -1,3 +1,6 @@
+#ifndef SCANNER_H
+#define SCANNER_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,7 +8,8 @@
 #include <stdbool.h>
 #include "automat.h"
 
-char* keywords[] = { "Double", "else", "func", "if", "Int", "let", "nil", "return", "String", "var", "while"};
+
+extern char* keywords[];
 
 typedef struct Lexeme
 {
@@ -53,3 +57,5 @@ typedef struct Lexeme
 Lexeme make_lexeme(AutomatState current, char *str);
 Lexeme get_lexeme(void);
 void add_to_string(char *str, size_t *len, char edge, AutomatState current, AutomatState next);
+
+#endif // SCANNER_H
