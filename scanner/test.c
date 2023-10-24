@@ -5,8 +5,12 @@
 int main(void)
 {
     Lexeme lexeme;
-    lexeme = get_lexeme();
-    printf("%d\n", lexeme.kind);
+    while (true)
+    {
+        lexeme = get_lexeme();
+        printf("%d\n", lexeme.kind);
+        if (lexeme.kind == LEX_EOF) break;
+    }
 
     if (lexeme.kind == IDENTIFIER || lexeme.kind == STRING || lexeme.kind == MULTILINE_STRING)
     {
