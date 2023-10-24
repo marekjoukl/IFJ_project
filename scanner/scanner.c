@@ -1,5 +1,7 @@
 #include "scanner.h"
 
+char* keywords[] = { "Double", "else", "func", "if", "Int", "let", "nil", "return", "String", "var", "while"};
+
 Lexeme get_lexeme(void)
 {
     Lexeme lexeme;              // the lexeme we are going to return
