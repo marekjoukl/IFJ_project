@@ -1,2 +1,5 @@
 scanner/test
 scanner/input.txt
+scanner/automat.o
+scanner/test.o
+scanner/scanner.o
