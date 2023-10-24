@@ -39,6 +39,7 @@ Lexeme get_lexeme(void)
             lexeme = make_lexeme(current, str);
             if (lexeme.kind == ERROR) 
             {
+                if (str != NULL) free(str);
                 fprintf(stderr, "Error: scanner.c - wrong lexeme structure");
                 exit (1);       // EXIT CODE 1 - wrong lexeme structure
             }
