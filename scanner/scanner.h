@@ -8,7 +8,6 @@
 #include <stdbool.h>
 #include "automat.h"
 
-
 extern char* keywords[];
 
 typedef struct Lexeme

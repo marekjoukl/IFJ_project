@@ -2,6 +2,7 @@
 
 char* keywords[] = { "Double", "else", "func", "if", "Int", "let", "nil", "return", "String", "var", "while"};
 
+// return the next lexeme, skipping whitespaces
 Lexeme get_next_non_whitespace_lexeme(void)
 {
     Lexeme lexeme;
