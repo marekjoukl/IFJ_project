@@ -2,6 +2,16 @@
 
 char* keywords[] = { "Double", "else", "func", "if", "Int", "let", "nil", "return", "String", "var", "while"};
 
+Lexeme get_next_non_whitespace_lexeme(void)
+{
+    Lexeme lexeme;
+    do
+    {
+        lexeme = get_lexeme();
+    } while (lexeme.kind == SPACE || lexeme.kind == NEWLINE || lexeme.kind == COMMENT || lexeme.kind == BLOCK_COMMENT);
+    return lexeme;
+}
+
 Lexeme get_lexeme(void)
 {
     Lexeme lexeme;              // the lexeme we are going to return
