@@ -56,6 +56,6 @@ typedef struct Lexeme
 
 Lexeme make_lexeme(AutomatState current, char *str);
 Lexeme get_lexeme(void);
-void add_to_string(char *str, size_t *len, char edge, AutomatState current, AutomatState next);
+void add_to_string(char **str, size_t *len, char edge, AutomatState current, AutomatState next);
 
 #endif // SCANNER_H
