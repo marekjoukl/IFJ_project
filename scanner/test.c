@@ -56,19 +56,24 @@ int main(void)
         if (lexeme.kind == IDENTIFIER || lexeme.kind == STRING || lexeme.kind == MULTILINE_STRING)
         {
             printf("       data: %s\n", lexeme.extra_data.string);
+            printf("       data: %s\n", lexeme.extra_data.string);
         }
         if (lexeme.kind == INTEGER)
         {
             //printf("%s\n", "dubeg");
             printf("       data: %d\n", lexeme.extra_data.IntValue);
+            printf("       data: %d\n", lexeme.extra_data.IntValue);
         }
         if (lexeme.kind == DOUBLE)
         {
             printf("       data: %f\n", lexeme.extra_data.DoubleValue);
+            printf("       data: %f\n", lexeme.extra_data.DoubleValue);
         }
+        printf("\n");
         printf("\n");
     }
     
     return 0;
 }
+
 
