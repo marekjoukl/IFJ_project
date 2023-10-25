@@ -27,7 +27,7 @@ Lexeme get_lexeme(void)
         
         if (storing_data == true)
         {
-            add_to_string(str, &len, edge, current, next);
+            add_to_string(&str, &len, edge, current, next);
             if (str == NULL)
             {
                 fprintf(stderr, "Error: scanner.c - realloc failed");
@@ -58,10 +58,10 @@ Lexeme get_lexeme(void)
 }
 
 // helper function for storing extra data, 
-void add_to_string(char *str, size_t *len, char edge, AutomatState current, AutomatState next)
+void add_to_string(char **str, size_t *len, char edge, AutomatState current, AutomatState next)
 {
-    str = realloc(str, sizeof(char) * (*len + 1));
-    if (str == NULL)
+    *str = realloc(*str, sizeof(char) * (*len + 1));
+    if (*str == NULL)
     {
         return;
     }
@@ -71,11 +71,11 @@ void add_to_string(char *str, size_t *len, char edge, AutomatState current, Auto
        (current == EndStringLit || current == EndMltLnStringLit || current == EmptyString || 
         current == IntLit || current == DoubleLit ||current == Id || current == IdTypeNil))
     {
-        str[*len] = '\0';
+        (*str)[*len] = '\0';
         (*len)++;
         return;
     }
-    str[*len] = edge;
+    (*str)[*len] = edge;
     (*len)++;
 }
 
@@ -140,7 +140,7 @@ Lexeme make_lexeme(AutomatState current, char *str)
             lexeme.kind = STRING;
             lexeme.extra_data.string = str;
             break;
-        case MltLnStringLit:
+        case EndMltLnStringLit:
             lexeme.kind = MULTILINE_STRING;
             lexeme.extra_data.string = str;
             break;
