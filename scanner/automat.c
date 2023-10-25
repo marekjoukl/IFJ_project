@@ -140,11 +140,11 @@ AutomatState transition(AutomatState current, char edge, unsigned int *counter)
             return StringLit;
 
         case DecPoint:
-            if (isdigit(edge)) return DoubleLit;
+            if (isdigit(edge)) return DoubleLitDec;
             return Error;
 
         case Exp:
-            if (isdigit(edge)) return DoubleLit;
+            if (isdigit(edge)) return DoubleLitExp;
             if (edge == '+' || edge == '-') return ExpSign;
             return Error;
 
@@ -164,15 +164,19 @@ AutomatState transition(AutomatState current, char edge, unsigned int *counter)
 
         //##############################
         // Third level states
-        // DoubleLit, ExpSign, NestedComment, CommentEnding, EscU, MltLnStringLit, EndStringLit
+        // DoubleLitDec, DoubleLitExp, ExpSign, NestedComment, CommentEnding, EscU, MltLnStringLit, EndStringLit
         //##############################
-        case DoubleLit:
-            if (isdigit(edge)) return DoubleLit;
+        case DoubleLitDec:
+            if (isdigit(edge)) return DoubleLitDec;
             if (edge == 'e' || edge == 'E') return Exp;
             return Error;
 
+        case DoubleLitExp:
+            if (isdigit(edge)) return DoubleLitExp;
+            return Error;
+
         case ExpSign:
-            if (isdigit(edge)) return DoubleLit;
+            if (isdigit(edge)) return DoubleLitExp;
             return Error;
 
         case NestedComment:

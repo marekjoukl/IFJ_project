@@ -30,7 +30,7 @@ Lexeme get_lexeme(void)
             add_to_string(&str, &len, edge, current, next);
             if (str == NULL)
             {
-                fprintf(stderr, "Error: scanner.c - realloc failed");
+                fprintf(stderr, "Error: scanner.c - realloc failed\n");
                 exit (99);      // EXIT CODE 99 - failed to allocate memory
             }
         }
@@ -42,7 +42,7 @@ Lexeme get_lexeme(void)
             if (lexeme.kind == ERROR) 
             {
                 if (str != NULL) free(str);
-                fprintf(stderr, "Error: scanner.c - wrong lexeme structure");
+                fprintf(stderr, "Error: scanner.c - wrong lexeme structure\n");
                 exit (1);       // EXIT CODE 1 - wrong lexeme structure
             }
 
@@ -69,7 +69,8 @@ void add_to_string(char **str, size_t *len, char edge, AutomatState current, Aut
     // add string terminator, if exiting a final state
     if (next == Error && 
        (current == EndStringLit || current == EndMltLnStringLit || current == EmptyString || 
-        current == IntLit || current == DoubleLit ||current == Id || current == IdTypeNil))
+        current == IntLit || current == DoubleLitDec || current == DoubleLitExp || 
+        current == Id || current == IdTypeNil))
     {
         (*str)[*len] = '\0';
         (*len)++;
@@ -148,7 +149,11 @@ Lexeme make_lexeme(AutomatState current, char *str)
             lexeme.kind = INTEGER;
             lexeme.extra_data.IntValue = atoi(str);
             break;
-        case DoubleLit:
+        case DoubleLitDec:
+            lexeme.kind = DOUBLE;
+            lexeme.extra_data.DoubleValue = atof(str);
+            break;
+        case DoubleLitExp:
             lexeme.kind = DOUBLE;
             lexeme.extra_data.DoubleValue = atof(str);
             break;
