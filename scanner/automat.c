@@ -149,7 +149,7 @@ AutomatState transition(AutomatState current, char edge, unsigned int *counter)
             return Error;
 
         case Comment:
-            if (edge != '\n' || edge != '\r' || edge != EOF) return Comment;
+            if (edge != '\n' && edge != '\r' && edge != EOF) return Comment;
             return Error;
 
         case CommentBody:

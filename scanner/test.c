@@ -8,7 +8,7 @@ int main(void)
     while (true)
     {
         lexeme = get_lexeme();
-        printf("%d\n", lexeme.kind);
+        printf("lexeme kind: %d\n", lexeme.kind);
         if (lexeme.kind == LEX_EOF) break;
     }
 
