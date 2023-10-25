@@ -3,3 +3,4 @@ scanner/input.txt
 scanner/automat.o
 scanner/test.o
 scanner/scanner.o
+.DS_Store
