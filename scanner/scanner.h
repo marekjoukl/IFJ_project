@@ -51,11 +51,13 @@ typedef struct Lexeme
         int IntValue;
         double DoubleValue;
     }   extra_data;
+
+    unsigned int line;
 } Lexeme;
 
 Lexeme make_lexeme(AutomatState current, char *str);
-Lexeme get_lexeme(void);
-Lexeme get_next_non_whitespace_lexeme(void);
+Lexeme get_lexeme(unsigned int *line);
+Lexeme get_next_non_whitespace_lexeme(unsigned int *line);
 void add_to_string(char **str, size_t *len, char edge, AutomatState current, AutomatState next);
 
 #endif // SCANNER_H

@@ -3,17 +3,17 @@
 char* keywords[] = { "Double", "else", "func", "if", "Int", "let", "nil", "return", "String", "var", "while"};
 
 // return the next lexeme, skipping whitespaces
-Lexeme get_next_non_whitespace_lexeme(void)
+Lexeme get_next_non_whitespace_lexeme(unsigned int *line)
 {
     Lexeme lexeme;
     do
     {
-        lexeme = get_lexeme();
+        lexeme = get_lexeme(line);
     } while (lexeme.kind == SPACE || lexeme.kind == NEWLINE || lexeme.kind == COMMENT || lexeme.kind == BLOCK_COMMENT);
     return lexeme;
 }
 
-Lexeme get_lexeme(void)
+Lexeme get_lexeme(unsigned int *line)
 {
     Lexeme lexeme;              // the lexeme we are going to return
     AutomatState current = Start;
@@ -50,10 +50,11 @@ Lexeme get_lexeme(void)
         {
             ungetc(edge, stdin);
             lexeme = make_lexeme(current, str);
+            lexeme.line = *line;
             if (lexeme.kind == ERROR) 
             {
                 if (str != NULL) free(str);
-                fprintf(stderr, "Error: scanner.c - wrong lexeme structure\n");
+                fprintf(stderr, "Error: scanner.c - wrong lexeme structure at line %i\n", *line);
                 exit (1);       // EXIT CODE 1 - wrong lexeme structure
             }
 
@@ -65,6 +66,7 @@ Lexeme get_lexeme(void)
             return lexeme;
         }
         current = next;
+        if (edge == '\n') (*line)++;
     }
 }
 
