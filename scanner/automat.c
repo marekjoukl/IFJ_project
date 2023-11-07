@@ -1,7 +1,8 @@
 #include "automat.h"
 
-AutomatState transition(AutomatState current, char edge, unsigned int *counter)
+AutomatState transition(AutomatState current, char edge)
 {
+    static unsigned int counter;   // helper variable for counting nested multiline comments
     switch (current)
     {
         //##############################
@@ -94,7 +95,7 @@ AutomatState transition(AutomatState current, char edge, unsigned int *counter)
         case Slash:
             if (edge == '/') return Comment;
             if (edge == '*') {
-                (*counter) = 0;
+                (counter) = 0;
                 return CommentBody;
             }
             return Error;
@@ -181,15 +182,15 @@ AutomatState transition(AutomatState current, char edge, unsigned int *counter)
 
         case NestedComment:
             if (edge == '*') {
-                (*counter)++;
+                (counter)++;
                 return CommentBody;
             }
             return CommentBody;
 
         case CommentEnding:
-            if (edge == '/' && (*counter) == 0) return BlockComment;
+            if (edge == '/' && (counter) == 0) return BlockComment;
             if (edge == '/') {
-                (*counter)--;
+                (counter)--;
                 return CommentBody;
             }
             return CommentBody;

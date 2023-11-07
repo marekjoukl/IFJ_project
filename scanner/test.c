@@ -46,11 +46,10 @@ const char* lexeme_kind_to_string(int kind)
 int main(void)
 {
     Lexeme lexeme;
-    unsigned int line = 1;
     while (true)
     {
-        if (INCLUDE_WHITE_SPACES == 1) lexeme = get_lexeme(&line);
-        else if (INCLUDE_WHITE_SPACES == 0) lexeme = get_next_non_whitespace_lexeme(&line);
+        if (INCLUDE_WHITE_SPACES == 1) lexeme = get_lexeme();
+        else if (INCLUDE_WHITE_SPACES == 0) lexeme = get_next_non_whitespace_lexeme();
 
         printf("lexeme kind: %s\n", lexeme_kind_to_string(lexeme.kind));
         if (lexeme.kind == LEX_EOF) break;

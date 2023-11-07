@@ -3,21 +3,21 @@
 char* keywords[] = { "Double", "else", "func", "if", "Int", "let", "nil", "return", "String", "var", "while"};
 
 // return the next lexeme, skipping whitespaces
-Lexeme get_next_non_whitespace_lexeme(unsigned int *line)
+Lexeme get_next_non_whitespace_lexeme(void)
 {
     Lexeme lexeme;
     do
     {
-        lexeme = get_lexeme(line);
+        lexeme = get_lexeme();
     } while (lexeme.kind == SPACE || lexeme.kind == NEWLINE || lexeme.kind == COMMENT || lexeme.kind == BLOCK_COMMENT);
     return lexeme;
 }
 
-Lexeme get_lexeme(unsigned int *line)
+Lexeme get_lexeme(void)
 {
+    static unsigned int line_counter = 1;   // helper variable for counting lines
     Lexeme lexeme;              // the lexeme we are going to return
     AutomatState current = Start;
-    unsigned int counter = 0;   // helper variable for nested multiline comments
     
     bool storing_data = false;  // helper variable for storing extra data
     char *str = NULL;           // helper variable for storing extra data
@@ -31,7 +31,7 @@ Lexeme get_lexeme(unsigned int *line)
             return (Lexeme) { .kind = LEX_EOF };
         }
 
-        AutomatState next = transition(current, edge, &counter);
+        AutomatState next = transition(current, edge);
 
         // if we are in the first state and we need to extra data
         if (current == Start && (next == IntLit || next == BeginString || next == Id)) storing_data = true; 
@@ -50,11 +50,11 @@ Lexeme get_lexeme(unsigned int *line)
         {
             ungetc(edge, stdin);
             lexeme = make_lexeme(current, str);
-            lexeme.line = *line;
+            lexeme.line = line_counter;
             if (lexeme.kind == ERROR) 
             {
                 if (str != NULL) free(str);
-                fprintf(stderr, "Error: scanner.c - wrong lexeme structure at line %i\n", *line);
+                fprintf(stderr, "Error: scanner.c - wrong lexeme structure at line %i\n", line_counter);
                 exit (1);       // EXIT CODE 1 - wrong lexeme structure
             }
 
@@ -66,7 +66,7 @@ Lexeme get_lexeme(unsigned int *line)
             return lexeme;
         }
         current = next;
-        if (edge == '\n') (*line)++;
+        if (edge == '\n') (line_counter)++;
     }
 }
 

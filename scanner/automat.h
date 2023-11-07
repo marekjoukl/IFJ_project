@@ -59,6 +59,6 @@ typedef enum AutomatState
     NewLine,
 } AutomatState;
 
-AutomatState transition(AutomatState current, char edge, unsigned int *counter);
+AutomatState transition(AutomatState current, char edge);
 
 #endif // AUTOMAT_H
