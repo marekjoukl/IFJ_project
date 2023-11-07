@@ -56,10 +56,10 @@ int main(void)
         if (lexeme.kind == IDENTIFIER || lexeme.kind == STRING || lexeme.kind == MULTILINE_STRING)
         {
             printf("       data: %s\n", lexeme.extra_data.string);
+            free(lexeme.extra_data.string);       //TODO: might need to be removed if we want to use the string later  
         }
         if (lexeme.kind == INTEGER)
         {
-            //printf("%s\n", "dubeg");
             printf("       data: %d\n", lexeme.extra_data.IntValue);
         }
         if (lexeme.kind == DOUBLE)
