@@ -9,7 +9,7 @@ Lexeme get_next_non_whitespace_lexeme(void)
     do
     {
         lexeme = get_lexeme();
-    } while (lexeme.kind == SPACE || lexeme.kind == NEWLINE || lexeme.kind == COMMENT || lexeme.kind == BLOCK_COMMENT);
+    } while (lexeme.kind == SPACE || lexeme.kind == NEWLINE ||lexeme.kind == COMMENT || lexeme.kind == BLOCK_COMMENT);
     return lexeme;
 }
 
@@ -62,7 +62,8 @@ Lexeme get_lexeme(void)
             {
                 // TODO: check if the identifier is a keyword
             }
-            
+            // TODO: check if is double?/int?/strin?
+
             return lexeme;
         }
         current = next;
@@ -134,6 +135,12 @@ Lexeme make_lexeme(AutomatState current, char *str)
             break;
         case LPar:
             lexeme.kind = LEFT_PAR;
+            break;
+        case LBrac:
+            lexeme.kind = LEFT_BRACKET;
+            break;
+        case RBrac:
+            lexeme.kind = RIGHT_BRACKET;
             break;
         case DoubleQmark:
             lexeme.kind = DOUBLE_QUESTION_MARK;

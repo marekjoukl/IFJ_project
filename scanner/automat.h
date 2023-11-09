@@ -23,6 +23,8 @@ typedef enum AutomatState
     Colon,
     RPar,
     LPar,
+    LBrac,
+    RBrac,
     SingleQmark,
     DoubleQmark,
     Id,

@@ -23,6 +23,8 @@ const char* lexeme_kind_to_string(int kind)
         case COLON: return "COLON";
         case RIGHT_PAR: return "RIGHT_PAR";
         case LEFT_PAR: return "LEFT_PAR";
+        case LEFT_BRACKET: return "LEFT_BRACKET";
+        case RIGHT_BRACKET: return "RIGHT_BRACKET";
         case DOUBLE_QUESTION_MARK: return "DOUBLE_QUESTION_MARK";
         case IDENTIFIER: return "IDENTIFIER";
         case IDENTIFIER_TYPE_NIL: return "IDENTIFIER_TYPE_NIL";

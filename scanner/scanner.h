@@ -27,6 +27,8 @@ typedef struct Lexeme
         COLON,
         RIGHT_PAR,
         LEFT_PAR,
+        LEFT_BRACKET,
+        RIGHT_BRACKET,
         DOUBLE_QUESTION_MARK,
         IDENTIFIER,
         IDENTIFIER_TYPE_NIL,
@@ -42,7 +44,7 @@ typedef struct Lexeme
         BLOCK_COMMENT,
         SPACE,
         NEWLINE,
-        LEX_EOF,
+        LEX_EOF,    
     } kind;
 
     union extra_data

@@ -7,7 +7,7 @@ AutomatState transition(AutomatState current, char edge)
     {
         //##############################
         // First level states
-        // Error, Start, Ls, Gt, ExlPoint, Assign, Comma, Colon, RPar, LPar, SingleQmark, Id, BeginString, IntLit, Plus, Minus, Asterisk, Slash, Space, NewLine
+        // Error, Start, Ls, Gt, ExlPoint, Assign, Comma, Colon, RPar, LPar, SingleQmark, Id, BeginString, IntLit, Plus, Minus, Asterisk, Slash, Space, NewLine, LBrac, RBrac
         //##############################
         case Error:
             fprintf(stderr, "Error: automat.c - should have created a token already");
@@ -22,6 +22,8 @@ AutomatState transition(AutomatState current, char edge)
             if (edge == ':') return Colon;
             if (edge == ')') return RPar;
             if (edge == '(') return LPar;
+            if (edge == '{') return LBrac;
+            if (edge == '}') return RBrac;
             if (edge == '?') return SingleQmark;
             if (isalpha(edge) || edge == '_') return Id;
             if (edge == '"') return BeginString;
