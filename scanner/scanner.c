@@ -76,7 +76,7 @@ Lexeme get_lexeme(void)
 // helper function for storing extra data, 
 void add_to_string(char **str, size_t *len, size_t *capacity, char edge, AutomatState current, AutomatState next)
 {
-    // if 
+    // if we need to allocate more space
     if (*len >= *capacity)
     {
         *str = realloc(*str, sizeof(char) * (*len + STRING_CHUNK));
