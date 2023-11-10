@@ -21,8 +21,9 @@ Lexeme get_lexeme(void)
     AutomatState current = Start;
     
     bool storing_data = false;  // helper variable for storing extra data
-    char *str = NULL;           // helper variable for storing extra data
-    size_t len = 0;             // helper variable for storing extra data
+    char *str = NULL;           // helper variable for storing strings
+    size_t len = 0;             // helper variable for storing strings
+    size_t capacity = 0;        // helper variable for storing strings
 
     while(true)
     {
@@ -39,7 +40,7 @@ Lexeme get_lexeme(void)
         
         if (storing_data == true)
         {
-            add_to_string(&str, &len, edge, current, next);
+            add_to_string(&str, &len, &capacity, edge, current, next);
             if (str == NULL)
             {
                 fprintf(stderr, "Error: scanner.c - realloc failed\n");
@@ -73,12 +74,17 @@ Lexeme get_lexeme(void)
 }
 
 // helper function for storing extra data, 
-void add_to_string(char **str, size_t *len, char edge, AutomatState current, AutomatState next)
+void add_to_string(char **str, size_t *len, size_t *capacity, char edge, AutomatState current, AutomatState next)
 {
-    *str = realloc(*str, sizeof(char) * (*len + 1 + STRING_CHUNK));
-    if (*str == NULL)
+    // if 
+    if (*len >= *capacity)
     {
-        return;
+        *str = realloc(*str, sizeof(char) * (*len + STRING_CHUNK));
+        if (*str == NULL)
+        {
+            return;
+        }
+        (*capacity) += STRING_CHUNK;
     }
 
     // add string terminator, if exiting a final state
@@ -93,6 +99,8 @@ void add_to_string(char **str, size_t *len, char edge, AutomatState current, Aut
     }
     (*str)[*len] = edge;
     (*len)++;
+    fprintf(stderr, "len: %zu\n", *len);
+    fprintf(stderr, "capacity: %zu\n", *capacity);
 }
 
 // generates lexeme from the current state
