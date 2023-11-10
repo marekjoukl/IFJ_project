@@ -1,6 +1,7 @@
 #include "scanner.h"
 
 char* keywords[] = { "Double", "else", "func", "if", "Int", "let", "nil", "return", "String", "var", "while"};
+const unsigned int STRING_CHUNK = 10;   // how much new space to allocate when reallocating space for a string
 
 // return the next lexeme, skipping whitespaces
 Lexeme get_next_non_whitespace_lexeme(void)
@@ -74,7 +75,7 @@ Lexeme get_lexeme(void)
 // helper function for storing extra data, 
 void add_to_string(char **str, size_t *len, char edge, AutomatState current, AutomatState next)
 {
-    *str = realloc(*str, sizeof(char) * (*len + 1));
+    *str = realloc(*str, sizeof(char) * (*len + 1 + STRING_CHUNK));
     if (*str == NULL)
     {
         return;
