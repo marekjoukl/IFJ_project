@@ -34,6 +34,7 @@ const char* lexeme_kind_to_string(int kind)
         case DOUBLE: return "DOUBLE";
         case PLUS: return "PLUS";
         case MINUS: return "MINUS";
+        case ARROW: return "ARROW";
         case ASTERISK: return "ASTERISK";
         case SLASH: return "SLASH";
         case COMMENT: return "COMMENT";

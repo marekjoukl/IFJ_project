@@ -38,6 +38,7 @@ typedef struct Lexeme
         DOUBLE,
         PLUS,
         MINUS,
+        ARROW,
         ASTERISK,
         SLASH,
         COMMENT,

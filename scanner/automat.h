@@ -50,6 +50,7 @@ typedef enum AutomatState
     ExpSign,
     Plus,
     Minus,
+    Arrow,
     Asterisk,
     Slash,
     Comment,

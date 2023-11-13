@@ -89,6 +89,7 @@ AutomatState transition(AutomatState current, char edge)
             return Error;
 
         case Minus:
+            if (edge == '>') return Arrow;
             return Error;
 
         case Asterisk:

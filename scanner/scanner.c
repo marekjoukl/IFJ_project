@@ -195,6 +195,9 @@ Lexeme make_lexeme(AutomatState current, char *str)
         case Minus:
             lexeme.kind = MINUS;
             break;
+        case Arrow:
+            lexeme.kind = ARROW;
+            break;
         case Asterisk:
             lexeme.kind = ASTERISK;
             break;
