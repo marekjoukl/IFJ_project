@@ -90,8 +90,7 @@ void add_to_string(char **str, size_t *len, size_t *capacity, char edge, Automat
     // add string terminator, if exiting a final state
     if (next == Error && 
        (current == EndStringLit || current == EndMltLnStringLit || current == EmptyString || 
-        current == IntLit || current == DoubleLitDec || current == DoubleLitExp || 
-        current == Id || current == IdTypeNil))
+        current == IntLit || current == DoubleLitDec || current == DoubleLitExp || current == Id))
     {
         (*str)[*len] = '\0';
         (*len)++;
@@ -99,8 +98,6 @@ void add_to_string(char **str, size_t *len, size_t *capacity, char edge, Automat
     }
     (*str)[*len] = edge;
     (*len)++;
-    fprintf(stderr, "len: %zu\n", *len);
-    fprintf(stderr, "capacity: %zu\n", *capacity);
 }
 
 // generates lexeme from the current state
@@ -151,41 +148,56 @@ Lexeme make_lexeme(AutomatState current, char *str)
         case RBrac:
             lexeme.kind = RIGHT_BRACKET;
             break;
+        case SingleQmark:
+            lexeme.kind = QUESTION_MARK;
+            break;
         case DoubleQmark:
             lexeme.kind = DOUBLE_QUESTION_MARK;
             break;
         case Id:
-            lexeme.kind = IDENTIFIER;
-            lexeme.extra_data.string = str;
-            break;
-        case IdTypeNil:
-            lexeme.kind = IDENTIFIER_TYPE_NIL;
-            lexeme.extra_data.string = str;
+            if (strcmp(str, "Double") == 0) lexeme.kind = DOUBLE;
+            else if (strcmp(str, "else") == 0) lexeme.kind = ELSE;
+            else if (strcmp(str, "func") == 0) lexeme.kind = FUNC;
+            else if (strcmp(str, "if") == 0) lexeme.kind = IF;
+            else if (strcmp(str, "Int") == 0) lexeme.kind = INT;
+            else if (strcmp(str, "let") == 0) lexeme.kind = LET;
+            else if (strcmp(str, "nil") == 0) lexeme.kind = NIL;
+            else if (strcmp(str, "return") == 0) lexeme.kind = RETURN;
+            else if (strcmp(str, "String") == 0) lexeme.kind = STRING;
+            else if (strcmp(str, "var") == 0) lexeme.kind = VAR;
+            else if (strcmp(str, "while") == 0) lexeme.kind = WHILE;
+            else 
+            {
+                lexeme.kind = IDENTIFIER;
+                lexeme.extra_data.string = str;
+                break;
+            }
+            free(str);
             break;
         case EndStringLit:
-            lexeme.kind = STRING;
+            lexeme.kind = STRING_LIT;
             lexeme.extra_data.string = str;
             break;
         case EmptyString:
-            lexeme.kind = STRING;
+            lexeme.kind = STRING_LIT;
             lexeme.extra_data.string = str;
             break;
         case EndMltLnStringLit:
-            lexeme.kind = MULTILINE_STRING;
+            lexeme.kind = MULTILINE_STRING_LIT;
             lexeme.extra_data.string = str;
             break;
         case IntLit:
-            lexeme.kind = INTEGER;
+            lexeme.kind = INTEGER_LIT;
             lexeme.extra_data.IntValue = atoi(str);
             free(str);
             break;
         case DoubleLitDec:
-            lexeme.kind = DOUBLE;
+            lexeme.kind = DOUBLE_LIT;
             lexeme.extra_data.DoubleValue = atof(str);
             free(str);
             break;
         case DoubleLitExp:
-            lexeme.kind = DOUBLE;
+            lexeme.kind = DOUBLE_LIT;
             lexeme.extra_data.DoubleValue = atof(str);
             free(str);
             break;

@@ -25,13 +25,14 @@ const char* lexeme_kind_to_string(int kind)
         case LEFT_PAR: return "LEFT_PAR";
         case LEFT_BRACKET: return "LEFT_BRACKET";
         case RIGHT_BRACKET: return "RIGHT_BRACKET";
+        case QUESTION_MARK: return "QUESTION_MARK";
         case DOUBLE_QUESTION_MARK: return "DOUBLE_QUESTION_MARK";
         case IDENTIFIER: return "IDENTIFIER";
         case IDENTIFIER_TYPE_NIL: return "IDENTIFIER_TYPE_NIL";
-        case STRING: return "STRING";
-        case MULTILINE_STRING: return "MULTILINE_STRING";
-        case INTEGER: return "INTEGER";
-        case DOUBLE: return "DOUBLE";
+        case STRING_LIT: return "STRING_LIT";
+        case MULTILINE_STRING_LIT: return "MULTILINE_STRING_LIT";
+        case INTEGER_LIT: return "INTEGER_LIT";
+        case DOUBLE_LIT: return "DOUBLE_LIT";
         case PLUS: return "PLUS";
         case MINUS: return "MINUS";
         case ARROW: return "ARROW";
@@ -42,6 +43,17 @@ const char* lexeme_kind_to_string(int kind)
         case SPACE: return "SPACE";
         case NEWLINE: return "NEWLINE";
         case LEX_EOF: return "LEX_EOF";
+        case DOUBLE: return "DOUBLE";
+        case ELSE: return "ELSE";
+        case FUNC: return "FUNC";
+        case IF: return "IF";
+        case INT: return "INT";
+        case LET: return "LET";
+        case NIL: return "NIL";
+        case RETURN: return "RETURN";
+        case STRING: return "STRING";
+        case VAR: return "VAR";
+        case WHILE: return "WHILE";
         default: return "UNKNOWN";
     }
 }
@@ -54,23 +66,23 @@ int main(void)
         if (INCLUDE_WHITE_SPACES == 1) lexeme = get_lexeme();
         else if (INCLUDE_WHITE_SPACES == 0) lexeme = get_next_non_whitespace_lexeme();
 
-        printf("lexeme kind: %s\n", lexeme_kind_to_string(lexeme.kind));
+        fprintf(stderr, "lexeme kind: %s\n", lexeme_kind_to_string(lexeme.kind));
         if (lexeme.kind == LEX_EOF) break;
-        if (lexeme.kind == IDENTIFIER || lexeme.kind == STRING || lexeme.kind == MULTILINE_STRING)
+        if (lexeme.kind == IDENTIFIER || lexeme.kind == STRING_LIT || lexeme.kind == MULTILINE_STRING_LIT)
         {
-            printf("       data: %s\n", lexeme.extra_data.string);
+            fprintf(stderr, "       data: %s\n", lexeme.extra_data.string);
             free(lexeme.extra_data.string);       //TODO: might need to be removed if we want to use the string later  
         }
-        if (lexeme.kind == INTEGER)
+        if (lexeme.kind == INTEGER_LIT)
         {
-            printf("       data: %d\n", lexeme.extra_data.IntValue);
+            fprintf(stderr, "       data: %d\n", lexeme.extra_data.IntValue);
         }
-        if (lexeme.kind == DOUBLE)
+        if (lexeme.kind == DOUBLE_LIT)
         {
-            printf("       data: %f\n", lexeme.extra_data.DoubleValue);
+            fprintf(stderr, "       data: %f\n", lexeme.extra_data.DoubleValue);
         }
-        printf("       line: %d\n", lexeme.line);
-        printf("\n");
+        fprintf(stderr, "       line: %d\n", lexeme.line);
+        fprintf(stderr, "\n");
     }
     
     return 0;
