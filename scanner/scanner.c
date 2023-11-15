@@ -27,10 +27,10 @@ Lexeme get_lexeme(void)
     while(true)
     {
         char edge = getchar();
-        if (edge == EOF)
+        /* if (edge == EOF)
         {
             return (Lexeme) { .kind = LEX_EOF };
-        }
+        } */
 
         AutomatState next = transition(current, edge);
 
@@ -215,6 +215,9 @@ Lexeme make_lexeme(AutomatState current, char *str)
             break;
         case NewLine:
             lexeme.kind = NEWLINE;
+            break;
+        case EndOfFile:
+            lexeme.kind = LEX_EOF;
             break;
         case Comment:
             lexeme.kind = COMMENT;

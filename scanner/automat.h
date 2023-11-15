@@ -59,6 +59,7 @@ typedef enum AutomatState
     BlockComment,
     Space,
     NewLine,
+    EndOfFile,
 } AutomatState;
 
 AutomatState transition(AutomatState current, char edge);
