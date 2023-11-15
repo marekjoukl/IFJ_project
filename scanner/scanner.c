@@ -27,10 +27,6 @@ Lexeme get_lexeme(void)
     while(true)
     {
         char edge = getchar();
-        /* if (edge == EOF)
-        {
-            return (Lexeme) { .kind = LEX_EOF };
-        } */
 
         AutomatState next = transition(current, edge);
 
