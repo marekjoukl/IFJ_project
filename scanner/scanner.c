@@ -1,6 +1,5 @@
 #include "scanner.h"
 
-char* keywords[] = { "Double", "else", "func", "if", "Int", "let", "nil", "return", "String", "var", "while"};
 const unsigned int STRING_CHUNK = 10;   // how much new space to allocate when reallocating space for a string
 
 // return the next lexeme, skipping whitespaces
@@ -59,12 +58,6 @@ Lexeme get_lexeme(void)
                 fprintf(stderr, "Error: scanner.c - wrong lexeme structure at line %i\n", line_counter);
                 exit (1);       // EXIT CODE 1 - wrong lexeme structure
             }
-
-            if (lexeme.kind == IDENTIFIER)
-            {
-                // TODO: check if the identifier is a keyword
-            }
-            // TODO: check if is double?/int?/strin?
 
             return lexeme;
         }
@@ -166,6 +159,7 @@ Lexeme make_lexeme(AutomatState current, char *str)
             else if (strcmp(str, "String") == 0) lexeme.kind = STRING;
             else if (strcmp(str, "var") == 0) lexeme.kind = VAR;
             else if (strcmp(str, "while") == 0) lexeme.kind = WHILE;
+            else if (strcmp(str, "_") == 0) lexeme.kind = UNDERSCORE;
             else 
             {
                 lexeme.kind = IDENTIFIER;

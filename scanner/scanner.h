@@ -8,8 +8,6 @@
 #include <stdbool.h>
 #include "automat.h"
 
-extern char* keywords[];
-
 typedef struct Lexeme
 {
     enum kind
@@ -58,6 +56,7 @@ typedef struct Lexeme
         STRING,
         VAR,
         WHILE,
+        UNDERSCORE,
     } kind;
 
     union extra_data

@@ -54,6 +54,7 @@ const char* lexeme_kind_to_string(int kind)
         case STRING: return "STRING";
         case VAR: return "VAR";
         case WHILE: return "WHILE";
+        case UNDERSCORE: return "UNDERSCORE";
         default: return "UNKNOWN";
     }
 }
