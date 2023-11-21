@@ -1,6 +1,6 @@
 #include "precedent.h"
 //#include "precedent_stack.h"
-#include "../scanner/scanner.h"
+#include "scanner.h"
 
 valid_itmes_t convert_lex_term(Lexeme lex)
 {
@@ -18,7 +18,6 @@ valid_itmes_t convert_lex_term(Lexeme lex)
         case LEFT_PAR:              item.type = LEFT_PAR_T; break;
         case DOUBLE_QUESTION_MARK:  item.type = DOUBLE_QUESTION_MARK_T; break;
         case IDENTIFIER:            item.type = TERM_T; break;
-        case IDENTIFIER_TYPE_NIL:   item.type = TERM_T; break;
         case STRING_LIT:            item.type = TERM_T; break;
         case MULTILINE_STRING_LIT:  item.type = TERM_T; break;
         case INTEGER_LIT:           item.type = TERM_T; break;
