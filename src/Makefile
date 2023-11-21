@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-std=c99 -Wall -Wextra -pedantic -g
 
-all: test
+all: test_scanner
 
 scanner.o: scanner.c scanner.h automat.h
 	$(CC) $(CFLAGS) -c scanner.c
@@ -9,11 +9,11 @@ scanner.o: scanner.c scanner.h automat.h
 automat.o: automat.c automat.h
 	$(CC) $(CFLAGS) -c automat.c
 
-test: test.o scanner.o automat.o
-	$(CC) $(CFLAGS) -o test test.o scanner.o automat.o
+test_scanner: test_scanner.o scanner.o automat.o
+	$(CC) $(CFLAGS) -o test_scanner test_scanner.o scanner.o automat.o
 
-test.o: test.c scanner.h automat.h
-	$(CC) $(CFLAGS) -c test.c
+test_scanner.o: test_scanner.c scanner.h automat.h
+	$(CC) $(CFLAGS) -c test_scanner.c
 
 clean:
-	rm -f test.o scanner.o automat.o test
+	rm -f test_scanner.o scanner.o automat.o test_scanner
