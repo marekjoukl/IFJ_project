@@ -11,6 +11,12 @@ scanner.o: $(SCANNER)scanner.c
 automat.o: $(SCANNER)automat.c 
 	$(CC) $(CFLAGS) -c $(SCANNER)automat.c
 
+test_scanner: test_scanner.o scanner.o automat.o
+	$(CC) $(CFLAGS) -o test_scanner test_scanner.o scanner.o automat.o
+
+test_scanner.o: test_scanner.c scanner.h automat.h
+	$(CC) $(CFLAGS) -c test_scanner.c
+
 #precedent files
 precedent.o:
 	$(CC) $(CFLAGS) -c precedent.c

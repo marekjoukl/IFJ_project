@@ -1,12 +1,11 @@
 #lexical analysys
-scanner/test
-scanner/input.txt
-scanner/automat.o
-scanner/test.o
-scanner/scanner.o
-scanner/input
+*.o
+*.txt
+.vscode
+*.numbers
+test_scannner
 
 #precedent analysys
-precedent/test
+test
 
 .DS_Store
