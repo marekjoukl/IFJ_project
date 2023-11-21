@@ -30,7 +30,6 @@ typedef struct Lexeme
         QUESTION_MARK,
         DOUBLE_QUESTION_MARK,
         IDENTIFIER,
-        IDENTIFIER_TYPE_NIL,
         STRING_LIT,
         MULTILINE_STRING_LIT,
         INTEGER_LIT,
