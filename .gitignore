@@ -1,7 +1,6 @@
-scanner/test
-scanner/input.txt
-scanner/automat.o
-scanner/test.o
-scanner/scanner.o
+test
+input.txt
+*.o
 .DS_Store
 .vscode
+*.numbers
