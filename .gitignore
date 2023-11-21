@@ -4,8 +4,7 @@
 .vscode
 *.numbers
 test_scannner
+.DS_Store
 
 #precedent analysys
 test
-
-.DS_Store
