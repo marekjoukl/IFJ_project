@@ -1,6 +1,12 @@
+#lexical analysys
 scanner/test
 scanner/input.txt
 scanner/automat.o
 scanner/test.o
 scanner/scanner.o
+scanner/input
+
+#precedent analysys
+precedent/test
+
 .DS_Store
