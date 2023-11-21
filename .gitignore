@@ -1,6 +1,10 @@
-test
-input.txt
+#lexical analysys
 *.o
-.DS_Store
+*.txt
 .vscode
 *.numbers
+test_scannner
+.DS_Store
+
+#precedent analysys
+test
