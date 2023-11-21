@@ -1,6 +1,6 @@
 #include "scanner.h"
 
-const unsigned int STRING_CHUNK = 10;   // how much new space to allocate when reallocating space for a string
+#define STRING_CHUNK 10   // how much new space to allocate when reallocating space for a string
 
 // return the next lexeme, skipping whitespaces
 Lexeme get_next_non_whitespace_lexeme(void)
@@ -13,6 +13,7 @@ Lexeme get_next_non_whitespace_lexeme(void)
     return lexeme;
 }
 
+// return the next lexeme, including whitespaces
 Lexeme get_lexeme(void)
 {
     static unsigned int line_counter = 1;   // helper variable for counting lines
