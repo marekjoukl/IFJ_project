@@ -66,7 +66,7 @@ ENDTEST
 
 
 
-int main()
+int main(void)
 {
     test_init();
     push_items();
