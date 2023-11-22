@@ -14,7 +14,7 @@ test_scanner.o: test_scanner.c scanner.h automat.h
 	$(CC) $(CFLAGS) -c test_scanner.c
 
 #precedent files
-precedent.o:
+precedent.o: precedent.c
 	$(CC) $(CFLAGS) -c precedent.c
 
 precedent_stack.o: precedent_stack.c
