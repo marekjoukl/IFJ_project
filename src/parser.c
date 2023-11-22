@@ -64,8 +64,35 @@ bool Sequence(Lexeme token) {
     //TODO: dokoncit
     // <SEQUENCE> -> IF <IF_EXP> LEFT_BRACKET <SEQUENCE> RIGHT_BRACKET <ELSE_STAT> <SEQUENCE>
     else if (token.kind == IF) {
+        token = get_next_non_whitespace_lexeme();
         if (!IfExp(token))
             exit(2);
+
+        token = get_next_non_whitespace_lexeme();
+
+        if (token.kind != LEFT_BRACKET)
+            exit(2);
+
+        token = get_next_non_whitespace_lexeme();
+
+        if (!Sequence(token))
+            exit(2);
+
+        token = get_next_non_whitespace_lexeme();
+
+        if (token.kind != RIGHT_BRACKET)
+            exit(2);
+
+        token = get_next_non_whitespace_lexeme();
+
+        if (!ElseStat(token))
+            exit(2);
+
+        token = get_next_non_whitespace_lexeme();
+
+        if (!Sequence(token))
+            exit(2);
+
         return true;
     }
     // <SEQUENCE> -> WHILE <EXPRESSION> LEFT_BRACKET <SEQUENCE> RIGHT_BRACKET <SEQUENCE>
@@ -74,8 +101,26 @@ bool Sequence(Lexeme token) {
     }
     // <SEQUENCE> -> FUNC IDENTIFIER LEFT_PAR <FIRST_PARAM_DEF> <DEF_FUNCTION> <SEQUENCE>
     else if (token.kind == FUNC) {
+        token = get_next_non_whitespace_lexeme();
+        if (token.kind != IDENTIFIER)
+            exit(2);
+
+        token = get_next_non_whitespace_lexeme();
+        if (token.kind != LEFT_PAR)
+            exit(2);
+
+        token = get_next_non_whitespace_lexeme();
+        if (!FirstParamDef(token))
+            exit(2);
+
+        token = get_next_non_whitespace_lexeme();
         if (!DefFunction(token))
             exit(2);
+
+        token = get_next_non_whitespace_lexeme();
+        if (!Sequence(token))
+            exit(2);
+
         return true;
     }
 
@@ -103,6 +148,52 @@ bool AssignOrFunction(Lexeme token) {
     return false;
 }
 
+bool DefFunction(Lexeme token) {
+    // <DEF_FUNCTION> -> ARROW <TYPE> LEFT_BRACKET <SEQUENCE> <RETURN_FUNCTION> RIGHT_BRACKET
+    if (token.kind != ARROW)
+        exit(2);
+    else {
+        token = get_next_non_whitespace_lexeme();
+        if (!Type(token))
+            exit(2);
+
+        token = get_next_non_whitespace_lexeme();
+        if (token.kind != LEFT_BRACKET)
+            exit(2);
+
+        token = get_next_non_whitespace_lexeme();
+        if (!Sequence(token))
+            exit(2);
+
+        token = get_next_non_whitespace_lexeme();
+        if (!ReturnFunction(token))
+            exit(2);
+
+        token = get_next_non_whitespace_lexeme();
+        if (token.kind != RIGHT_BRACKET)
+            exit(2);
+
+        return true;
+}
+
+    return false;
+}
+
+bool ReturnFunction(Lexeme token) {
+    // <RETURN_FUNCTION> -> RETURN <EXPRESSION>
+    if (token.kind == RETURN){
+        token = get_next_non_whitespace_lexeme();
+        if (!Expression(token))
+            exit(2);
+
+        return true;
+    }
+    // <RETURN_FUNCTION> -> ε
+    if (token.kind == RIGHT_BRACKET)
+        return true;
+    return false;
+}
+
 bool FirstParam(Lexeme token){
     // <FIRST_PARAM> -> RIGHT_PAR
     if (token.kind == RIGHT_PAR)
@@ -119,6 +210,78 @@ bool FirstParam(Lexeme token){
             exit(2);
         return true;
     }
+    return false;
+}
+
+bool FirstParamDef(Lexeme token) {
+    // <FIRST_PARAM_DEF> -> RIGHT_PAR
+    if (token.kind == RIGHT_PAR)
+        return true;
+    // <FIRST_PARAM_DEF> -> <PARAMS_DEF> <PARAMS_DEF_N>
+    if (token.kind == IDENTIFIER || token.kind == UNDERSCORE) {
+        token = get_next_non_whitespace_lexeme();
+        if (!ParamsDef(token))
+            exit(2);
+
+        token = get_next_non_whitespace_lexeme();
+        if(!ParamsDefN(token))
+            exit(2);
+
+        return true;
+    }
+    return false;
+}
+
+bool ParamsDef(Lexeme token) {
+    // <PARAMS_DEF> -> <PARAMS_NAME_DEF> IDENTIFIER COLON <TYPE>
+    if (token.kind == UNDERSCORE || token.kind == IDENTIFIER) {
+        token = get_next_non_whitespace_lexeme();
+        if (!ParamsNameDef(token))
+            exit(2);
+
+        token = get_next_non_whitespace_lexeme();
+        if (token.kind != IDENTIFIER)
+            exit(2);
+
+        token = get_next_non_whitespace_lexeme();
+        if (token.kind != COLON)
+            exit(2);
+
+        token = get_next_non_whitespace_lexeme();
+        if (!Type(token))
+            exit(2);
+
+        return true;
+    }
+    return false;
+}
+
+bool ParamsDefN(Lexeme token) {
+    // <PARAMS_DEF_N> -> RIGHT_PAR
+    if (token.kind == RIGHT_PAR)
+        return true;
+    // <PARAMS_DEF_N> -> COMMA <PARAMS_DEF> <PARAMS_DEF_N>
+    if (token.kind == COMMA){
+        token = get_next_non_whitespace_lexeme();
+        if (!ParamsDef(token))
+            exit(2);
+
+        token = get_next_non_whitespace_lexeme();
+        if(!ParamsDefN(token))
+            exit(2);
+
+        return true;
+    }
+    return false;
+}
+
+bool ParamsNameDef(Lexeme token) {
+    // <PARAMS_NAME_DEF> -> UNDERSCORE
+    if (token.kind == UNDERSCORE)
+        return true;
+    // <PARAMS_NAME_DEF> -> IDENTIFIER
+    if (token.kind == IDENTIFIER)
+        return true;
     return false;
 }
 
@@ -176,6 +339,42 @@ bool IdOrLit(Lexeme token) {
     if (token.kind == IDENTIFIER || token.kind == STRING_LIT || token.kind == DOUBLE_LIT || token.kind ==  INTEGER_LIT)
         return true;
     
+    return false;
+}
+
+bool IfExp(Lexeme token) {
+    if (token.kind == LET) {
+        token = get_next_non_whitespace_lexeme();
+        if (token.kind != IDENTIFIER)
+            exit(2);
+        return true;
+    }
+    if (token.kind == IDENTIFIER || token.kind == INTEGER_LIT || token.kind == DOUBLE_LIT || token.kind == STRING_LIT || token.kind == LEFT_PAR) {
+        token = get_next_non_whitespace_lexeme();
+        if (!Expression(token))
+            exit(2);
+        return true;
+    }
+    return false;
+}
+
+bool ElseStat(Lexeme token) {
+    // <ELSE_STAT> -> ELSE LEFT_BRACKET <SEQUENCE> RIGHT_BRACKET
+    if (token.kind == ELSE) {
+        token = get_next_non_whitespace_lexeme();
+        if (token.kind != LEFT_BRACKET)
+            exit(2);
+
+        token = get_next_non_whitespace_lexeme();
+        if (!Sequence(token))
+            exit(2);
+
+        token = get_next_non_whitespace_lexeme();
+        if (token.kind != RIGHT_BRACKET)
+            exit(2);
+        return true;
+    }
+
     return false;
 }
 
