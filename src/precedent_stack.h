@@ -3,15 +3,6 @@
 
 //#include "precedent.h"
 
-
-//enum item_types
-//{
-//    TERMINAL,
-//    EXPRESSION,
-//    STOPPAGE,
-//    DOLLAR
-//};
-
 typedef struct valid_itmes
 {
     //prec_terminal_t type;
