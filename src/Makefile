@@ -40,4 +40,4 @@ test: test.o precedent_stack.o precedent.o scanner.o automat.o
 
 #clean
 clean:
-	rm -f *.o
+	rm -f *.o test_scanner test_parser test
