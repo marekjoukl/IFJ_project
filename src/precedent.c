@@ -111,10 +111,6 @@ bool precedent_analysys(Lexeme *lexeme)
             valid = false;
             cont = true;
             break;
-//        case FINISH_R:
-//            puts("FINISH"); //debug
-//            valid = false;
-//            cont = false;
         default:
             break;
         }
@@ -133,9 +129,6 @@ bool precedent_analysys(Lexeme *lexeme)
             puts("MERGE"); //debug
             stack_merge(&stack);
             break;
-//        case FINISH_R:
-//            cont = false;
-//            break;
         default:
             cont = false;
             break;
