@@ -20,12 +20,12 @@ precedent.o:
 precedent_stack.o: precedent_stack.c
 	$(CC) $(CFLAGS) -c precedent_stack.c
 
-test.o: test.c
-	$(CC) $(CFLAGS) -c test.c
+test_precedent.o: test_precedent.c
+	$(CC) $(CFLAGS) -c test_precedent.c
 
-test: test.o precedent_stack.o precedent.o scanner.o automat.o
-	$(CC) $(CFLAGS) -o test test.o precedent_stack.o precedent.o scanner.o automat.o
+test_precedent: test_precedent.o precedent_stack.o precedent.o scanner.o automat.o
+	$(CC) $(CFLAGS) -o test_precedent test_precedent.o precedent_stack.o precedent.o scanner.o automat.o
 
 #clean
 clean:
-	rm test.o precedent_stack.o precedent.o scanner.o automat.o
+	rm *.o

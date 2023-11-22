@@ -2,6 +2,22 @@
 //#include "precedent_stack.h"
 #include "scanner.h"
 
+
+//debug ///////////////////////////////////////////////////////////////////////
+void print_stack2(prec_stack_t *stack)
+{
+    int i = 0;
+    printf("------------stack-----------\n");
+    while(stack != NULL)
+    {
+        printf("position %d, type = %d\n", i, stack->items.type);
+        stack = stack->next;
+        i++;
+    }
+    printf("----------------------------\n");
+}
+/////////////////////////////////////////////////////////////////////////////////
+
 valid_itmes_t convert_lex_term(Lexeme lex)
 {
     valid_itmes_t item;
@@ -47,52 +63,88 @@ const prec_rules_t prec_table[TERMINAL_CNT_T][TERMINAL_CNT_T] =
     {STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, SHIFT_R , STOPPAGE_R, ERROR_R}, // (
     {MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , ERROR_R   , MERGE_R , ERROR_R   , MERGE_R}, // )
     {MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , ERROR_R   , MERGE_R , ERROR_R   , MERGE_R}, // term
-    {STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, ERROR_R , STOPPAGE_R, ERROR_R} // $   
+    {STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, ERROR_R , STOPPAGE_R, ERROR_R}  // $   
 };
 
 prec_rules_t give_rule(prec_stack_t *stack, prec_terminal_t input)
 {
     valid_itmes_t top;
     stack_top_terminal(stack, &top);
-    //input = MUL_T; //debug
-    return prec_table[input][top.type]; //debug
+    return prec_table[top.type][input];
 }
 
-bool precedent_analysys(void)
+bool precedent_analysys(Lexeme *lexeme)
 {
     bool valid = true;
+    bool cont = true;
+    valid_itmes_t top; //debug
     prec_stack_t *stack;
     stack_init(&stack);
-    Lexeme lexeme = get_next_non_whitespace_lexeme();
-    valid_itmes_t input = convert_lex_term(lexeme);
-
+    //Lexeme lexeme = get_next_non_whitespace_lexeme();
+    valid_itmes_t input = convert_lex_term(*lexeme);
+    //puts("init"); //debug
     while(valid)
     {
+        stack_top_terminal(stack, &top); //debug
         prec_rules_t rule = give_rule(stack, input.type);
+        printf("1. top = %d, next = %d, rule = %d\n", top.type , input.type , rule); //debug
         switch (rule)
         {
         case SHIFT_R:
             stack_push(&stack, &input);
-            lexeme = get_next_non_whitespace_lexeme();
-            input = convert_lex_term(lexeme);
+            *lexeme = get_next_non_whitespace_lexeme();
+            input = convert_lex_term(*lexeme);
             break;
         case STOPPAGE_R:
+            puts("STOPPAGE"); //debug
             stack_push_stoppage(&stack);
             stack_push(&stack, &input);
-            lexeme = get_next_non_whitespace_lexeme();
-            input = convert_lex_term(lexeme);
+            *lexeme = get_next_non_whitespace_lexeme();
+            input = convert_lex_term(*lexeme);
             break;
         case MERGE_R:
+            puts("MERGE"); //debug
             stack_merge(&stack);
             break;
-        case ERROR_R:
+        case ERROR_R: 
+            puts("ERROR"); //debug
             valid = false;
+            cont = true;
+            break;
+//        case FINISH_R:
+//            puts("FINISH"); //debug
+//            valid = false;
+//            cont = false;
         default:
             break;
         }
     }
+    print_stack2(stack); //debug
+    // second traverse with input = $
+    input.type = DOLLAR_T;
+    while(cont == true)
+    {
+        stack_top_terminal(stack, &top); //debug
+        prec_rules_t rule = give_rule(stack, input.type);
+        printf("2. top = %d, next = %d, rule = %d\n", top.type , input.type , rule); //debug
+        switch (rule)
+        {
+        case MERGE_R:
+            puts("MERGE"); //debug
+            stack_merge(&stack);
+            break;
+//        case FINISH_R:
+//            cont = false;
+//            break;
+        default:
+            cont = false;
+            break;
+        }
+    }
+
     if(stack_empty(stack))
         valid = true;
+    
     stack_dispose(&stack);    
     return valid;
 }

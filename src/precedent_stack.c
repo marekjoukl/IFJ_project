@@ -11,7 +11,9 @@ void stack_init(prec_stack_t **stack)
 
 bool stack_empty(prec_stack_t *stack)
 {
-    return (stack != NULL && stack->items.type == DOLLAR_T && stack->next == NULL);
+    valid_itmes_t destination;
+    stack_top_terminal(stack, &destination);
+    return (stack != NULL && destination.type == DOLLAR_T );
 }
 
 void stack_push(prec_stack_t **stack, valid_itmes_t *item) //mozno by mohol byt typ lexeme pre item?
