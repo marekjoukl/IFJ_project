@@ -26,36 +26,37 @@ bool Sequence(Lexeme token) {
     if (token.kind == LET || token.kind == VAR) {
         if (!VarDef(token))
             exit(2);
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
 
         if (token.kind != IDENTIFIER)
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
 
         if (!VarTypeDef(token))
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
 
         if (!AssignVar(token))
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
 
         Sequence(token);
         return true;
     }
 
     
+    
     // <SEQUENCE> -> IDENTIFIER <ASSIGN_OR_FUNCTION> <SEQUENCE>
     else if (token.kind == IDENTIFIER) {
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
 
         if (!AssignOrFunction(token))
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
 
         Sequence(token);
         return true;
@@ -97,6 +98,26 @@ bool Sequence(Lexeme token) {
     }
     // <SEQUENCE> -> WHILE <EXPRESSION> LEFT_BRACKET <SEQUENCE> RIGHT_BRACKET <SEQUENCE>
     else if (token.kind == WHILE) {
+        GETTOKEN();
+        if (!Expression(token))
+            exit(2);
+        
+        GETTOKEN();
+        if (token.kind != LEFT_BRACKET)
+            exit(2);
+
+        GETTOKEN();
+        if(!Sequence(token))
+            exit(2);
+
+        GETTOKEN();
+        if(token.kind != RIGHT_BRACKET)
+            exit(2);
+
+        GETTOKEN();
+        if(!Sequence(token))
+            exit(2);
+            
         return true;
     }
     // <SEQUENCE> -> FUNC IDENTIFIER LEFT_PAR <FIRST_PARAM_DEF> <DEF_FUNCTION> <SEQUENCE>
@@ -133,14 +154,14 @@ bool Sequence(Lexeme token) {
 bool AssignOrFunction(Lexeme token) {
     // <ASSIGN_OR_FUNCTION> -> ASSIGNMENT <EXP_OR_CALL>
     if (token.kind == ASSIGNMENT){
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (!ExpOrCall(token))
             exit(2);
         return true;
     }
     // <ASSIGN_OR_FUNCTION> -> LEFT_PAR <FIRST_PARAM>
     if (token.kind == LEFT_PAR){
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if(!FirstParam(token))
             exit(2);
         return true;
@@ -200,11 +221,11 @@ bool FirstParam(Lexeme token){
         return true;
     // <FIRST_PARAM> -> <PARAMS> <PARAMS_N>
     if (token.kind == INTEGER_LIT || token.kind == IDENTIFIER || token.kind == STRING_LIT || token.kind == DOUBLE_LIT) {
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (!Params(token))
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
 
         if(!ParamsN(token))
             exit(2);
@@ -291,11 +312,11 @@ bool ParamsN(Lexeme token) {
         return true;
     // <PARAMS_N> -> COMMA <PARAMS> <PARAMS_N>
     if (token.kind == COMMA){
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (!Params(token))
             exit(2);
         
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
 
         if(!ParamsN(token))
             exit(2);
@@ -311,7 +332,7 @@ bool Params(Lexeme token) {
         return true;
     // <PARAMS> -> IDENTIFIER <PARAMS_NAME>
     if (token.kind == IDENTIFIER){
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if(!ParamsName(token))
             exit(2);
         return true;
@@ -322,7 +343,7 @@ bool Params(Lexeme token) {
 bool ParamsName(Lexeme token){
     // <PARAMS_NAME> -> COLON <ID_OR_LIT>
     if (token.kind == COLON){
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if(!IdOrLit(token))
             exit(2);
         return true;
@@ -389,7 +410,7 @@ bool VarDef(Lexeme token) {
 bool VarTypeDef(Lexeme token) {
     // <VAR_TYPE_DEF> -> COLON <TYPE>
     if (token.kind == COLON) {
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (!Type(token))
             exit(2);
         return true;
@@ -404,21 +425,21 @@ bool VarTypeDef(Lexeme token) {
 bool Type(Lexeme token) {
     // <TYPE> -> INT <Q_MARK>
     if (token.kind == INT) {
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if(!QMark(token))
             exit(2);
         return true;
     }
     // <TYPE> -> STRING <Q_MARK>
     else if (token.kind == STRING) {
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if(!QMark(token))
             exit(2);
         return true;
     }
     // <TYPE> -> DOUBLE <Q_MARK>
     else if (token.kind == DOUBLE) {
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if(!QMark(token))
             exit(2);
         return true;
@@ -441,7 +462,7 @@ bool QMark(Lexeme token) {
 bool AssignVar(Lexeme token) {
     // <ASSIGN_VAR> -> ASSIGNMENT <EXP_OR_CALL>
     if (token.kind == ASSIGNMENT) {
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (!ExpOrCall(token))
             exit(2);
         return true;
@@ -455,13 +476,13 @@ bool AssignVar(Lexeme token) {
 
 bool ExpOrCall(Lexeme token) {
     if (token.kind == IDENTIFIER) {             //TODO: FIND OUT WHAT RULE TO USE (26. / 27.)
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (!CallFunction(token))
             exit(2);
         return true;
     }
     else if ((token.kind == IDENTIFIER /* TODO: look into symtable if id is var or func */) || token.kind == INTEGER_LIT || token.kind == DOUBLE_LIT || token.kind == STRING_LIT || token.kind == LEFT_PAR) {
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (!Expression(token))
             exit(2);
         return true;

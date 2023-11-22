@@ -13,6 +13,9 @@
 #include <stdbool.h>
 #include "scanner.h"
 
+#define GETTOKEN() \
+    token = get_next_non_whitespace_lexeme();
+
 bool Prog(Lexeme token);
 bool Sequence(Lexeme token);
 bool VarDef(Lexeme token);
