@@ -8,7 +8,7 @@
 
 bool Prog(Lexeme token) {
     // // <PROG> -> EOF
-    if (token.kind == EOF) return true;
+    if (token.kind == LEX_EOF) return true;
     // <PROG> -> <SEQUENCE>
     if (token.kind == IDENTIFIER || token.kind == FUNC || token.kind == IF || token.kind == LET || token.kind == WHILE || token.kind == VAR) {
         Sequence(token);
@@ -19,7 +19,7 @@ bool Prog(Lexeme token) {
 
 bool Sequence(Lexeme token) {
     // <SEQUENCE> -> ε
-    if (token.kind == RIGHT_BRACKET || token.kind == EOF) return true;
+    if (token.kind == RIGHT_BRACKET || token.kind == LEX_EOF) return true;
 
     // <SEQUENCE> -> <VAR_DEF> IDENTIFIER <VAR_TYPE_DEF> <ASSIGN_VAR> <SEQUENCE>
     if (token.kind == LET || token.kind == VAR) {
@@ -147,6 +147,7 @@ bool Sequence(Lexeme token) {
     else if (token.kind == RIGHT_BRACKET || token.kind == LEX_EOF) {
         return true;
     }
+    return false;
 }
 
 bool AssignOrFunction(Lexeme token) {

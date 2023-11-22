@@ -15,13 +15,13 @@ test_scanner.o: test_scanner.c scanner.h automat.h
 
 
 #parser files
-parser.o:
+parser.o: precedent.c precedent.h
 	$(CC) $(CFLAGS) -c parser.c
 
 test_parser.o: test_parser.c
 	$(CC) $(CFLAGS) -c test_parser.c
 
-test_parser: automat.o scanner.o precedent.o precedent_stack.o test_parser.o parser.o
+test_parser: test_parser.o parser.o automat.o scanner.o precedent.o precedent_stack.o
 	$(CC) $(CFLAGS) -o test_parser test_parser.o parser.o scanner.o automat.o precedent.o precedent_stack.o
 
 
@@ -40,4 +40,4 @@ test: test.o precedent_stack.o precedent.o scanner.o automat.o
 
 #clean
 clean:
-	rm test.o precedent_stack.o precedent.o scanner.o automat.o parser.o 
+	rm -f *.o

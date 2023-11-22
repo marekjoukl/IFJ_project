@@ -9,4 +9,4 @@ build
 
 #precedent analysys
 test
-test_scannner
+test_parser
