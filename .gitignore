@@ -3,7 +3,7 @@
 *.txt
 .vscode
 *.numbers
-test_scannner
+test_scanner
 .DS_Store
 build
 
