@@ -1,6 +1,6 @@
 /**
  * @file parser.c
- * @author Marek Joukl (xjoukl00)
+ * @author Marek Joukl (xjoukl00), Ondrej Kožányi (xkozan01)
  * @brief Parser using recursive descent
  */
 
@@ -65,31 +65,31 @@ bool Sequence(Lexeme token) {
     //TODO: dokoncit
     // <SEQUENCE> -> IF <IF_EXP> LEFT_BRACKET <SEQUENCE> RIGHT_BRACKET <ELSE_STAT> <SEQUENCE>
     else if (token.kind == IF) {
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (!IfExp(token))
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
 
         if (token.kind != LEFT_BRACKET)
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
 
         if (!Sequence(token))
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
 
         if (token.kind != RIGHT_BRACKET)
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
 
         if (!ElseStat(token))
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
 
         if (!Sequence(token))
             exit(2);
@@ -122,23 +122,23 @@ bool Sequence(Lexeme token) {
     }
     // <SEQUENCE> -> FUNC IDENTIFIER LEFT_PAR <FIRST_PARAM_DEF> <DEF_FUNCTION> <SEQUENCE>
     else if (token.kind == FUNC) {
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (token.kind != IDENTIFIER)
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (token.kind != LEFT_PAR)
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (!FirstParamDef(token))
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (!DefFunction(token))
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (!Sequence(token))
             exit(2);
 
@@ -174,23 +174,23 @@ bool DefFunction(Lexeme token) {
     if (token.kind != ARROW)
         exit(2);
     else {
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (!Type(token))
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (token.kind != LEFT_BRACKET)
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (!Sequence(token))
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (!ReturnFunction(token))
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (token.kind != RIGHT_BRACKET)
             exit(2);
 
@@ -203,7 +203,7 @@ bool DefFunction(Lexeme token) {
 bool ReturnFunction(Lexeme token) {
     // <RETURN_FUNCTION> -> RETURN <EXPRESSION>
     if (token.kind == RETURN){
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (!Expression(token))
             exit(2);
 
@@ -240,11 +240,11 @@ bool FirstParamDef(Lexeme token) {
         return true;
     // <FIRST_PARAM_DEF> -> <PARAMS_DEF> <PARAMS_DEF_N>
     if (token.kind == IDENTIFIER || token.kind == UNDERSCORE) {
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (!ParamsDef(token))
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if(!ParamsDefN(token))
             exit(2);
 
@@ -256,19 +256,19 @@ bool FirstParamDef(Lexeme token) {
 bool ParamsDef(Lexeme token) {
     // <PARAMS_DEF> -> <PARAMS_NAME_DEF> IDENTIFIER COLON <TYPE>
     if (token.kind == UNDERSCORE || token.kind == IDENTIFIER) {
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (!ParamsNameDef(token))
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (token.kind != IDENTIFIER)
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (token.kind != COLON)
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (!Type(token))
             exit(2);
 
@@ -283,11 +283,11 @@ bool ParamsDefN(Lexeme token) {
         return true;
     // <PARAMS_DEF_N> -> COMMA <PARAMS_DEF> <PARAMS_DEF_N>
     if (token.kind == COMMA){
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (!ParamsDef(token))
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if(!ParamsDefN(token))
             exit(2);
 
@@ -365,13 +365,13 @@ bool IdOrLit(Lexeme token) {
 
 bool IfExp(Lexeme token) {
     if (token.kind == LET) {
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (token.kind != IDENTIFIER)
             exit(2);
         return true;
     }
     if (token.kind == IDENTIFIER || token.kind == INTEGER_LIT || token.kind == DOUBLE_LIT || token.kind == STRING_LIT || token.kind == LEFT_PAR) {
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (!Expression(token))
             exit(2);
         return true;
@@ -382,15 +382,15 @@ bool IfExp(Lexeme token) {
 bool ElseStat(Lexeme token) {
     // <ELSE_STAT> -> ELSE LEFT_BRACKET <SEQUENCE> RIGHT_BRACKET
     if (token.kind == ELSE) {
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (token.kind != LEFT_BRACKET)
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (!Sequence(token))
             exit(2);
 
-        token = get_next_non_whitespace_lexeme();
+        GETTOKEN();
         if (token.kind != RIGHT_BRACKET)
             exit(2);
         return true;
