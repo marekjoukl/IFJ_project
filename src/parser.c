@@ -15,7 +15,6 @@ bool Prog(Lexeme token) {
         return true;
     }
     exit(2);
-    return false;
 }
 
 bool Sequence(Lexeme token) {
@@ -195,9 +194,7 @@ bool DefFunction(Lexeme token) {
             exit(2);
 
         return true;
-}
-
-    return false;
+    }
 }
 
 bool ReturnFunction(Lexeme token) {
@@ -226,7 +223,6 @@ bool FirstParam(Lexeme token){
             exit(2);
 
         GETTOKEN();
-
         if(!ParamsN(token))
             exit(2);
         return true;
@@ -349,7 +345,7 @@ bool ParamsName(Lexeme token){
         return true;
     }
     // <PARAMS_NAME> -> ε
-    if (token.kind == COMMA || RIGHT_PAR)
+    if (token.kind == COMMA || token.kind == RIGHT_PAR)
         return true;
 
     return false;
@@ -488,4 +484,21 @@ bool ExpOrCall(Lexeme token) {
         return true;
     }
     return false;
+}
+
+bool CallFunction(Lexeme token) {
+    // <CALL_FUNCTION> -> IDENTIFIER LEFT_PAR <FIRST_PARAM>
+    if (token.kind != IDENTIFIER)
+        exit(2);
+    else {
+        GETTOKEN();
+        if (token.kind != LEFT_PAR)
+            exit(2);
+
+        GETTOKEN();
+        if (!FirstParam(token))
+            exit(2);
+
+        return true;
+    }
 }
