@@ -28,7 +28,6 @@ const char* lexeme_kind_to_string(int kind)
         case QUESTION_MARK: return "QUESTION_MARK";
         case DOUBLE_QUESTION_MARK: return "DOUBLE_QUESTION_MARK";
         case IDENTIFIER: return "IDENTIFIER";
-        case IDENTIFIER_TYPE_NIL: return "IDENTIFIER_TYPE_NIL";
         case STRING_LIT: return "STRING_LIT";
         case MULTILINE_STRING_LIT: return "MULTILINE_STRING_LIT";
         case INTEGER_LIT: return "INTEGER_LIT";
@@ -59,8 +58,17 @@ const char* lexeme_kind_to_string(int kind)
     }
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
+    FILE *input = stdin;
+    if (argc > 1) {
+        input = fopen(argv[1], "r");
+        if (input == NULL) {
+            printf("Could not open file %s\n", argv[1]);
+             return 1;
+        }
+    }
+
     Lexeme lexeme;
     while (true)
     {
@@ -84,6 +92,10 @@ int main(void)
         }
         fprintf(stderr, "       line: %d\n", lexeme.line);
         fprintf(stderr, "\n");
+    }
+
+    if (argc > 1) {
+        fclose(input);
     }
     
     return 0;

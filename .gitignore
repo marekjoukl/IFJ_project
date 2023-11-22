@@ -5,6 +5,7 @@
 *.numbers
 test_scannner
 .DS_Store
+build
 
 #precedent analysys
 test_precedent

@@ -7,3 +7,6 @@ Team project for the subject *Formal Languages and Compilers* at FIT VUT. Progra
 - **Daniel Putiš** (xputis00)
 
 ### [Automat States Graph (needs Google Drive sign-in to access)](https://app.diagrams.net/#G1-KdfZnwRCArH8mRM3EBFcQtjo7TIYxtR)
+
+### LL_TABLE
+![LL_Table.png](https://github.com/hepaku/IFJ_project/blob/main/LL_TABLE.png)
