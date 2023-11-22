@@ -501,3 +501,8 @@ bool CallFunction(Lexeme token) {
         return true;
     }
 }
+
+bool Expression(Lexeme *token) {
+    // TODO: call precedence analysis
+    return true;
+}
