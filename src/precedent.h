@@ -2,7 +2,7 @@
 #define PRECEDENT_H
 
 //#include <stdio.h>
-#include "../scanner/scanner.h"
+#include "scanner.h"
 #include "precedent_stack.h"
 
 typedef enum {

@@ -98,10 +98,9 @@ bool Sequence(Lexeme token) {
     // <SEQUENCE> -> WHILE <EXPRESSION> LEFT_BRACKET <SEQUENCE> RIGHT_BRACKET <SEQUENCE>
     else if (token.kind == WHILE) {
         GETTOKEN();
-        if (!Expression(token))
+        if (!Expression(&token))
             exit(2);
         
-        GETTOKEN();
         if (token.kind != LEFT_BRACKET)
             exit(2);
 
@@ -201,7 +200,7 @@ bool ReturnFunction(Lexeme token) {
     // <RETURN_FUNCTION> -> RETURN <EXPRESSION>
     if (token.kind == RETURN){
         GETTOKEN();
-        if (!Expression(token))
+        if (!Expression(&token))
             exit(2);
 
         return true;
@@ -368,7 +367,7 @@ bool IfExp(Lexeme token) {
     }
     if (token.kind == IDENTIFIER || token.kind == INTEGER_LIT || token.kind == DOUBLE_LIT || token.kind == STRING_LIT || token.kind == LEFT_PAR) {
         GETTOKEN();
-        if (!Expression(token))
+        if (!Expression(&token))
             exit(2);
         return true;
     }
@@ -479,7 +478,7 @@ bool ExpOrCall(Lexeme token) {
     }
     else if ((token.kind == IDENTIFIER /* TODO: look into symtable if id is var or func */) || token.kind == INTEGER_LIT || token.kind == DOUBLE_LIT || token.kind == STRING_LIT || token.kind == LEFT_PAR) {
         GETTOKEN();
-        if (!Expression(token))
+        if (!Expression(&token))
             exit(2);
         return true;
     }

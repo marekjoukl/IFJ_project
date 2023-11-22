@@ -1,6 +1,6 @@
 /**
  * @file parser.h
- * @author Marek Joukl (xjoukl00)
+ * @author Marek Joukl (xjoukl00), Ondrej Kožányi (xkozan01)
  * @brief Header for parser
  */
 
@@ -42,7 +42,7 @@ bool IdOrLit(Lexeme token);
 
 
 //TODO: find out how to call precendencnu analyzu
-bool Expression(Lexeme token);
+bool Expression(Lexeme *token);
 
 #endif
 

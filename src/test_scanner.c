@@ -28,7 +28,6 @@ const char* lexeme_kind_to_string(int kind)
         case QUESTION_MARK: return "QUESTION_MARK";
         case DOUBLE_QUESTION_MARK: return "DOUBLE_QUESTION_MARK";
         case IDENTIFIER: return "IDENTIFIER";
-        case IDENTIFIER_TYPE_NIL: return "IDENTIFIER_TYPE_NIL";
         case STRING_LIT: return "STRING_LIT";
         case MULTILINE_STRING_LIT: return "MULTILINE_STRING_LIT";
         case INTEGER_LIT: return "INTEGER_LIT";
