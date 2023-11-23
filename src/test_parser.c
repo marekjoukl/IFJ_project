@@ -13,18 +13,12 @@ int main(int argc, char *argv[]){
     }
     Lexeme token;
     bool check = true;
-    while (true)
-    {
-        token = get_next_non_whitespace_lexeme();     
-        check = Prog(token);
-        if (!check){
-            printf("ERROR\n");
-            break;
-        }
-        else if (check) {
-            printf("funguje\n");
-            break;
-        }
+    token = get_next_non_whitespace_lexeme();  
+    check = Prog(&token);
+    if (!check){
+        printf("ERROR\n");
+    } else {
+        printf("funguje\n");
     }
     fclose(input);
     return 0;
