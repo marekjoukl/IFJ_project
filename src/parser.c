@@ -7,7 +7,7 @@
 #include "parser.h"
 
 bool Prog(Lexeme token) {
-    // // <PROG> -> EOF
+    // <PROG> -> EOF
     if (token.kind == LEX_EOF) return true;
     // <PROG> -> <SEQUENCE>
     if (token.kind == IDENTIFIER || token.kind == FUNC || token.kind == IF || token.kind == LET || token.kind == WHILE || token.kind == VAR) {
@@ -22,7 +22,7 @@ bool Sequence(Lexeme token) {
     if (token.kind == RIGHT_BRACKET || token.kind == LEX_EOF) return true;
 
     // <SEQUENCE> -> <VAR_DEF> IDENTIFIER <VAR_TYPE_DEF> <ASSIGN_VAR> <SEQUENCE>
-    if (token.kind == LET || token.kind == VAR) {
+    if (token.kind == LET || token.kind == VAR) {   
         if (!VarDef(token))
             exit(2);
         GETTOKEN();
@@ -61,7 +61,6 @@ bool Sequence(Lexeme token) {
         return true;
     }
     
-    //TODO: dokoncit
     // <SEQUENCE> -> IF <IF_EXP> LEFT_BRACKET <SEQUENCE> RIGHT_BRACKET <ELSE_STAT> <SEQUENCE>
     else if (token.kind == IF) {
         GETTOKEN();

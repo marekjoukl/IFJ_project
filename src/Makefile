@@ -15,7 +15,7 @@ test_scanner.o: test_scanner.c scanner.h automat.h
 
 
 #parser files
-parser.o: precedent.c precedent.h
+parser.o: precedent.c precedent.h parser.c parser.h
 	$(CC) $(CFLAGS) -c parser.c
 
 test_parser.o: test_parser.c
