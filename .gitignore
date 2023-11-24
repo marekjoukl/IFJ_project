@@ -11,3 +11,4 @@ build
 test
 test_parser
 LL_Grammar_2
+!LL_Table.txt
