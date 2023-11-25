@@ -28,6 +28,7 @@ typedef enum AutomatState
     SingleQmark,
     DoubleQmark,
     Id,
+    IdNil,
     BeginString,
     StringLit,
     EscSeq,
