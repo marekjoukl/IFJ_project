@@ -38,6 +38,7 @@ typedef struct data {
     bool is_function;
     char *string_value;
     double numeric_value;
+    bool blinded_sign;
 } data_t;
 
 //one item in symtable
