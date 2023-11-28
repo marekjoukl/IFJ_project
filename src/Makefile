@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-std=c99 -Wall -Wextra -pedantic -g
 
-#scannaer files
+#scanner files
 scanner.o: scanner.c scanner.h automat.h
 	$(CC) $(CFLAGS) -c scanner.c
 
@@ -12,6 +12,18 @@ test_scanner: test_scanner.o scanner.o automat.o
 
 test_scanner.o: test_scanner.c scanner.h automat.h
 	$(CC) $(CFLAGS) -c test_scanner.c
+
+
+#parser files
+parser.o: precedent.c precedent.h parser.c parser.h
+	$(CC) $(CFLAGS) -c parser.c
+
+test_parser.o: test_parser.c
+	$(CC) $(CFLAGS) -c test_parser.c
+
+test_parser: test_parser.o parser.o automat.o scanner.o precedent.o precedent_stack.o
+	$(CC) $(CFLAGS) -o test_parser test_parser.o parser.o scanner.o automat.o precedent.o precedent_stack.o
+
 
 #precedent files
 precedent.o:
@@ -28,4 +40,4 @@ test: test.o precedent_stack.o precedent.o scanner.o automat.o
 
 #clean
 clean:
-	rm test.o precedent_stack.o precedent.o scanner.o automat.o
+	rm -f *.o test_scanner test_parser test

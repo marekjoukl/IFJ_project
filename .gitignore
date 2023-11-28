@@ -3,9 +3,12 @@
 *.txt
 .vscode
 *.numbers
-test_scannner
+test_scanner
 .DS_Store
 build
 
 #precedent analysys
 test
+test_parser
+LL_Grammar_2
+!LL_Table.txt

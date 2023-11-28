@@ -69,8 +69,8 @@ AutomatState transition(AutomatState current, char edge)
             if (edge == '?') return DoubleQmark;
             return Error;
 
-        //if Id is the end state check if it is a keyword
         case Id:
+            if (edge == '?') return IdNil;
             if (isalnum(edge) || edge == '_') return Id;
             return Error;
 
@@ -113,7 +113,7 @@ AutomatState transition(AutomatState current, char edge)
 
         //##############################
         // Second level states
-        // LsEqual, GtEqual, NotEqual, Equal, DoubleQmark, EmptyString, StringLit, DecPoint, Exp, Comment, CommentBody, EscSeq
+        // LsEqual, GtEqual, NotEqual, Equal, DoubleQmark, EmptyString, StringLit, DecPoint, Exp, Comment, CommentBody, EscSeq, IdNil, Arrow
         //##############################
         case LsEqual:
             return Error;
@@ -160,6 +160,12 @@ AutomatState transition(AutomatState current, char edge)
         case EscSeq:
             if (edge == 'u') return EscU;
             if (edge == 'n' || edge == 'r' || edge == 't' || edge == '"' || edge == '\\') return StringLit;
+            return Error;
+
+        case IdNil:
+            return Error;
+
+        case Arrow:
             return Error;
 
         //##############################
