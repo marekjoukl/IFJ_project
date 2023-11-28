@@ -46,7 +46,8 @@ valid_itmes_t convert_lex_term(Lexeme lex)
     }
     return item;
 }
-const prec_rules_t prec_table[TERMINAL_CNT_T][TERMINAL_CNT_T] = 
+
+const stack_rules_t prec_table[TERMINAL_CNT_T][TERMINAL_CNT_T] = 
 { // +           -           *           /           ==          !=          <           >           <=          >=          ??          !           (           )         term        $
     {MERGE_R   , MERGE_R   , STOPPAGE_R, STOPPAGE_R, ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , MERGE_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // +
     {MERGE_R   , MERGE_R   , STOPPAGE_R, STOPPAGE_R, ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , MERGE_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // -
@@ -66,7 +67,8 @@ const prec_rules_t prec_table[TERMINAL_CNT_T][TERMINAL_CNT_T] =
     {STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, ERROR_R , STOPPAGE_R, ERROR_R}  // $   
 };
 
-prec_rules_t give_rule(prec_stack_t *stack, prec_terminal_t input)
+
+stack_rules_t give_stack_rule(prec_stack_t *stack, prec_terminal_t input)
 {
     valid_itmes_t top;
     stack_top_terminal(stack, &top);
@@ -77,20 +79,21 @@ bool precedent_analysys(Lexeme *lexeme)
 {
     bool valid = true;
     bool cont = true;
-    valid_itmes_t top; //debug
+    valid_itmes_t top; //
     prec_stack_t *stack;
     stack_init(&stack);
-    //Lexeme lexeme = get_next_non_whitespace_lexeme();
     valid_itmes_t input = convert_lex_term(*lexeme);
-    //puts("init"); //debug
+    stack_rules_t stack_rule;
+
     while(valid)
     {
         stack_top_terminal(stack, &top); //debug
-        prec_rules_t rule = give_rule(stack, input.type);
-        printf("1. top = %d, next = %d, rule = %d\n", top.type , input.type , rule); //debug
-        switch (rule)
+        stack_rule = give_stack_rule(stack, input.type);
+        printf("1. top = %d, next = %d, stack_rule = %d\n", top.type , input.type , stack_rule); //debug
+        switch (stack_rule)
         {
         case SHIFT_R:
+            puts("SHIFT"); //debug
             stack_push(&stack, &input);
             *lexeme = get_next_non_whitespace_lexeme();
             input = convert_lex_term(*lexeme);
@@ -104,7 +107,13 @@ bool precedent_analysys(Lexeme *lexeme)
             break;
         case MERGE_R:
             puts("MERGE"); //debug
-            stack_merge(&stack);
+            if(check_prec_rule(stack))    
+                stack_merge(&stack);
+            else
+            {
+                valid = false;
+                cont = false;
+            }
             break;
         case ERROR_R: 
             puts("ERROR"); //debug
@@ -116,18 +125,22 @@ bool precedent_analysys(Lexeme *lexeme)
         }
     }
     print_stack2(stack); //debug
+
     // second traverse with input = $
     input.type = DOLLAR_T;
     while(cont == true)
     {
         stack_top_terminal(stack, &top); //debug
-        prec_rules_t rule = give_rule(stack, input.type);
-        printf("2. top = %d, next = %d, rule = %d\n", top.type , input.type , rule); //debug
-        switch (rule)
+        stack_rules_t stack_rule = give_stack_rule(stack, input.type);
+        printf("2. top = %d, next = %d, stack_rule = %d\n", top.type , input.type , stack_rule); //debug
+        switch (stack_rule)
         {
         case MERGE_R:
-            puts("MERGE"); //debug
-            stack_merge(&stack);
+            puts("MERGE2"); //debug
+            if(check_prec_rule(stack))    
+                stack_merge(&stack);
+            else
+                valid = false;
             break;
         default:
             cont = false;
@@ -137,6 +150,8 @@ bool precedent_analysys(Lexeme *lexeme)
 
     if(stack_empty(stack))
         valid = true;
+//    else
+//        exit(2);
     
     stack_dispose(&stack);    
     return valid;

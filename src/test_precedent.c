@@ -67,14 +67,14 @@ ENDTEST
 
 TEST(rule, "test give rule")
 stack_init(&test_stack);
-printf("rule = %d\n" ,give_rule(test_stack, LEFT_PAR_T));
+printf("rule = %d\n" ,give_stack_rule(test_stack, LEFT_PAR_T));
 ENDTEST
 
 
 TEST(basic, "test basic precedent")
 Lexeme token = get_next_non_whitespace_lexeme();
 bool valid = precedent_analysys(&token);
-printf("valid expression = %d, $ = %d\n", valid, token.kind);
+printf("valid expression = %d, next token = %d\n", valid, token.kind);
 ENDTEST
 
 int main(void)

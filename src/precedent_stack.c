@@ -80,6 +80,84 @@ void stack_merge(prec_stack_t **stack)
     stack_push(stack, &expression);
 }
 
+bool check_stoppage(prec_stack_t *stack, int cnt)
+{
+    bool valid = true;
+    while (valid == true && cnt > 0)
+    {
+        if(stack == NULL || stack->items.type == STOPPAGE_T)
+            valid = false;
+        cnt--;
+    }
+    return valid;
+}
+
+bool rule1(prec_stack_t *stack, valid_itmes_t rule)
+{
+    return (check_stoppage(stack,2) && stack->items.type == rule.type);
+}
+
+bool rule3(prec_stack_t *stack, valid_itmes_t rule)
+{
+    return (check_stoppage(stack,3) && stack->items.type == EXPRESSION_T && stack->next->items.type == rule.type && stack->next->next->items.type == EXPRESSION_T);
+}
+
+bool check_prec_rule(prec_stack_t *stack)
+{
+    valid_itmes_t rule;
+    stack_top_terminal(stack, &rule);
+    bool valid = false;
+    switch (rule.type)
+    {
+    case MUL_T:
+        valid = rule3(stack, rule);    
+        break;
+    case DIV_T:
+        valid = rule3(stack, rule);    
+        break;
+    case PLUS_T:
+        valid = rule3(stack, rule);    
+        break;
+    case MINUS_T:
+        valid = rule3(stack, rule);    
+        break;
+    case EQUAL_T:
+        valid = rule3(stack, rule);    
+        break;
+    case NOT_EQUAL_T:
+        valid = rule3(stack, rule);    
+        break;
+    case LESS_T:
+        valid = rule3(stack, rule);    
+        break;
+    case GREATER_T:
+        valid = rule3(stack, rule);    
+        break;
+    case LESS_EQUAL_T:
+        valid = rule3(stack, rule);    
+        break;
+    case GREATER_EQUAL_T:
+        valid = rule3(stack, rule);    
+        break;
+    case DOUBLE_QUESTION_MARK_T:
+        valid = rule3(stack, rule);    
+        break;
+    case EXCLAMATION_POINT_T:
+        valid = (check_stoppage(stack, 2) && stack->items.type == rule.type && stack->next->items.type == EXPRESSION_T);
+        break;
+    case RIGHT_PAR_T:
+        valid = (check_stoppage(stack,3) && stack->items.type == RIGHT_PAR_T && stack->next->items.type == EXPRESSION_T && stack->next->next->items.type == LEFT_PAR_T);
+        break;
+    case TERM_T:
+        valid = rule1(stack, rule);
+        break;  
+    default:
+        valid = false;
+        break;
+    }
+    return valid;
+}
+
 void stack_dispose(prec_stack_t **stack)
 {
     prec_stack_t *tmp;

@@ -31,16 +31,16 @@ typedef enum {
     STOPPAGE_T      // not a terminal (stoppage in stack <)
 } prec_terminal_t;
 
-typedef enum prec_rules{
+typedef enum stack_rules{
     ERROR_R,
     SHIFT_R,
     STOPPAGE_R,
     MERGE_R
-} prec_rules_t;
+} stack_rules_t;
 
-extern const prec_rules_t prec_table[TERMINAL_CNT_T][TERMINAL_CNT_T];
+extern const stack_rules_t prec_table[TERMINAL_CNT_T][TERMINAL_CNT_T];
 
-prec_rules_t give_rule(prec_stack_t *stack, prec_terminal_t input);
+stack_rules_t give_stack_rule(prec_stack_t *stack, prec_terminal_t input);
 valid_itmes_t convert_lex_term(Lexeme lex);
 bool precedent_analysys(Lexeme *lexeme);
 
