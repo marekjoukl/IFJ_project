@@ -8,7 +8,7 @@ test_scanner
 build
 
 #precedent analysys
-test
+test_precedent
 test_parser
 LL_Grammar_2
 !LL_Table.txt

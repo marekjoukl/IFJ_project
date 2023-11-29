@@ -2,6 +2,22 @@
 //#include "precedent_stack.h"
 #include "scanner.h"
 
+
+//debug ///////////////////////////////////////////////////////////////////////
+void print_stack2(prec_stack_t *stack)
+{
+    int i = 0;
+    printf("------------stack-----------\n");
+    while(stack != NULL)
+    {
+        printf("position %d, type = %d\n", i, stack->items.type);
+        stack = stack->next;
+        i++;
+    }
+    printf("----------------------------\n");
+}
+/////////////////////////////////////////////////////////////////////////////////
+
 valid_itmes_t convert_lex_term(Lexeme lex)
 {
     valid_itmes_t item;
@@ -30,7 +46,8 @@ valid_itmes_t convert_lex_term(Lexeme lex)
     }
     return item;
 }
-const prec_rules_t prec_table[TERMINAL_CNT_T][TERMINAL_CNT_T] = 
+
+const stack_rules_t prec_table[TERMINAL_CNT_T][TERMINAL_CNT_T] = 
 { // +           -           *           /           ==          !=          <           >           <=          >=          ??          !           (           )         term        $
     {MERGE_R   , MERGE_R   , STOPPAGE_R, STOPPAGE_R, ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , MERGE_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // +
     {MERGE_R   , MERGE_R   , STOPPAGE_R, STOPPAGE_R, ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , MERGE_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // -
@@ -47,52 +64,95 @@ const prec_rules_t prec_table[TERMINAL_CNT_T][TERMINAL_CNT_T] =
     {STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, SHIFT_R , STOPPAGE_R, ERROR_R}, // (
     {MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , ERROR_R   , MERGE_R , ERROR_R   , MERGE_R}, // )
     {MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , ERROR_R   , MERGE_R , ERROR_R   , MERGE_R}, // term
-    {STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, ERROR_R , STOPPAGE_R, ERROR_R} // $   
+    {STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, ERROR_R , STOPPAGE_R, ERROR_R}  // $   
 };
 
-prec_rules_t give_rule(prec_stack_t *stack, prec_terminal_t input)
+
+stack_rules_t give_stack_rule(prec_stack_t *stack, prec_terminal_t input)
 {
     valid_itmes_t top;
     stack_top_terminal(stack, &top);
-    //input = MUL_T; //debug
-    return prec_table[input][top.type]; //debug
+    return prec_table[top.type][input];
 }
 
-bool precedent_analysys(void)
+bool precedent_analysys(Lexeme *lexeme)
 {
     bool valid = true;
+    bool cont = true;
+    valid_itmes_t top; //
     prec_stack_t *stack;
     stack_init(&stack);
-    Lexeme lexeme = get_next_non_whitespace_lexeme();
-    valid_itmes_t input = convert_lex_term(lexeme);
+    valid_itmes_t input = convert_lex_term(*lexeme);
+    stack_rules_t stack_rule;
 
     while(valid)
     {
-        prec_rules_t rule = give_rule(stack, input.type);
-        switch (rule)
+        stack_top_terminal(stack, &top); //debug
+        stack_rule = give_stack_rule(stack, input.type);
+        printf("1. top = %d, next = %d, stack_rule = %d\n", top.type , input.type , stack_rule); //debug
+        switch (stack_rule)
         {
         case SHIFT_R:
+            puts("SHIFT"); //debug
             stack_push(&stack, &input);
-            lexeme = get_next_non_whitespace_lexeme();
-            input = convert_lex_term(lexeme);
+            *lexeme = get_next_non_whitespace_lexeme();
+            input = convert_lex_term(*lexeme);
             break;
         case STOPPAGE_R:
+            puts("STOPPAGE"); //debug
             stack_push_stoppage(&stack);
             stack_push(&stack, &input);
-            lexeme = get_next_non_whitespace_lexeme();
-            input = convert_lex_term(lexeme);
+            *lexeme = get_next_non_whitespace_lexeme();
+            input = convert_lex_term(*lexeme);
             break;
         case MERGE_R:
-            stack_merge(&stack);
+            puts("MERGE"); //debug
+            if(check_prec_rule(stack))    
+                stack_merge(&stack);
+            else
+            {
+                valid = false;
+                cont = false;
+            }
             break;
-        case ERROR_R:
+        case ERROR_R: 
+            puts("ERROR"); //debug
             valid = false;
+            cont = true;
+            break;
         default:
             break;
         }
     }
+    print_stack2(stack); //debug
+
+    // second traverse with input = $
+    input.type = DOLLAR_T;
+    while(cont == true)
+    {
+        stack_top_terminal(stack, &top); //debug
+        stack_rules_t stack_rule = give_stack_rule(stack, input.type);
+        printf("2. top = %d, next = %d, stack_rule = %d\n", top.type , input.type , stack_rule); //debug
+        switch (stack_rule)
+        {
+        case MERGE_R:
+            puts("MERGE2"); //debug
+            if(check_prec_rule(stack))    
+                stack_merge(&stack);
+            else
+                valid = false;
+            break;
+        default:
+            cont = false;
+            break;
+        }
+    }
+
     if(stack_empty(stack))
         valid = true;
+//    else
+//        exit(2);
+    
     stack_dispose(&stack);    
     return valid;
 }

@@ -32,6 +32,7 @@ valid_itmes_t test_items2[] = {{EXPRESSION_T}, {MUL_T}, {EXPRESSION_T}};
 TEST(test_init, "init")
 stack_init(&test_stack);
 print_stack(test_stack);
+printf("%d\n", stack_empty(test_stack));
 stack_dispose(&test_stack);
 ENDTEST
 
@@ -64,7 +65,17 @@ print_stack(test_stack);
 stack_dispose(&test_stack);
 ENDTEST
 
+TEST(rule, "test give rule")
+stack_init(&test_stack);
+printf("rule = %d\n" ,give_stack_rule(test_stack, LEFT_PAR_T));
+ENDTEST
 
+
+TEST(basic, "test basic precedent")
+Lexeme token = get_next_non_whitespace_lexeme();
+bool valid = precedent_analysys(&token);
+printf("valid expression = %d, next token = %d\n", valid, token.kind);
+ENDTEST
 
 int main(void)
 {
@@ -72,4 +83,6 @@ int main(void)
     push_items();
     push_stoppage();
     merge();
+    rule();
+    basic();
 }

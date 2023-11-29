@@ -1,16 +1,8 @@
 #ifndef PRECEDENT_STACK_H
 #define PRECEDENT_STACK_H
 
-//#include "precedent.h"
+#include "precedent.h"
 
-
-//enum item_types
-//{
-//    TERMINAL,
-//    EXPRESSION,
-//    STOPPAGE,
-//    DOLLAR
-//};
 
 typedef struct valid_itmes
 {
@@ -29,6 +21,7 @@ bool stack_empty(prec_stack_t *stack);
 void stack_push(prec_stack_t **stack, valid_itmes_t *item);
 void stack_top_terminal(prec_stack_t *stack, valid_itmes_t *destination);
 void stack_push_stoppage(prec_stack_t **stack);
+bool check_prec_rule(prec_stack_t *stack);
 void stack_merge(prec_stack_t **stack);
 void stack_dispose(prec_stack_t **stack);
 

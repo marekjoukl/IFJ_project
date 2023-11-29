@@ -34,18 +34,18 @@ test_symtable: test_symtable.o symtable.o parser.o automat.o scanner.o precedent
 	$(CC) $(CFLAGS) -o test_symtable test_symtable.o symtable.o parser.o scanner.o automat.o precedent.o precedent_stack.o
 
 #precedent files
-precedent.o:
+precedent.o: precedent.c
 	$(CC) $(CFLAGS) -c precedent.c
 
 precedent_stack.o: precedent_stack.c
 	$(CC) $(CFLAGS) -c precedent_stack.c
 
-test.o: test.c
-	$(CC) $(CFLAGS) -c test.c
+test_precedent.o: test_precedent.c
+	$(CC) $(CFLAGS) -c test_precedent.c
 
-test: test.o precedent_stack.o precedent.o scanner.o automat.o
-	$(CC) $(CFLAGS) -o test test.o precedent_stack.o precedent.o scanner.o automat.o
+test_precedent: test_precedent.o precedent_stack.o precedent.o scanner.o automat.o
+	$(CC) $(CFLAGS) -o test_precedent test_precedent.o precedent_stack.o precedent.o scanner.o automat.o
 
 #clean
 clean:
-	rm -f *.o test_scanner test_parser test test_symtable
+rm -f *.o test_scanner test_parser test test_symtable
