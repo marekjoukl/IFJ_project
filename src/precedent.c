@@ -35,7 +35,6 @@ valid_itmes_t convert_lex_term(Lexeme lex)
         case DOUBLE_QUESTION_MARK:  item.type = DOUBLE_QUESTION_MARK_T; break;
         case IDENTIFIER:            item.type = TERM_T; break;
         case STRING_LIT:            item.type = TERM_T; break;
-        case MULTILINE_STRING_LIT:  item.type = TERM_T; break;
         case INTEGER_LIT:           item.type = TERM_T; break;
         case DOUBLE_LIT:            item.type = TERM_T; break;
         case PLUS:                  item.type = PLUS_T; break;
@@ -153,6 +152,8 @@ bool precedent_analysys(Lexeme *lexeme)
 //    else
 //        exit(2);
     
-    stack_dispose(&stack);    
+    stack_dispose(&stack);  
+    fprintf(stderr, "precedent_analysys: token %d\n", lexeme->kind); 
+    fprintf(stderr, "precedent_analysys: %s\n", valid ? "true" : "false"); 
     return valid;
 }

@@ -13,6 +13,8 @@
 #include <stdbool.h>
 #include "scanner.h"
 #include "precedent.h"
+#include "error.h"
+#include "symtable.h"
 
 #define GETTOKEN() \
     *token = get_next_non_whitespace_lexeme();

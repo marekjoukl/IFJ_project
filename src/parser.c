@@ -13,11 +13,11 @@ bool Prog(Lexeme *token) {
     // <PROG> -> <SEQUENCE> <PROG>
     if (token->kind == IDENTIFIER || token->kind == IF || token->kind == LET || token->kind == WHILE || token->kind == VAR) {
         if (!Sequence(token)) {
-            ERROR_HANDLE(2, token);
+            ERROR_HANDLE(SYNTAX_ERROR, token);
         }
 
         if (!Prog(token)) {
-            ERROR_HANDLE(2, token);
+            ERROR_HANDLE(SYNTAX_ERROR, token);
         }
 
         return true;
@@ -27,44 +27,44 @@ bool Prog(Lexeme *token) {
     if (token->kind == FUNC) {
         GETTOKEN();
         if (token->kind != IDENTIFIER)
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         GETTOKEN();
         if (token->kind != LEFT_PAR) {
-            ERROR_HANDLE(2, token);
+            ERROR_HANDLE(SYNTAX_ERROR, token);
         }
 
         GETTOKEN();
         if (!FirstParamDef(token)) {
-            ERROR_HANDLE(2, token);
+            ERROR_HANDLE(SYNTAX_ERROR, token);
         }
 
         if (!DefFunction(token)) {
-            ERROR_HANDLE(2, token);
+            ERROR_HANDLE(SYNTAX_ERROR, token);
         }
             
 
         if (!Prog(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
     }
 
-    { ERROR_HANDLE(2, token); }
+    { ERROR_HANDLE(SYNTAX_ERROR, token); }
 }
 
 bool Sequence(Lexeme *token) {
     // <SEQUENCE> -> <VAR_DEF> IDENTIFIER <VAR_TYPE_DEF> <ASSIGN_VAR>
     if (token->kind == LET || token->kind == VAR) {
         if (!VarDef(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if (token->kind != IDENTIFIER)
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
         GETTOKEN();
 
         if (!VarTypeOrAssign(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
     }
@@ -73,7 +73,7 @@ bool Sequence(Lexeme *token) {
     else if (token->kind == IDENTIFIER) {
         GETTOKEN();
         if (!AssignOrFunction(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
     }
@@ -82,21 +82,21 @@ bool Sequence(Lexeme *token) {
     else if (token->kind == IF) {
         GETTOKEN();
         if (!IfExp(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if (token->kind != LEFT_BRACKET)
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
         GETTOKEN();
 
         if (!SequenceN(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if (token->kind != RIGHT_BRACKET)
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
         GETTOKEN();
 
         if (!ElseStat(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
     }
@@ -104,17 +104,17 @@ bool Sequence(Lexeme *token) {
     else if (token->kind == WHILE) {
         GETTOKEN();
         if (!Expression(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if (token->kind != LEFT_BRACKET)
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
         GETTOKEN();
 
         if(!SequenceN(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if(token->kind != RIGHT_BRACKET)
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
         GETTOKEN();
             
         return true;
@@ -135,10 +135,10 @@ bool SequenceN(Lexeme *token) {
     // <SEQUENCE_N> -> <SEQUENCE> <SEQUENCE_N>
     if (token->kind == IDENTIFIER || token->kind == IF || token->kind == LET || token->kind == WHILE || token->kind == VAR) {
         if (!Sequence(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if (!SequenceN(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
     }
@@ -150,14 +150,14 @@ bool AssignOrFunction(Lexeme *token) {
     if (token->kind == ASSIGNMENT){
         GETTOKEN();
         if (!ExpOrCall(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
         return true;
     }
     // <ASSIGN_OR_FUNCTION> -> LEFT_PAR <FIRST_PARAM>
     if (token->kind == LEFT_PAR){
         GETTOKEN();
         if(!FirstParam(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
         return true;
     }
     return false;
@@ -167,20 +167,20 @@ bool DefFunction(Lexeme *token) {
     // <DEF_FUNCTION> -> <VOID_F> LEFT_BRACKET <SEQUENCE_N> <RETURN_FUNCTION> RIGHT_BRACKET
     if (token->kind == LEFT_BRACKET || token->kind == ARROW) {
         if (!VoidF(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if (token->kind != LEFT_BRACKET)
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
         GETTOKEN();
 
         if (!SequenceN(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if (!ReturnFunction(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if (token->kind != RIGHT_BRACKET)
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
         GETTOKEN();
 
         return true;
@@ -197,7 +197,7 @@ bool VoidF(Lexeme *token) {
     if (token->kind == ARROW) {
         GETTOKEN();
         if (!Type(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
         return true;
     }
     return false;
@@ -208,7 +208,7 @@ bool ReturnFunction(Lexeme *token) {
     if (token->kind == RETURN){
         GETTOKEN();
         if (!ReturnFunctionN(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
     }
@@ -226,7 +226,7 @@ bool ReturnFunctionN(Lexeme *token) {
     // <RETURN_FUNCTION_N> -> <EXPRESSION>
     if (token->kind == IDENTIFIER || token->kind == INTEGER_LIT || token->kind == DOUBLE_LIT || token->kind == STRING_LIT || token->kind == LEFT_PAR) {
         if (!Expression(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
         return true;
     }
     return false;
@@ -241,10 +241,10 @@ bool FirstParam(Lexeme *token){
     // <FIRST_PARAM> -> <PARAMS> <PARAMS_N>
     if (token->kind == INTEGER_LIT || token->kind == IDENTIFIER || token->kind == STRING_LIT || token->kind == DOUBLE_LIT) {
         if (!Params(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if(!ParamsN(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
         return true;
     }
     return false;
@@ -260,11 +260,11 @@ bool  FirstParamDef(Lexeme *token) {
     if (token->kind == IDENTIFIER || token->kind == UNDERSCORE) {
         //GETTOKEN();
         if (!ParamsDef(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         //GETTOKEN();
         if(!ParamsDefN(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
     }
@@ -276,19 +276,19 @@ bool ParamsDef(Lexeme *token) {
     if (token->kind == UNDERSCORE || token->kind == IDENTIFIER) {
         //GETTOKEN();
         if (!ParamsNameDef(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         //GETTOKEN();
         if (token->kind != IDENTIFIER)
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         GETTOKEN();
         if (token->kind != COLON)
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         GETTOKEN();
         if (!Type(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
     }
@@ -305,11 +305,11 @@ bool ParamsDefN(Lexeme *token) {
     if (token->kind == COMMA){
         GETTOKEN();
         if (!ParamsDef(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         //GETTOKEN();
         if(!ParamsDefN(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
     }
@@ -341,10 +341,10 @@ bool ParamsN(Lexeme *token) {
     if (token->kind == COMMA){
         GETTOKEN();
         if (!Params(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if(!ParamsN(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
     }
@@ -361,7 +361,7 @@ bool Params(Lexeme *token) {
     if (token->kind == IDENTIFIER){
         GETTOKEN();
         if(!ParamsName(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
         return true;
     }
     // <PARAMS> -> NIL
@@ -378,7 +378,7 @@ bool ParamsName(Lexeme *token){
     if (token->kind == COLON){
         GETTOKEN();
         if(!IdOrLit(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
     }
@@ -412,7 +412,7 @@ bool IfExp(Lexeme *token) {
     // <IF_EXP> -> <EXPRESSION>
     if (token->kind == IDENTIFIER || token->kind == INTEGER_LIT || token->kind == DOUBLE_LIT || token->kind == STRING_LIT || token->kind == LEFT_PAR) {
         if (!Expression(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
     }
@@ -424,14 +424,14 @@ bool ElseStat(Lexeme *token) {
     if (token->kind == ELSE) {
         GETTOKEN();
         if (token->kind != LEFT_BRACKET)
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
         GETTOKEN();
 
         if (!SequenceN(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if (token->kind != RIGHT_BRACKET)
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
         GETTOKEN();
 
         return true;
@@ -461,10 +461,10 @@ bool VarTypeOrAssign(Lexeme *token) {
     if (token->kind == COLON) {
         GETTOKEN();
         if (!Type(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if (!AssignVar(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
     }
@@ -472,7 +472,7 @@ bool VarTypeOrAssign(Lexeme *token) {
     else if (token->kind == ASSIGNMENT) {
         GETTOKEN();
         if (!ExpOrCall(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
     }
@@ -503,7 +503,7 @@ bool AssignVar(Lexeme *token) {
     if (token->kind == ASSIGNMENT) {
         GETTOKEN();
         if (!ExpOrCall(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
         return true;
     }
     // <ASSIGN_VAR> -> ε
@@ -516,12 +516,12 @@ bool AssignVar(Lexeme *token) {
 bool ExpOrCall(Lexeme *token) {
     if (token->kind == IDENTIFIER) {             //TODO: FIND OUT WHAT RULE TO USE (26. / 27.)
         if (!CallFunction(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
         return true;
     }
     else if ((token->kind == IDENTIFIER /* TODO: look into symtable if id is var or func */) || token->kind == INTEGER_LIT || token->kind == DOUBLE_LIT || token->kind == STRING_LIT || token->kind == LEFT_PAR) {
         if (!Expression(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
         return true;
     }
     return false;
@@ -532,11 +532,11 @@ bool CallFunction(Lexeme *token) {
     if (token->kind == IDENTIFIER) {
         GETTOKEN();
         if (token->kind != LEFT_PAR)
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
         GETTOKEN();
 
         if (!FirstParam(token))
-            { ERROR_HANDLE(2, token); }
+            { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
     }
@@ -544,7 +544,5 @@ bool CallFunction(Lexeme *token) {
 }
 
 bool Expression(Lexeme *token) {
-    GETTOKEN();
-    // TODO: call precedence analysis
-    return true;
+    return precedent_analysys(token);
 }

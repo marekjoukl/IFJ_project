@@ -14,7 +14,7 @@ test_scanner.o: test_scanner.c scanner.h automat.h
 	$(CC) $(CFLAGS) -c test_scanner.c
 
 #parser files
-parser.o: precedent.c precedent.h parser.c parser.h
+parser.o: precedent.c precedent.h parser.c parser.h scanner.c automat.c
 	$(CC) $(CFLAGS) -c parser.c
 
 test_parser.o: test_parser.c
@@ -48,4 +48,4 @@ test_precedent: test_precedent.o precedent_stack.o precedent.o scanner.o automat
 
 #clean
 clean:
-rm -f *.o test_scanner test_parser test test_symtable
+	rm -f *.o test_scanner test_parser test test_symtable

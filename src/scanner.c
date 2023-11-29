@@ -206,7 +206,7 @@ Lexeme make_lexeme(AutomatState current, char *str)
             lexeme.extra_data.string = str;
             break;
         case EndMltLnStringLit:
-            lexeme.kind = MULTILINE_STRING_LIT;
+            lexeme.kind = STRING_LIT;
             lexeme.extra_data.string = str;
             break;
         case IntLit:
