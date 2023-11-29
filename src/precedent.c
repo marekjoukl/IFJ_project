@@ -131,7 +131,7 @@ bool precedent_analysys(Lexeme *lexeme)
     while(cont == true)
     {
         stack_top_terminal(stack, &top); //debug
-        stack_rules_t stack_rule = give_stack_rule(stack, input.type);
+        stack_rule = give_stack_rule(stack, input.type);
         printf("2. top = %d, next = %d, stack_rule = %d\n", top.type , input.type , stack_rule); //debug
         switch (stack_rule)
         {
