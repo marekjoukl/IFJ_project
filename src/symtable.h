@@ -27,7 +27,7 @@ typedef struct data {
     data_type_t item_type;
     bool can_be_nil;
     bool value_is_nil;
-    bool is_defined;
+    //bool is_defined;
     int param_count;
     char **param_names;
     char **params_id;
@@ -43,14 +43,14 @@ typedef struct data {
 typedef struct symtable_item
 {
     char *key;
-    data_t data;
+    data_t *data;
 } symtable_item_t;
 
-typedef symtable_item_t* Symtable[MAX_HT_SIZE];
+typedef symtable_item_t *Symtable[MAX_HT_SIZE];
 
 unsigned int SymtableHashFunction(char *key);   //hash function
 void SymtableInit(Symtable *table);            //initialize symtable
-void SymtableAddItem(Symtable *table, char *key, data_t data);  //add item to symtable with key and data
+void SymtableAddItem(Symtable *table, char *key, data_t *data);  //add item to symtable with key and data
 symtable_item_t* SymtableSearch(Symtable *table, char *key);    //search for item with given key in symtable
 void SymtableDeleteItem(Symtable *table, char *key);        //delete item with given key from symtable
 void SymtableDeleteAll(Symtable *table);                //delete all items from symtable

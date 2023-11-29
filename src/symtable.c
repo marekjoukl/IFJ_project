@@ -26,7 +26,7 @@ void SymtableInit(Symtable *table)
     }
 }
 
-void SymtableAddItem(Symtable *table, char *key, data_t data) {
+void SymtableAddItem(Symtable *table, char *key, data_t *data) {
     unsigned int counter = 0;
     symtable_item_t *item = SymtableSearch(table, key);
     if (item != NULL) {
@@ -72,7 +72,7 @@ symtable_item_t* SymtableSearch(Symtable *table, char *key) {
             if (counter >= MAX_HT_SIZE) {
                 break;
             }
-            if (strcmp(item->key, key) == 0 && item->data.blinded_sign == false) {
+            if (strcmp(item->key, key) == 0 && item->data->blinded_sign == false) {
                 return item;
             }
             hash = (hash + 1) % MAX_HT_SIZE;
@@ -86,7 +86,7 @@ symtable_item_t* SymtableSearch(Symtable *table, char *key) {
 void SymtableDeleteItem(Symtable *table, char *key) {
     symtable_item_t *item = SymtableSearch(table, key);
     if (item == NULL) return;
-    item->data.blinded_sign = true;
+    item->data->blinded_sign = true;
 }
 
 void SymtableDeleteAll(Symtable *table) {
@@ -94,30 +94,30 @@ void SymtableDeleteAll(Symtable *table) {
         if ((*table)[i] != NULL) {
             free((*table)[i]->key);
 
-            if ((*table)[i]->data.param_names != NULL) {
-                for (int j = 0; j < (*table)[i]->data.param_count; j++) {
-                    if ((*table)[i]->data.param_names[j] != NULL) {
-                        free((*table)[i]->data.param_names[j]);
+            if ((*table)[i]->data->param_names != NULL) {
+                for (int j = 0; j < (*table)[i]->data->param_count; j++) {
+                    if ((*table)[i]->data->param_names[j] != NULL) {
+                        free((*table)[i]->data->param_names[j]);
                     }
                 }
-                free((*table)[i]->data.param_names);
+                free((*table)[i]->data->param_names);
             }
 
-            if ((*table)[i]->data.params_id != NULL) {
-                for (int j = 0; j < (*table)[i]->data.param_count; j++) {
-                    if ((*table)[i]->data.params_id[j] != NULL) {
-                        free((*table)[i]->data.params_id[j]);
+            if ((*table)[i]->data->params_id != NULL) {
+                for (int j = 0; j < (*table)[i]->data->param_count; j++) {
+                    if ((*table)[i]->data->params_id[j] != NULL) {
+                        free((*table)[i]->data->params_id[j]);
                     }
                 }
-                free((*table)[i]->data.params_id);
+                free((*table)[i]->data->params_id);
             }
 
-            if ((*table)[i]->data.param_types != NULL) {
-                free((*table)[i]->data.param_types);
+            if ((*table)[i]->data->param_types != NULL) {
+                free((*table)[i]->data->param_types);
             }
 
-            if ((*table)[i]->data.string_value != NULL) {
-                free((*table)[i]->data.string_value);
+            if ((*table)[i]->data->string_value != NULL) {
+                free((*table)[i]->data->string_value);
             }
 
             free((*table)[i]);

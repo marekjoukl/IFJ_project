@@ -11,7 +11,6 @@ int main(int argc, char *argv[]){
              return 1;
         }
     }
-    bool check = true;
     StartParser();
     printf("funguje\n");
     fclose(input);

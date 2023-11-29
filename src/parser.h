@@ -33,9 +33,9 @@ bool VarTypeOrAssign(Lexeme *token, symtable_stack_t *stack);
 bool AssignVar(Lexeme *token, symtable_stack_t *stack);
 bool DefFunction(Lexeme *token, symtable_stack_t *stack);
 bool VoidF(Lexeme *token, symtable_stack_t *stack);
-bool FirstParamDef(Lexeme *token, symtable_stack_t *stack);
-bool ParamsDef(Lexeme *token, symtable_stack_t *stack);
-bool ParamsNameDef(Lexeme *token, symtable_stack_t *stack);
+bool FirstParamDef(Lexeme *token, symtable_stack_t *stack, Lexeme *temp_token);
+bool ParamsDef(Lexeme *token, symtable_stack_t *stack, Lexeme *temp_token);
+bool ParamsNameDef(Lexeme *token, symtable_stack_t *stack, Lexeme *temp_token, bool first_or_second);
 bool ParamsDefN(Lexeme *token, symtable_stack_t *stack);
 bool ReturnFunction(Lexeme *token, symtable_stack_t *stack);
 bool ReturnFunctionN(Lexeme *token, symtable_stack_t *stack);
@@ -48,7 +48,7 @@ bool Params(Lexeme *token, symtable_stack_t *stack);
 bool ParamsName(Lexeme *token, symtable_stack_t *stack);
 bool ElseStat(Lexeme *token, symtable_stack_t *stack);
 bool IfExp(Lexeme *token, symtable_stack_t *stack);
-bool Type(Lexeme *token, symtable_stack_t *stack);
+bool Type(Lexeme *token, symtable_stack_t *stack, Lexeme *temp_token);
 bool IdOrLit(Lexeme *token, symtable_stack_t *stack);
 
 
