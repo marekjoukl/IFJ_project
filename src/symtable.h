@@ -12,8 +12,6 @@
 #include <string.h>
 #include <stdbool.h>
 #include "scanner.h"
-#include "precedent.h"
-#include "parser.h"
 #include "error.h"
 
 #define MAX_HT_SIZE 20011   //Prime number for hash table size (20011 is the closest prime number to 20000)
@@ -48,7 +46,7 @@ typedef struct symtable_item
     data_t data;
 } symtable_item_t;
 
-typedef symtable_item_t *Symtable[MAX_HT_SIZE];
+typedef symtable_item_t* Symtable[MAX_HT_SIZE];
 
 unsigned int SymtableHashFunction(char *key);   //hash function
 void SymtableInit(Symtable *table);            //initialize symtable

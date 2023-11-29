@@ -15,6 +15,7 @@
 #include "precedent.h"
 #include "error.h"
 #include "symtable.h"
+#include "symtable_stack.h"
 
 #define GETTOKEN() \
     *token = get_next_non_whitespace_lexeme();
@@ -23,35 +24,36 @@
     fprintf(stderr, "Error: parser.c - syntax error at line %d, with token: %d\n", token->line, token->kind); \
     exit(exit_code);
 
-bool Prog(Lexeme *token);
-bool Sequence(Lexeme *token);
-bool SequenceN(Lexeme *token);
-bool VarDef(Lexeme *token);
-bool VarTypeOrAssign(Lexeme *token);
-bool AssignVar(Lexeme *token);
-bool DefFunction(Lexeme *token);
-bool VoidF(Lexeme *token);
-bool FirstParamDef(Lexeme *token);
-bool ParamsDef(Lexeme *token);
-bool ParamsNameDef(Lexeme *token);
-bool ParamsDefN(Lexeme *token);
-bool ReturnFunction(Lexeme *token);
-bool ReturnFunctionN(Lexeme *token);
-bool AssignOrFunction(Lexeme *token);
-bool ExpOrCall(Lexeme *token);
-bool CallFunction(Lexeme *token);
-bool FirstParam(Lexeme *token);
-bool ParamsN(Lexeme *token);
-bool Params(Lexeme *token);
-bool ParamsName(Lexeme *token);
-bool ElseStat(Lexeme *token);
-bool IfExp(Lexeme *token);
-bool Type(Lexeme *token);
-bool IdOrLit(Lexeme *token);
+void StartParser();
+bool Prog(Lexeme *token, symtable_stack_t *stack);
+bool Sequence(Lexeme *token, symtable_stack_t *stack);
+bool SequenceN(Lexeme *token, symtable_stack_t *stack);
+bool VarDef(Lexeme *token, symtable_stack_t *stack);
+bool VarTypeOrAssign(Lexeme *token, symtable_stack_t *stack);
+bool AssignVar(Lexeme *token, symtable_stack_t *stack);
+bool DefFunction(Lexeme *token, symtable_stack_t *stack);
+bool VoidF(Lexeme *token, symtable_stack_t *stack);
+bool FirstParamDef(Lexeme *token, symtable_stack_t *stack);
+bool ParamsDef(Lexeme *token, symtable_stack_t *stack);
+bool ParamsNameDef(Lexeme *token, symtable_stack_t *stack);
+bool ParamsDefN(Lexeme *token, symtable_stack_t *stack);
+bool ReturnFunction(Lexeme *token, symtable_stack_t *stack);
+bool ReturnFunctionN(Lexeme *token, symtable_stack_t *stack);
+bool AssignOrFunction(Lexeme *token, symtable_stack_t *stack);
+bool ExpOrCall(Lexeme *token, symtable_stack_t *stack);
+bool CallFunction(Lexeme *token, symtable_stack_t *stack);
+bool FirstParam(Lexeme *token, symtable_stack_t *stack);
+bool ParamsN(Lexeme *token, symtable_stack_t *stack);
+bool Params(Lexeme *token, symtable_stack_t *stack);
+bool ParamsName(Lexeme *token, symtable_stack_t *stack);
+bool ElseStat(Lexeme *token, symtable_stack_t *stack);
+bool IfExp(Lexeme *token, symtable_stack_t *stack);
+bool Type(Lexeme *token, symtable_stack_t *stack);
+bool IdOrLit(Lexeme *token, symtable_stack_t *stack);
 
 
 //TODO: find out how to call precendencnu analyzu
-bool Expression(Lexeme *token);
+bool Expression(Lexeme *token, symtable_stack_t *stack);
 
 #endif
 

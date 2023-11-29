@@ -11,15 +11,9 @@ int main(int argc, char *argv[]){
              return 1;
         }
     }
-    Lexeme token;
     bool check = true;
-    token = get_next_non_whitespace_lexeme();  
-    check = Prog(&token);
-    if (!check){
-        printf("ERROR\n");
-    } else {
-        printf("funguje\n");
-    }
+    StartParser();
+    printf("funguje\n");
     fclose(input);
     return 0;
 }

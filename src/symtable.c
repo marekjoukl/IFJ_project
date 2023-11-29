@@ -103,7 +103,7 @@ void SymtableDeleteAll(Symtable *table) {
                 free((*table)[i]->data.param_names);
             }
 
-            if ((*table)[i]->data.string_value != NULL) {
+            if ((*table)[i]->data.params_id != NULL) {
                 for (int j = 0; j < (*table)[i]->data.param_count; j++) {
                     if ((*table)[i]->data.params_id[j] != NULL) {
                         free((*table)[i]->data.params_id[j]);
@@ -114,6 +114,10 @@ void SymtableDeleteAll(Symtable *table) {
 
             if ((*table)[i]->data.param_types != NULL) {
                 free((*table)[i]->data.param_types);
+            }
+
+            if ((*table)[i]->data.string_value != NULL) {
+                free((*table)[i]->data.string_value);
             }
 
             free((*table)[i]);

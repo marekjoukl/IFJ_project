@@ -6,17 +6,25 @@
 
 #include "parser.h"
 
-bool Prog(Lexeme *token) {
+void StartParser() {
+    symtable_stack_t *stack = SymtableStackInit();
+    Symtable table;
+    Lexeme *token = NULL;
+    GETTOKEN();
+    Prog(token, stack);
+}
+
+bool Prog(Lexeme *token, symtable_stack_t *stack) {
     // <PROG> -> LEX_EOF
     if (token->kind == LEX_EOF) return true;
 
     // <PROG> -> <SEQUENCE> <PROG>
     if (token->kind == IDENTIFIER || token->kind == IF || token->kind == LET || token->kind == WHILE || token->kind == VAR) {
-        if (!Sequence(token)) {
+        if (!Sequence(token, stack)) {
             ERROR_HANDLE(SYNTAX_ERROR, token);
         }
 
-        if (!Prog(token)) {
+        if (!Prog(token, stack)) {
             ERROR_HANDLE(SYNTAX_ERROR, token);
         }
 
@@ -35,16 +43,16 @@ bool Prog(Lexeme *token) {
         }
 
         GETTOKEN();
-        if (!FirstParamDef(token)) {
+        if (!FirstParamDef(token, stack)) {
             ERROR_HANDLE(SYNTAX_ERROR, token);
         }
 
-        if (!DefFunction(token)) {
+        if (!DefFunction(token, stack)) {
             ERROR_HANDLE(SYNTAX_ERROR, token);
         }
             
 
-        if (!Prog(token))
+        if (!Prog(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
@@ -53,17 +61,17 @@ bool Prog(Lexeme *token) {
     { ERROR_HANDLE(SYNTAX_ERROR, token); }
 }
 
-bool Sequence(Lexeme *token) {
+bool Sequence(Lexeme *token, symtable_stack_t *stack) {
     // <SEQUENCE> -> <VAR_DEF> IDENTIFIER <VAR_TYPE_DEF> <ASSIGN_VAR>
     if (token->kind == LET || token->kind == VAR) {
-        if (!VarDef(token))
+        if (!VarDef(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if (token->kind != IDENTIFIER)
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
         GETTOKEN();
 
-        if (!VarTypeOrAssign(token))
+        if (!VarTypeOrAssign(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
@@ -72,7 +80,7 @@ bool Sequence(Lexeme *token) {
     // <SEQUENCE> -> IDENTIFIER <ASSIGN_OR_FUNCTION>
     else if (token->kind == IDENTIFIER) {
         GETTOKEN();
-        if (!AssignOrFunction(token))
+        if (!AssignOrFunction(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
@@ -81,21 +89,21 @@ bool Sequence(Lexeme *token) {
     // <SEQUENCE> -> IF <IF_EXP> LEFT_BRACKET <SEQUENCE_N> RIGHT_BRACKET <ELSE_STAT>
     else if (token->kind == IF) {
         GETTOKEN();
-        if (!IfExp(token))
+        if (!IfExp(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if (token->kind != LEFT_BRACKET)
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
         GETTOKEN();
 
-        if (!SequenceN(token))
+        if (!SequenceN(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if (token->kind != RIGHT_BRACKET)
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
         GETTOKEN();
 
-        if (!ElseStat(token))
+        if (!ElseStat(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
@@ -103,14 +111,14 @@ bool Sequence(Lexeme *token) {
     // <SEQUENCE> -> WHILE <EXPRESSION> LEFT_BRACKET <SEQUENCE_N> RIGHT_BRACKET
     else if (token->kind == WHILE) {
         GETTOKEN();
-        if (!Expression(token))
+        if (!Expression(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if (token->kind != LEFT_BRACKET)
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
         GETTOKEN();
 
-        if(!SequenceN(token))
+        if(!SequenceN(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if(token->kind != RIGHT_BRACKET)
@@ -127,17 +135,17 @@ bool Sequence(Lexeme *token) {
     return false;
 }
 
-bool SequenceN(Lexeme *token) {
+bool SequenceN(Lexeme *token, symtable_stack_t *stack) {
     // <SEQUENCE_N> -> ε
     if (token->kind == RIGHT_BRACKET || token->kind == RETURN) {
         return true;
     }
     // <SEQUENCE_N> -> <SEQUENCE> <SEQUENCE_N>
     if (token->kind == IDENTIFIER || token->kind == IF || token->kind == LET || token->kind == WHILE || token->kind == VAR) {
-        if (!Sequence(token))
+        if (!Sequence(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
-        if (!SequenceN(token))
+        if (!SequenceN(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
@@ -145,38 +153,38 @@ bool SequenceN(Lexeme *token) {
     return false;
 }
 
-bool AssignOrFunction(Lexeme *token) {
+bool AssignOrFunction(Lexeme *token, symtable_stack_t *stack) {
     // <ASSIGN_OR_FUNCTION> -> ASSIGNMENT <EXP_OR_CALL>
     if (token->kind == ASSIGNMENT){
         GETTOKEN();
-        if (!ExpOrCall(token))
+        if (!ExpOrCall(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
         return true;
     }
     // <ASSIGN_OR_FUNCTION> -> LEFT_PAR <FIRST_PARAM>
     if (token->kind == LEFT_PAR){
         GETTOKEN();
-        if(!FirstParam(token))
+        if(!FirstParam(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
         return true;
     }
     return false;
 }
 
-bool DefFunction(Lexeme *token) {
+bool DefFunction(Lexeme *token, symtable_stack_t *stack) {
     // <DEF_FUNCTION> -> <VOID_F> LEFT_BRACKET <SEQUENCE_N> <RETURN_FUNCTION> RIGHT_BRACKET
     if (token->kind == LEFT_BRACKET || token->kind == ARROW) {
-        if (!VoidF(token))
+        if (!VoidF(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if (token->kind != LEFT_BRACKET)
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
         GETTOKEN();
 
-        if (!SequenceN(token))
+        if (!SequenceN(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
-        if (!ReturnFunction(token))
+        if (!ReturnFunction(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if (token->kind != RIGHT_BRACKET)
@@ -188,7 +196,7 @@ bool DefFunction(Lexeme *token) {
     return false;
 }
 
-bool VoidF(Lexeme *token) {
+bool VoidF(Lexeme *token, symtable_stack_t *stack) {
     // <VOID_F> -> ε
     if (token->kind == LEFT_BRACKET) {
         return true;
@@ -196,18 +204,18 @@ bool VoidF(Lexeme *token) {
     // <VOID_F> -> ARROW <TYPE>
     if (token->kind == ARROW) {
         GETTOKEN();
-        if (!Type(token))
+        if (!Type(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
         return true;
     }
     return false;
 }
 
-bool ReturnFunction(Lexeme *token) {
+bool ReturnFunction(Lexeme *token, symtable_stack_t *stack) {
     // <RETURN_FUNCTION> -> RETURN <RETURN_FUNCTION_N>
     if (token->kind == RETURN){
         GETTOKEN();
-        if (!ReturnFunctionN(token))
+        if (!ReturnFunctionN(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
@@ -219,20 +227,20 @@ bool ReturnFunction(Lexeme *token) {
     return false;
 }
 
-bool ReturnFunctionN(Lexeme *token) {
+bool ReturnFunctionN(Lexeme *token, symtable_stack_t *stack) {
     // <RETURN_FUNCTION_N> -> ε
     if (token->kind == RIGHT_BRACKET)
         return true;
     // <RETURN_FUNCTION_N> -> <EXPRESSION>
     if (token->kind == IDENTIFIER || token->kind == INTEGER_LIT || token->kind == DOUBLE_LIT || token->kind == STRING_LIT || token->kind == LEFT_PAR) {
-        if (!Expression(token))
+        if (!Expression(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
         return true;
     }
     return false;
 }
 
-bool FirstParam(Lexeme *token){
+bool FirstParam(Lexeme *token, symtable_stack_t *stack){
     // <FIRST_PARAM> -> RIGHT_PAR
     if (token->kind == RIGHT_PAR) {
         GETTOKEN();
@@ -240,17 +248,17 @@ bool FirstParam(Lexeme *token){
     }
     // <FIRST_PARAM> -> <PARAMS> <PARAMS_N>
     if (token->kind == INTEGER_LIT || token->kind == IDENTIFIER || token->kind == STRING_LIT || token->kind == DOUBLE_LIT) {
-        if (!Params(token))
+        if (!Params(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
-        if(!ParamsN(token))
+        if(!ParamsN(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
         return true;
     }
     return false;
 }
 
-bool  FirstParamDef(Lexeme *token) {
+bool  FirstParamDef(Lexeme *token, symtable_stack_t *stack) {
     // <FIRST_PARAM_DEF> -> RIGHT_PAR
     if (token->kind == RIGHT_PAR) {
         GETTOKEN();
@@ -259,11 +267,11 @@ bool  FirstParamDef(Lexeme *token) {
     // <FIRST_PARAM_DEF> -> <PARAMS_DEF> <PARAMS_DEF_N>
     if (token->kind == IDENTIFIER || token->kind == UNDERSCORE) {
         //GETTOKEN();
-        if (!ParamsDef(token))
+        if (!ParamsDef(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         //GETTOKEN();
-        if(!ParamsDefN(token))
+        if(!ParamsDefN(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
@@ -271,11 +279,11 @@ bool  FirstParamDef(Lexeme *token) {
     return false;
 }
 
-bool ParamsDef(Lexeme *token) {
+bool ParamsDef(Lexeme *token, symtable_stack_t *stack) {
     // <PARAMS_DEF> -> <PARAMS_NAME_DEF> IDENTIFIER COLON <TYPE>
     if (token->kind == UNDERSCORE || token->kind == IDENTIFIER) {
         //GETTOKEN();
-        if (!ParamsNameDef(token))
+        if (!ParamsNameDef(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         //GETTOKEN();
@@ -287,7 +295,7 @@ bool ParamsDef(Lexeme *token) {
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         GETTOKEN();
-        if (!Type(token))
+        if (!Type(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
@@ -295,7 +303,7 @@ bool ParamsDef(Lexeme *token) {
     return false;
 }
 
-bool ParamsDefN(Lexeme *token) {
+bool ParamsDefN(Lexeme *token, symtable_stack_t *stack) {
     // <PARAMS_DEF_N> -> RIGHT_PAR
     if (token->kind == RIGHT_PAR) {
         GETTOKEN();
@@ -304,11 +312,11 @@ bool ParamsDefN(Lexeme *token) {
     // <PARAMS_DEF_N> -> COMMA <PARAMS_DEF> <PARAMS_DEF_N>
     if (token->kind == COMMA){
         GETTOKEN();
-        if (!ParamsDef(token))
+        if (!ParamsDef(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         //GETTOKEN();
-        if(!ParamsDefN(token))
+        if(!ParamsDefN(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
@@ -316,7 +324,7 @@ bool ParamsDefN(Lexeme *token) {
     return false;
 }
 
-bool ParamsNameDef(Lexeme *token) {
+bool ParamsNameDef(Lexeme *token, symtable_stack_t *stack) {
     // <PARAMS_NAME_DEF> -> UNDERSCORE
     if (token->kind == UNDERSCORE) {
         GETTOKEN();
@@ -330,7 +338,7 @@ bool ParamsNameDef(Lexeme *token) {
     return false;
 }
 
-bool ParamsN(Lexeme *token) {
+bool ParamsN(Lexeme *token, symtable_stack_t *stack) {
     // <PARAMS_N> -> RIGHT_PAR
     if (token->kind == RIGHT_PAR) {
         GETTOKEN();
@@ -340,10 +348,10 @@ bool ParamsN(Lexeme *token) {
     // <PARAMS_N> -> COMMA <PARAMS> <PARAMS_N>
     if (token->kind == COMMA){
         GETTOKEN();
-        if (!Params(token))
+        if (!Params(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
-        if(!ParamsN(token))
+        if(!ParamsN(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
@@ -351,7 +359,7 @@ bool ParamsN(Lexeme *token) {
     return false;
 }
 
-bool Params(Lexeme *token) {
+bool Params(Lexeme *token, symtable_stack_t *stack) {
     //  <PARAMS> -> INT_LIT || DOUBLE_LIT || STRING_LIT
     if (token->kind == INTEGER_LIT || token->kind == STRING_LIT || token->kind == DOUBLE_LIT) {
         GETTOKEN();
@@ -360,7 +368,7 @@ bool Params(Lexeme *token) {
     // <PARAMS> -> IDENTIFIER <PARAMS_NAME>
     if (token->kind == IDENTIFIER){
         GETTOKEN();
-        if(!ParamsName(token))
+        if(!ParamsName(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
         return true;
     }
@@ -373,11 +381,11 @@ bool Params(Lexeme *token) {
     return false;
 }
 
-bool ParamsName(Lexeme *token){
+bool ParamsName(Lexeme *token, symtable_stack_t *stack){
     // <PARAMS_NAME> -> COLON <ID_OR_LIT>
     if (token->kind == COLON){
         GETTOKEN();
-        if(!IdOrLit(token))
+        if(!IdOrLit(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
@@ -389,7 +397,7 @@ bool ParamsName(Lexeme *token){
     return false;
 }
 
-bool IdOrLit(Lexeme *token) {
+bool IdOrLit(Lexeme *token, symtable_stack_t *stack) {
     // <ID_OR_LIT> -> IDENTIFIER || INT_LIT || DOUBLE_LIT || STRING_lIT || NIL
     if (token->kind == IDENTIFIER || token->kind == STRING_LIT || token->kind == DOUBLE_LIT || token->kind ==  INTEGER_LIT || token->kind == NIL) {
         GETTOKEN();
@@ -399,7 +407,7 @@ bool IdOrLit(Lexeme *token) {
     return false;
 }
 
-bool IfExp(Lexeme *token) {
+bool IfExp(Lexeme *token, symtable_stack_t *stack) {
     // <IF_EXP> -> LET IDENTIFIER
     if (token->kind == LET) {
         GETTOKEN();
@@ -411,7 +419,7 @@ bool IfExp(Lexeme *token) {
     }
     // <IF_EXP> -> <EXPRESSION>
     if (token->kind == IDENTIFIER || token->kind == INTEGER_LIT || token->kind == DOUBLE_LIT || token->kind == STRING_LIT || token->kind == LEFT_PAR) {
-        if (!Expression(token))
+        if (!Expression(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
@@ -419,7 +427,7 @@ bool IfExp(Lexeme *token) {
     return false;
 }
 
-bool ElseStat(Lexeme *token) {
+bool ElseStat(Lexeme *token, symtable_stack_t *stack) {
     // <ELSE_STAT> -> ELSE LEFT_BRACKET <SEQUENCE_N> RIGHT_BRACKET
     if (token->kind == ELSE) {
         GETTOKEN();
@@ -427,7 +435,7 @@ bool ElseStat(Lexeme *token) {
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
         GETTOKEN();
 
-        if (!SequenceN(token))
+        if (!SequenceN(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if (token->kind != RIGHT_BRACKET)
@@ -440,7 +448,7 @@ bool ElseStat(Lexeme *token) {
     return false;
 }
 
-bool VarDef(Lexeme *token) {
+bool VarDef(Lexeme *token, symtable_stack_t *stack) {
     // <VAR_DEF> -> LET
     if (token->kind == LET) {
         GETTOKEN();
@@ -456,14 +464,14 @@ bool VarDef(Lexeme *token) {
     return false;
 }
 
-bool VarTypeOrAssign(Lexeme *token) {
+bool VarTypeOrAssign(Lexeme *token, symtable_stack_t *stack) {
     // <VAR_TYPE_OR_ASSIGN> -> COLON <TYPE> <ASSIGN_VAR>
     if (token->kind == COLON) {
         GETTOKEN();
-        if (!Type(token))
+        if (!Type(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
-        if (!AssignVar(token))
+        if (!AssignVar(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
@@ -471,7 +479,7 @@ bool VarTypeOrAssign(Lexeme *token) {
     // <VAR_TYPE_OR_ASSIGN> -> ASSIGNMENT <EXP_OR_CALL>
     else if (token->kind == ASSIGNMENT) {
         GETTOKEN();
-        if (!ExpOrCall(token))
+        if (!ExpOrCall(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
@@ -479,7 +487,7 @@ bool VarTypeOrAssign(Lexeme *token) {
     return false;
 }
 
-bool Type(Lexeme *token) {
+bool Type(Lexeme *token, symtable_stack_t *stack) {
     // <TYPE> -> INT
     if (token->kind == INT) {
         GETTOKEN();
@@ -498,11 +506,11 @@ bool Type(Lexeme *token) {
     return false;
 }
 
-bool AssignVar(Lexeme *token) {
+bool AssignVar(Lexeme *token, symtable_stack_t *stack) {
     // <ASSIGN_VAR> -> ASSIGNMENT <EXP_OR_CALL>
     if (token->kind == ASSIGNMENT) {
         GETTOKEN();
-        if (!ExpOrCall(token))
+        if (!ExpOrCall(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
         return true;
     }
@@ -513,21 +521,34 @@ bool AssignVar(Lexeme *token) {
     return false;
 }
 
-bool ExpOrCall(Lexeme *token) {
-    if (token->kind == IDENTIFIER) {             //TODO: FIND OUT WHAT RULE TO USE (26. / 27.)
-        if (!CallFunction(token))
+bool ExpOrCall(Lexeme *token, symtable_stack_t *stack) {
+    symtable_item_t *item = NULL;
+    if (token->kind == IDENTIFIER) {
+        item = SymtableSearchAll(stack, token->extra_data.string);
+        if (item == NULL) {
+            GETTOKEN();
+            if (token->kind == LEFT_PAR)
+                { ERROR_HANDLE(DEFINITION_ERROR, token); }
+            else
+                { ERROR_HANDLE(UNDEFINED_VAR_ERROR, token); }
+        }
+    }
+
+    if (token->kind == IDENTIFIER && item->data.is_function) {
+        if (!CallFunction(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
         return true;
     }
-    else if ((token->kind == IDENTIFIER /* TODO: look into symtable if id is var or func */) || token->kind == INTEGER_LIT || token->kind == DOUBLE_LIT || token->kind == STRING_LIT || token->kind == LEFT_PAR) {
-        if (!Expression(token))
+
+    else if (token->kind == IDENTIFIER || token->kind == INTEGER_LIT || token->kind == DOUBLE_LIT || token->kind == STRING_LIT || token->kind == LEFT_PAR) {
+        if (!Expression(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
         return true;
     }
     return false;
 }
 
-bool CallFunction(Lexeme *token) {
+bool CallFunction(Lexeme *token, symtable_stack_t *stack) {
     // <CALL_FUNCTION> -> IDENTIFIER LEFT_PAR <FIRST_PARAM>
     if (token->kind == IDENTIFIER) {
         GETTOKEN();
@@ -535,7 +556,7 @@ bool CallFunction(Lexeme *token) {
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
         GETTOKEN();
 
-        if (!FirstParam(token))
+        if (!FirstParam(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
@@ -543,6 +564,7 @@ bool CallFunction(Lexeme *token) {
     return false;
 }
 
-bool Expression(Lexeme *token) {
+bool Expression(Lexeme *token, symtable_stack_t *stack) {
+    //TODO: pridat stack do precedencnej
     return precedent_analysys(token);
 }
