@@ -25,7 +25,6 @@ const char* lexeme_kind_to_string(int kind)
         case LEFT_PAR: return "LEFT_PAR";
         case LEFT_BRACKET: return "LEFT_BRACKET";
         case RIGHT_BRACKET: return "RIGHT_BRACKET";
-        case QUESTION_MARK: return "QUESTION_MARK";
         case DOUBLE_QUESTION_MARK: return "DOUBLE_QUESTION_MARK";
         case IDENTIFIER: return "IDENTIFIER";
         case STRING_LIT: return "STRING_LIT";
@@ -62,10 +61,11 @@ int main(int argc, char *argv[])
 {
     FILE *input = stdin;
     if (argc > 1) {
+        fprintf(stderr, "Opening file %s\n", argv[1]);
         input = fopen(argv[1], "r");
         if (input == NULL) {
             printf("Could not open file %s\n", argv[1]);
-             return 1;
+            return 1;
         }
     }
 
@@ -82,14 +82,12 @@ int main(int argc, char *argv[])
             fprintf(stderr, "       data: %s\n", lexeme.extra_data.string);
             free(lexeme.extra_data.string);       //TODO: might need to be removed if we want to use the string later  
         }
-        if (lexeme.kind == INTEGER_LIT)
-        {
-            fprintf(stderr, "       data: %d\n", lexeme.extra_data.IntValue);
-        }
-        if (lexeme.kind == DOUBLE_LIT)
-        {
-            fprintf(stderr, "       data: %f\n", lexeme.extra_data.DoubleValue);
-        }
+        if (lexeme.kind == INTEGER_LIT) fprintf(stderr, "       data: %d\n", lexeme.extra_data.IntValue);
+        if (lexeme.kind == DOUBLE_LIT) fprintf(stderr, "       data: %f\n", lexeme.extra_data.DoubleValue);
+        if (lexeme.kind == DOUBLE) fprintf(stderr, "       nil_type: %s\n", lexeme.nil_type ? "true" : "false");
+        if (lexeme.kind == INT) fprintf(stderr, "       nil_type: %s\n", lexeme.nil_type ? "true" : "false");
+        if (lexeme.kind == STRING) fprintf(stderr, "       nil_type: %s\n", lexeme.nil_type ? "true" : "false");
+        
         fprintf(stderr, "       line: %d\n", lexeme.line);
         fprintf(stderr, "\n");
     }

@@ -27,7 +27,6 @@ typedef struct Lexeme
         LEFT_PAR,
         LEFT_BRACKET,
         RIGHT_BRACKET,
-        QUESTION_MARK,
         DOUBLE_QUESTION_MARK,
         IDENTIFIER,
         STRING_LIT,
@@ -66,6 +65,7 @@ typedef struct Lexeme
     }   extra_data;
 
     unsigned int line;
+    bool nil_type;
 } Lexeme;
 
 Lexeme make_lexeme(AutomatState current, char *str);
