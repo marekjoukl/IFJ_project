@@ -37,6 +37,7 @@ typedef struct data {
     char *string_value;
     double numeric_value;
     bool blinded_sign;
+    int param_count_current;
 } data_t;
 
 //one item in symtable
