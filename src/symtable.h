@@ -21,6 +21,7 @@ typedef enum {
     TYPE_DOUBLE,
     TYPE_STRING,
     TYPE_UNDEFINED,
+    TYPE_BOOL, //for precedent anaylsys 5 < 10
 } data_type_t;
 
 typedef struct data {
