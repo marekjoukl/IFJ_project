@@ -36,32 +36,32 @@ void StartParser();
 bool Prog(Lexeme *token, symtable_stack_t *stack);
 bool Sequence(Lexeme *token, symtable_stack_t *stack);
 bool SequenceN(Lexeme *token, symtable_stack_t *stack);
-bool VarDef(Lexeme *token, symtable_stack_t *stack);
-bool VarTypeOrAssign(Lexeme *token, symtable_stack_t *stack, Lexeme *temp_token);
-bool AssignVar(Lexeme *token, symtable_stack_t *stack, Lexeme *temp_token);
-bool DefFunction(Lexeme *token, symtable_stack_t *stack, Lexeme *temp_token);
-bool VoidF(Lexeme *token, symtable_stack_t *stack, Lexeme *temp_token);
-bool FirstParamDef(Lexeme *token, symtable_stack_t *stack, Lexeme *temp_token);
-bool ParamsDef(Lexeme *token, symtable_stack_t *stack, Lexeme *temp_token);
-bool ParamsNameDef(Lexeme *token, symtable_stack_t *stack, Lexeme *temp_token, bool first_or_second);
-bool ParamsDefN(Lexeme *token, symtable_stack_t *stack, Lexeme *temp_token);
-bool ReturnFunction(Lexeme *token, symtable_stack_t *stack);
-bool ReturnFunctionN(Lexeme *token, symtable_stack_t *stack);
+bool VarDef(Lexeme *token, symtable_stack_t *stack, bool *is_let);
+bool VarTypeOrAssign(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item);
+bool AssignVar(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item);
+bool DefFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token);
+bool VoidF(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token);
+bool FirstParamDef(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token);
+bool ParamsDef(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token);
+bool ParamsNameDef(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token, bool first_or_second);
+bool ParamsDefN(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token);
+bool ReturnFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token);
+bool ReturnFunctionN(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token);
 bool AssignOrFunction(Lexeme *token, symtable_stack_t *stack, Lexeme *temp_token);
-bool ExpOrCall(Lexeme *token, symtable_stack_t *stack);
-bool CallFunction(Lexeme *token, symtable_stack_t *stack);
-bool FirstParam(Lexeme *token, symtable_stack_t *stack, Lexeme *temp_token);
-bool ParamsN(Lexeme *token, symtable_stack_t *stack, Lexeme *temp_token);
-bool Params(Lexeme *token, symtable_stack_t *stack, Lexeme *temp_token);
-bool ParamsName(Lexeme *token, symtable_stack_t *stack,Lexeme *temp_token, Lexeme *param_name_or_id);
+bool ExpOrCall(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item);
+bool CallFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item);
+bool FirstParam(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token);
+bool ParamsN(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item);
+bool Params(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item);
+bool ParamsName(Lexeme *token, symtable_stack_t *stack, symtable_item_t *function, Lexeme *param_name_or_id);
 bool ElseStat(Lexeme *token, symtable_stack_t *stack);
 bool IfExp(Lexeme *token, symtable_stack_t *stack);
-bool Type(Lexeme *token, symtable_stack_t *stack, Lexeme *temp_token, bool param);
+bool Type(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, bool param);
 bool IdOrLit(Lexeme *token, symtable_stack_t *stack, Lexeme *temp_token);
 
 
 //TODO: find out how to call precendencnu analyzu
-bool Expression(Lexeme *token, symtable_stack_t *stack);
+bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item);
 
 #endif
 
