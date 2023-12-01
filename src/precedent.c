@@ -24,6 +24,7 @@ valid_itmes_t convert_lex_term(Lexeme lex, symtable_stack_t *sym_stack)
 
         case IDENTIFIER:
             item.type = TERM_T; 
+
             symtable_item_t *variable = SymtableSearchAll(sym_stack, lex.extra_data.string);
             item.var_type = variable->data->item_type;
             item.can_be_nil = variable->data->can_be_nil;
@@ -99,11 +100,32 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
             (stack->next->next->items.var_type != TYPE_INT && stack->next->next->items.var_type != TYPE_DOUBLE))
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
 
-        // if(stack->items.var_type == stack->next->next->items.var_type) TODO
-            // Int2Double()
-
-        new_expression->can_be_nil = false;
         new_expression->var_type = stack->items.var_type;
+        new_expression->can_be_nil = false;
+
+        if(stack->items.var_type != stack->next->next->items.var_type) //TODO
+        {
+            if(stack->items.var_type == TYPE_INT){
+                if(stack->items.is_lit == false)
+                    {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+                // int2double TODO
+            }
+            
+            if(stack->next->next->items.var_type == TYPE_INT){
+
+                if(stack->next->next->items.is_lit == false)
+                    {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+                // int2double TODO
+            }
+
+            new_expression->var_type = TYPE_DOUBLE;
+        }
+
+        if(stack->items.is_lit == false)
+            new_expression->is_lit = stack->items.is_lit;
+        else
+            new_expression->is_lit = stack->next->next->items.is_lit;
+
         break;
     
     case DIV_T:
@@ -117,6 +139,12 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
 
         new_expression->can_be_nil = false;
         new_expression->var_type = stack->items.var_type;
+
+        if(stack->items.is_lit == false)
+            new_expression->is_lit = stack->items.is_lit;
+        else
+            new_expression->is_lit = stack->next->next->items.is_lit;
+
         break;
     
     case PLUS_T:
@@ -125,31 +153,67 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
            stack->next->next->items.var_type == TYPE_BOOL || stack->next->next->items.var_type == TYPE_UNDEFINED)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
 
-        if(stack->items.var_type != stack->next->next->items.var_type){
-            if(stack->items.var_type == TYPE_STRING)
-                {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-            // TODO int2double()
-        }
-        
         new_expression->can_be_nil = false;
         new_expression->var_type = stack->items.var_type;
+
+        if(stack->items.var_type != stack->next->next->items.var_type)
+        {
+            if(stack->items.var_type == TYPE_STRING)
+                {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+
+            if(stack->items.var_type == TYPE_INT){
+                if(stack->items.is_lit == false)
+                    {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+                // int2double TODO
+            }
+
+            if(stack->next->next->items.var_type == TYPE_INT){
+                if(stack->next->next->items.is_lit == false)
+                    {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+                // int2double TODO
+            }
+
+            new_expression->var_type = TYPE_DOUBLE;
+        }
+        
+        if(stack->items.is_lit == false)
+            new_expression->is_lit = stack->items.is_lit;
+        else
+            new_expression->is_lit = stack->next->next->items.is_lit;
         break;
     
     case MINUS_T:
         valid = rule3(stack, rule);
-        puts("minus"); //debug
 
         if((stack->items.var_type != TYPE_INT && stack->items.var_type != TYPE_DOUBLE) || 
             (stack->next->next->items.var_type != TYPE_INT && stack->next->next->items.var_type != TYPE_DOUBLE))
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
 
-        puts("minus1"); //debug
-        
-        // if(stack->items.var_type == stack->next->next->items.var_type) TODO
-            // Int2Double()
-
         new_expression->can_be_nil = false;
         new_expression->var_type = stack->items.var_type;
+
+        if(stack->items.var_type != stack->next->next->items.var_type)
+        {
+            if(stack->items.var_type == TYPE_INT){
+                if(stack->items.is_lit == false)
+                    {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+                // int2double TODO
+            }
+            
+            if(stack->next->next->items.var_type == TYPE_INT){
+                if(stack->next->next->items.is_lit == false)
+                    {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+                // int2double TODO
+            }
+
+            new_expression->var_type = TYPE_DOUBLE;
+        }
+
+        if(stack->items.is_lit == false)
+            new_expression->is_lit = stack->items.is_lit;
+        else
+            new_expression->is_lit = stack->next->next->items.is_lit;
+
         break;
     
     case EQUAL_T:
@@ -226,12 +290,14 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
         valid = (check_stoppage(stack, 2) && stack->items.type == rule.type && stack->next->items.type == EXPRESSION_T);
         new_expression->can_be_nil = false;
         new_expression->var_type = stack->next->items.var_type;
+        new_expression->is_lit = stack->next->items.is_lit;
         break;
     
     case RIGHT_PAR_T:
         valid = (check_stoppage(stack,3) && stack->items.type == RIGHT_PAR_T && stack->next->items.type == EXPRESSION_T && stack->next->next->items.type == LEFT_PAR_T);
         new_expression->can_be_nil = stack->next->items.can_be_nil;
         new_expression->var_type = stack->next->items.var_type;
+        new_expression->is_lit = stack->next->items.is_lit;
         break;
     
     case TERM_T:
@@ -242,7 +308,7 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
         break;  
     
     default:
-        valid = false;
+        ERROR_HANDLE_PREC(SYNTAX_ERROR, token);
         break;
     }
     return valid;
@@ -254,10 +320,18 @@ bool precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
     bool cont = true;
     prec_stack_t *stack;
     stack_init(&stack);
-    valid_itmes_t input = convert_lex_term(*lexeme, sym_stack);
     stack_rules_t stack_rule;
     symtable_item_t *variable;
     valid_itmes_t new_expression;
+
+    if(lexeme->kind == IDENTIFIER) //debug does not have to be in final code
+    {
+        variable = SymtableSearchAll(sym_stack, lexeme->extra_data.string);
+        if(variable == NULL)
+            {ERROR_HANDLE_PREC(UNDEFINED_VAR_ERROR, lexeme);}
+    }
+
+    valid_itmes_t input = convert_lex_term(*lexeme, sym_stack);
 
     while(valid)
     {
@@ -287,16 +361,13 @@ bool precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
             if(check_prec_rule(stack, sym_stack, &new_expression, lexeme))
                 stack_merge(&stack, new_expression);
             else
-            {
-                valid = false;
-                cont = false;
-            }
+                {ERROR_HANDLE_PREC(SYNTAX_ERROR, lexeme);}
             break;
-        case ERROR_R: 
+        case ERROR_R:
             valid = false;
-            cont = true;
             break;
         default:
+            ERROR_HANDLE_PREC(SYNTAX_ERROR, lexeme);
             break;
         }
     }
@@ -306,25 +377,21 @@ bool precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
     while(cont == true)
     {
         stack_rule = give_stack_rule(stack, input.type);
-        switch (stack_rule)
-        {
-        case MERGE_R:
+        if(stack_rule == MERGE_R){
             if(check_prec_rule(stack, sym_stack, &new_expression, lexeme))
                 stack_merge(&stack, new_expression);
             else
-                valid = false;
-            break;
-        default:
-            cont = false;
-            break;
+                {ERROR_HANDLE_PREC(SYNTAX_ERROR, lexeme);}
         }
+        else
+            cont = false;
     }
 
+    // check if all syntax operations valid
     if(stack_empty(stack))
         valid = true;
-    else{
+    else
         {ERROR_HANDLE_PREC(SYNTAX_ERROR, lexeme);}
-    }
     
     stack_dispose(&stack);  
     return valid;
