@@ -10,5 +10,10 @@ build
 #precedent analysys
 test_precedent
 test_parser
+
+#symtable
+test_symtable
+
+#Grammar
 LL_Grammar_2
 !LL_Table.txt

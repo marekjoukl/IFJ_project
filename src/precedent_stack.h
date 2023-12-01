@@ -4,6 +4,10 @@
 #include "precedent.h"
 
 
+#define ERROR_HANDLE_PREC_STACK(exit_code) \
+    fprintf(stderr, "Error: precedent_stack.c - error code %d\n", exit_code); \
+    exit(exit_code);
+
 typedef struct valid_itmes
 {
     //prec_terminal_t type;
