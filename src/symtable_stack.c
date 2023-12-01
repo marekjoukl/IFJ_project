@@ -32,7 +32,7 @@ void SymtableStackPush(symtable_stack_t *stack, Symtable *table) {
         }
     }
     stack->array[stack->size] = table;
-    stack->size++;
+    (stack->size)++;
 }
 
 void SymtableStackPop(symtable_stack_t *stack) {
@@ -42,7 +42,7 @@ void SymtableStackPop(symtable_stack_t *stack) {
     }
     SymtableDeleteAll(stack->array[stack->size - 1]);
     free(stack->array[stack->size - 1]);
-    stack->size--;
+    (stack->size)--;
 }
 
 symtable_item_t *SymtableSearchAll(symtable_stack_t *stack, char *key) {

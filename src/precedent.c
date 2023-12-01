@@ -342,7 +342,7 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
     
     case TERM_T:
         valid = rule1(stack, rule);
-        new_expression->can_be_nil = false;
+        new_expression->can_be_nil = stack->items.can_be_nil;
         new_expression->var_type = stack->items.var_type;
         new_expression->is_lit = stack->items.is_lit;
         break;  
@@ -372,7 +372,7 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
     }
 
     valid_itmes_t input = convert_lex_term(*lexeme, sym_stack);
-
+    
     while(valid)
     {
         //check if variable was defined
@@ -384,6 +384,7 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
         }
 
         stack_rule = give_stack_rule(stack, input.type);
+
         switch (stack_rule)
         {
         case SHIFT_R:
@@ -416,6 +417,15 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
     input.type = DOLLAR_T;
     while(cont == true)
     {
+
+        // chceck if variable was defined
+        if(lexeme->kind == IDENTIFIER)
+        {
+            variable = SymtableSearchAll(sym_stack, lexeme->extra_data.string);
+            if(variable == NULL)
+                {ERROR_HANDLE_PREC(UNDEFINED_VAR_ERROR, lexeme);}
+        }
+        
         stack_rule = give_stack_rule(stack, input.type);
         if(stack_rule == MERGE_R){
             if(check_prec_rule(stack, sym_stack, &new_expression, lexeme))
@@ -432,6 +442,7 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
         {ERROR_HANDLE_PREC(SYNTAX_ERROR, lexeme);}
 
     data_type_t exit_data_type = stack->items.var_type;
-    stack_dispose(&stack);  
+    stack_dispose(&stack); 
+
     return exit_data_type;
 }
