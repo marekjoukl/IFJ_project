@@ -1,8 +1,9 @@
 #include "precedent.h"
+//#include "precedent_stack.h"
 #include "scanner.h"
 
 
-valid_itmes_t convert_lex_term(Lexeme lex, symtable_stack_t *sym_stack)
+valid_itmes_t convert_lex_term(Lexeme lex)
 {
     valid_itmes_t item;
     switch (lex.kind)
@@ -17,11 +18,15 @@ valid_itmes_t convert_lex_term(Lexeme lex, symtable_stack_t *sym_stack)
         case RIGHT_PAR:             item.type = RIGHT_PAR_T; break;
         case LEFT_PAR:              item.type = LEFT_PAR_T; break;
         case DOUBLE_QUESTION_MARK:  item.type = DOUBLE_QUESTION_MARK_T; break;
+        case IDENTIFIER:            item.type = TERM_T; break;
+        case STRING_LIT:            item.type = TERM_T; break;
+        case INTEGER_LIT:           item.type = TERM_T; break;
+        case DOUBLE_LIT:            item.type = TERM_T; break;
         case PLUS:                  item.type = PLUS_T; break;
         case MINUS:                 item.type = MINUS_T; break;
         case ASTERISK:              item.type = MUL_T; break;
         case SLASH:                 item.type = DIV_T; break;
-
+        
         case IDENTIFIER:
             item.type = TERM_T; 
 
@@ -318,11 +323,11 @@ bool precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
 {
     bool valid = true;
     bool cont = true;
+    valid_itmes_t top; //
     prec_stack_t *stack;
     stack_init(&stack);
+
     stack_rules_t stack_rule;
-    symtable_item_t *variable;
-    valid_itmes_t new_expression;
 
     if(lexeme->kind == IDENTIFIER) //debug does not have to be in final code
     {
@@ -335,31 +340,24 @@ bool precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
 
     while(valid)
     {
-        //check if variable was defined
-        if(lexeme->kind == IDENTIFIER)
-        {
-            variable = SymtableSearchAll(sym_stack, lexeme->extra_data.string);
-            if(variable == NULL)
-                {ERROR_HANDLE_PREC(UNDEFINED_VAR_ERROR, lexeme);}
-        }
-
+        stack_top_terminal(stack, &top); //debug
         stack_rule = give_stack_rule(stack, input.type);
         switch (stack_rule)
         {
         case SHIFT_R:
             stack_push(&stack, &input);
             *lexeme = get_next_non_whitespace_lexeme();
-            input = convert_lex_term(*lexeme, sym_stack);
+            input = convert_lex_term(*lexeme);
             break;
         case STOPPAGE_R:
             stack_push_stoppage(&stack);
             stack_push(&stack, &input);
             *lexeme = get_next_non_whitespace_lexeme();
-            input = convert_lex_term(*lexeme, sym_stack);
+            input = convert_lex_term(*lexeme);
             break;
         case MERGE_R:
-            if(check_prec_rule(stack, sym_stack, &new_expression, lexeme))
-                stack_merge(&stack, new_expression);
+            if(check_prec_rule(stack))
+                stack_merge(&stack);
             else
                 {ERROR_HANDLE_PREC(SYNTAX_ERROR, lexeme);}
             break;
@@ -376,6 +374,7 @@ bool precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
     input.type = DOLLAR_T;
     while(cont == true)
     {
+        stack_top_terminal(stack, &top); //debug
         stack_rule = give_stack_rule(stack, input.type);
         if(stack_rule == MERGE_R){
             if(check_prec_rule(stack, sym_stack, &new_expression, lexeme))

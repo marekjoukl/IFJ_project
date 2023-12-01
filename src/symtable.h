@@ -21,7 +21,9 @@ typedef enum {
     TYPE_DOUBLE,
     TYPE_STRING,
     TYPE_UNDEFINED,
-    TYPE_BOOL, //for precedent anaylsys 5 < 10
+    TYPE_INT_NIL,
+    TYPE_DOUBLE_NIL,
+    TYPE_STRING_NIL,
 } data_type_t;
 
 typedef struct data {
@@ -29,6 +31,7 @@ typedef struct data {
     bool can_be_nil;
     bool value_is_nil;
     //bool is_defined;
+    bool is_modifiable;
     int param_count;
     char **param_names;
     char **params_id;
