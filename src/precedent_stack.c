@@ -20,8 +20,8 @@ void stack_push(prec_stack_t **stack, valid_itmes_t *item) //mozno by mohol byt 
 {
     prec_stack_t *new = malloc(sizeof(prec_stack_t));
     if(new == NULL)
-        return;
-    new->items.type = item->type;
+        {ERROR_HANDLE_PREC_STACK(INTERNAL_ERROR);}
+    new->items = *item;
     new->next = *stack;
     *stack = new;
 }
@@ -49,8 +49,10 @@ void stack_push_stoppage(prec_stack_t **stack)
         {
             prec_stack_t *new = malloc(sizeof(prec_stack_t));
             if(new == NULL) 
-                return;
-            new->items.type = tmp->items.type;
+                {ERROR_HANDLE_PREC_STACK(INTERNAL_ERROR);}
+
+            new->items = tmp->items;
+            new->next = tmp->next;
             tmp->items.type = STOPPAGE_T;
             new->next = tmp->next;
             tmp->next = new;

@@ -70,19 +70,43 @@ stack_init(&test_stack);
 printf("rule = %d\n" ,give_stack_rule(test_stack, LEFT_PAR_T));
 ENDTEST
 
-
-TEST(basic, "test basic precedent")
+TEST(basic, "test basic precedent and seamnatic without variables")
 Lexeme token = get_next_non_whitespace_lexeme();
-bool valid = precedent_analysys(&token);
-printf("valid expression = %d, next token = %d\n", valid, token.kind);
+symtable_stack_t *stack = SymtableStackInit();
+Symtable *table = malloc(sizeof(Symtable));
+SymtableInit(table);
+SymtableStackPush(stack, table);
+
+bool valid = precedent_analysys(&token, stack);
+printf("valid basic test = %d, next token = %d", valid, token.kind);
+
+SymtableStackPop(stack);
+SymtableStackDispose(stack);
+ENDTEST
+
+TEST(advanced, "test with premade variables")
+Lexeme token = get_next_non_whitespace_lexeme();
+symtable_stack_t *stack = SymtableStackInit();
+Symtable *table = malloc(sizeof(Symtable));
+SymtableInit(table);
+SymtableStackPush(stack, table);
+data_t testdata[] = {{TYPE_INT, 0, 0, 0, NULL, NULL, NULL, 0, 0, NULL, 0.0, 0, 0}, {TYPE_DOUBLE, 0, 0, 0, NULL, NULL, NULL, 0, 0, NULL, 0.0, 0, 0}, {TYPE_STRING, 0, 0, 0, NULL, NULL, NULL, 0, 0, NULL, 0.0, 0, 0}};
+SymtableAddItem(table, "a", &(testdata[0]));
+
+bool valid = precedent_analysys(&token, stack);
+printf("valid advanced test = %d, next token = %d", valid, token.kind);
+
+SymtableStackPop(stack);
+SymtableStackDispose(stack);
 ENDTEST
 
 int main(void)
 {
-    test_init();
-    push_items();
-    push_stoppage();
-    merge();
-    rule();
-    basic();
+    // test_init();
+    // push_items();
+    // push_stoppage();
+    // merge();
+    // rule();
+    // basic();
+    advanced();
 }
