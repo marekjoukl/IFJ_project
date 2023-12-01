@@ -48,8 +48,8 @@ precedent_stack.o: precedent_stack.c
 test_precedent.o: test_precedent.c
 	$(CC) $(CFLAGS) -c test_precedent.c
 
-test_precedent: test_precedent.o precedent_stack.o precedent.o scanner.o automat.o
-	$(CC) $(CFLAGS) -o test_precedent test_precedent.o precedent_stack.o precedent.o scanner.o automat.o
+test_precedent: test_precedent.o precedent_stack.o precedent.o scanner.o automat.o symtable.o symtable_stack.o
+	$(CC) $(CFLAGS) -o test_precedent test_precedent.o precedent_stack.o precedent.o scanner.o automat.o symtable.o symtable_stack.o
 
 #clean
 clean:
