@@ -14,7 +14,7 @@ symtable_stack_t* SymtableStackInit() {
     }
     stack->capacity = STACK_INIT_SIZE;
     stack->size = 0;
-    stack->array = malloc(sizeof(Symtable) * stack->capacity);
+    stack->array = malloc(sizeof(Symtable*) * stack->capacity);
     if (stack->array == NULL) {
         fprintf(stderr, "Error: symtable_stack.c - SymtableStackInit() - malloc failed\n");
         exit(INTERNAL_ERROR);
@@ -25,7 +25,7 @@ symtable_stack_t* SymtableStackInit() {
 void SymtableStackPush(symtable_stack_t *stack, Symtable *table) {
     if (SymtableStackIsFull(stack)) {
         stack->capacity += STACK_INIT_SIZE;
-        stack->array = realloc(stack->array, sizeof(Symtable) * stack->capacity);
+        stack->array = realloc(stack->array, sizeof(Symtable*) * stack->capacity);
         if (stack->array == NULL) {
             fprintf(stderr, "Error: symtable_stack.c - SymtableStackPush() - realloc failed\n");
             exit(INTERNAL_ERROR);
