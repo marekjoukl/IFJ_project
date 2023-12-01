@@ -90,8 +90,8 @@ symtable_stack_t *stack = SymtableStackInit();
 Symtable *table = malloc(sizeof(Symtable));
 SymtableInit(table);
 SymtableStackPush(stack, table);
-data_t testdata[] = {{TYPE_INT, 0, 0, 0, NULL, NULL, NULL, 0, 0, NULL, 0.0, 0, 0}, {TYPE_DOUBLE, 0, 0, 0, NULL, NULL, NULL, 0, 0, NULL, 0.0, 0, 0}, {TYPE_STRING, 0, 0, 0, NULL, NULL, NULL, 0, 0, NULL, 0.0, 0, 0}};
-SymtableAddItem(table, "a", &(testdata[0]));
+// data_t testdata[] = {{TYPE_INT, 0, 0, 0, NULL, NULL, NULL, 0, 0, NULL, 0.0, 0, 0}, {TYPE_DOUBLE, 0, 0, 0, NULL, NULL, NULL, 0, 0, NULL, 0.0, 0, 0}, {TYPE_STRING, 0, 0, 0, NULL, NULL, NULL, 0, 0, NULL, 0.0, 0, 0}};
+// SymtableAddItem(table, "a", &(testdata[0]));
 
 bool valid = precedent_analysys(&token, stack);
 printf("valid advanced test = %d, next token = %d", valid, token.kind);
