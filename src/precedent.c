@@ -364,7 +364,7 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
     symtable_item_t *variable;
     valid_itmes_t new_expression;
 
-    if(lexeme->kind == IDENTIFIER) //debug does not have to be in final code
+    if(lexeme->kind == IDENTIFIER)
     {
         variable = SymtableSearchAll(sym_stack, lexeme->extra_data.string);
         if(variable == NULL)
