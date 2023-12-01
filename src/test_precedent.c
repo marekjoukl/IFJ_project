@@ -107,6 +107,6 @@ int main(void)
     // push_stoppage();
     // merge();
     // rule();
-    // basic();
-    advanced();
+    basic();
+    // advanced();
 }
