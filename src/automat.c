@@ -69,8 +69,8 @@ AutomatState transition(AutomatState current, char edge)
             if (edge == '?') return DoubleQmark;
             return Error;
 
-        //if Id is the end state check if it is a keyword
         case Id:
+            if (edge == '?') return IdNil;
             if (isalnum(edge) || edge == '_') return Id;
             return Error;
 
@@ -113,7 +113,7 @@ AutomatState transition(AutomatState current, char edge)
 
         //##############################
         // Second level states
-        // LsEqual, GtEqual, NotEqual, Equal, DoubleQmark, EmptyString, StringLit, DecPoint, Exp, Comment, CommentBody, EscSeq
+        // LsEqual, GtEqual, NotEqual, Equal, DoubleQmark, EmptyString, StringLit, DecPoint, Exp, Comment, CommentBody, EscSeq, IdNil, Arrow
         //##############################
         case LsEqual:
             return Error;
@@ -131,7 +131,7 @@ AutomatState transition(AutomatState current, char edge)
             return Error;
 
         case EmptyString:
-            if (edge == '"') return MltLnStringLit;
+            if (edge == '"') return MltLnStringStart;
             return Error;
 
         case StringLit:
@@ -155,6 +155,7 @@ AutomatState transition(AutomatState current, char edge)
         case CommentBody:
             if (edge == '/') return NestedComment;
             if (edge == '*') return CommentEnding;
+            if (edge == EOF) return Error;
             return CommentBody;
 
         case EscSeq:
@@ -162,9 +163,15 @@ AutomatState transition(AutomatState current, char edge)
             if (edge == 'n' || edge == 'r' || edge == 't' || edge == '"' || edge == '\\') return StringLit;
             return Error;
 
+        case IdNil:
+            return Error;
+
+        case Arrow:
+            return Error;
+
         //##############################
         // Third level states
-        // DoubleLitDec, DoubleLitExp, ExpSign, NestedComment, CommentEnding, EscU, MltLnStringLit, EndStringLit
+        // DoubleLitDec, DoubleLitExp, ExpSign, NestedComment, CommentEnding, EscU, EndStringLit, MltLnStringStart
         //##############################
         case DoubleLitDec:
             if (isdigit(edge)) return DoubleLitDec;
@@ -184,6 +191,7 @@ AutomatState transition(AutomatState current, char edge)
                 (counter)++;
                 return CommentBody;
             }
+            if (edge == EOF) return Error;
             return CommentBody;
 
         case CommentEnding:
@@ -192,22 +200,23 @@ AutomatState transition(AutomatState current, char edge)
                 (counter)--;
                 return CommentBody;
             }
+            if (edge == EOF) return Error;
             return CommentBody;
 
         case EscU:
             if (edge == '{') return EscLBr;
             return Error;
 
-        case MltLnStringLit:
-            if (edge == '"') return FirstQuote;
-            return MltLnStringLit;
+        case MltLnStringStart:
+            if (edge == '\n') return MltLnStringLit;
+            return Error;
 
         case EndStringLit:
             return Error;
 
         //##############################
         // Fourth level states
-        // BlockComment, EscLBr, FirstQuote
+        // BlockComment, EscLBr, MltLnStringLit
         //##############################
         case BlockComment:
             return Error;
@@ -216,30 +225,60 @@ AutomatState transition(AutomatState current, char edge)
             if (isxdigit(edge)) return FirstHex;
             return Error;
 
-        case FirstQuote:
-            if (edge == '"') return SecondQuote;
+        case MltLnStringLit:
+            if (edge == '"') return FirstQuoteErr;
+            if (edge == '\n') return MltLnStringStartEnd;
             return MltLnStringLit;
 
         //##############################
         // Fifth level states
-        // FirstHex, SecondQuote
+        // FirstHex, MltLnStringStartEnd, FirstQuoteErr
         //##############################
         case FirstHex:
             if (isxdigit(edge)) return SecondHex;
             return Error;
 
-        case SecondQuote:
-            if (edge == '"') return EndMltLnStringLit;
+        case MltLnStringStartEnd:
+            if (edge == '"') return FirstQuote;
+            if (edge == '\n') return MltLnStringStartEnd;
+            if ((edge != '"') && (edge != '\n')) return MltLnStringLit;
+            return Error;
+
+        case FirstQuoteErr:
+            if (edge == '"') return SecondQuoteErr;
             return MltLnStringLit;
 
         //##############################
         // Sixth level states
-        // SecondHex, EndMltLnStringLit
+        // SecondHex, FirstQuote
         //##############################
         case SecondHex:
             if (edge == '}') return StringLit;
             return Error;
 
+        case FirstQuote:
+            if (edge == '"') return SecondQuote;
+            return MltLnStringLit;
+
+        case SecondQuoteErr:
+            if (edge == '"') return ThirdQuoteErr;
+            return MltLnStringLit;
+
+        //##############################
+        // Seventh level states
+        // SecondQuote, ThirdQuoteErr, 
+        //##############################
+        case SecondQuote:
+            if (edge == '"') return EndMltLnStringLit;
+            return MltLnStringLit;
+
+        case ThirdQuoteErr:
+            return Error;
+
+        //##############################
+        // Eighth level states
+        // EndMltLnStringLit
+        //##############################
         case EndMltLnStringLit:
             return Error;
 

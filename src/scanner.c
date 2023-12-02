@@ -40,7 +40,7 @@ Lexeme get_lexeme(void)
             if (str == NULL)
             {
                 fprintf(stderr, "Error: scanner.c - realloc failed\n");
-                exit (99);      // EXIT CODE 99 - failed to allocate memory
+                exit (INTERNAL_ERROR);      // EXIT CODE 99 - failed to allocate memory
             }
         }
 
@@ -53,7 +53,7 @@ Lexeme get_lexeme(void)
             {
                 if (str != NULL) free(str);
                 fprintf(stderr, "Error: scanner.c - wrong lexeme structure at line %i\n", line_counter);
-                exit (1);       // EXIT CODE 1 - wrong lexeme structure
+                exit (LEXICAL_ERROR);       // EXIT CODE 1 - wrong lexeme structure
             }
 
             return lexeme;
@@ -79,15 +79,35 @@ void add_to_string(char **str, size_t *len, size_t *capacity, char edge, Automat
 
     // add string terminator, if exiting a final state
     if (next == Error && 
-       (current == EndStringLit || current == EndMltLnStringLit || current == EmptyString || 
-        current == IntLit || current == DoubleLitDec || current == DoubleLitExp || current == Id))
+       (current == EmptyString || 
+        current == IntLit || current == DoubleLitDec || current == DoubleLitExp || current == Id || current == IdNil))
     {
         (*str)[*len] = '\0';
         (*len)++;
         return;
     }
-    (*str)[*len] = edge;
-    (*len)++;
+    else if (next == Error)
+    {
+        if (current == EndStringLit) // remove " from the end of a string
+        {
+            (*str)[*len - 1] = '\0';
+            (*len)++;
+            return;
+        }
+        if (current == EndMltLnStringLit) // remove \n""" from the end of a multiline string 
+        {
+            (*str)[*len - 4] = '\0';
+            (*len)++;
+            return;
+        }
+    }
+    // do not add " on the beginning of a string
+    if (!(next == BeginString && current == Start) && !(next == EmptyString && current == BeginString) && 
+        !(next == MltLnStringStart && current == EmptyString) && !(next == MltLnStringLit && current == MltLnStringStart))
+    {
+        (*str)[*len] = edge;
+        (*len)++;
+    }
 }
 
 // generates lexeme from the current state
@@ -138,22 +158,31 @@ Lexeme make_lexeme(AutomatState current, char *str)
         case RBrac:
             lexeme.kind = RIGHT_BRACKET;
             break;
-        case SingleQmark:
-            lexeme.kind = QUESTION_MARK;
-            break;
         case DoubleQmark:
             lexeme.kind = DOUBLE_QUESTION_MARK;
             break;
         case Id:
-            if (strcmp(str, "Double") == 0) lexeme.kind = DOUBLE;
+            if (strcmp(str, "Double") == 0) 
+            {
+                lexeme.kind = DOUBLE;
+                lexeme.nil_type = false;
+            }
+            else if (strcmp(str, "Int") == 0) 
+            {
+                lexeme.kind = INT;
+                lexeme.nil_type = false;
+            }
+            else if (strcmp(str, "String") == 0) 
+            {
+                lexeme.kind = STRING;
+                lexeme.nil_type = false;
+            }
             else if (strcmp(str, "else") == 0) lexeme.kind = ELSE;
             else if (strcmp(str, "func") == 0) lexeme.kind = FUNC;
             else if (strcmp(str, "if") == 0) lexeme.kind = IF;
-            else if (strcmp(str, "Int") == 0) lexeme.kind = INT;
             else if (strcmp(str, "let") == 0) lexeme.kind = LET;
             else if (strcmp(str, "nil") == 0) lexeme.kind = NIL;
             else if (strcmp(str, "return") == 0) lexeme.kind = RETURN;
-            else if (strcmp(str, "String") == 0) lexeme.kind = STRING;
             else if (strcmp(str, "var") == 0) lexeme.kind = VAR;
             else if (strcmp(str, "while") == 0) lexeme.kind = WHILE;
             else if (strcmp(str, "_") == 0) lexeme.kind = UNDERSCORE;
@@ -161,6 +190,29 @@ Lexeme make_lexeme(AutomatState current, char *str)
             {
                 lexeme.kind = IDENTIFIER;
                 lexeme.extra_data.string = str;
+                break;
+            }
+            free(str);
+            break;
+        case IdNil:
+            if (strcmp(str, "Double?") == 0)
+            {
+                lexeme.kind = DOUBLE;
+                lexeme.nil_type = true;
+            }
+            else if (strcmp(str, "Int?") == 0)
+            {
+                lexeme.kind = INT;
+                lexeme.nil_type = true;
+            }
+            else if (strcmp(str, "String?") == 0)
+            {
+                lexeme.kind = STRING;
+                lexeme.nil_type = true;
+            }
+            else
+            {
+                lexeme.kind = ERROR;
                 break;
             }
             free(str);
@@ -174,7 +226,7 @@ Lexeme make_lexeme(AutomatState current, char *str)
             lexeme.extra_data.string = str;
             break;
         case EndMltLnStringLit:
-            lexeme.kind = MULTILINE_STRING_LIT;
+            lexeme.kind = STRING_LIT;
             lexeme.extra_data.string = str;
             break;
         case IntLit:
