@@ -1159,13 +1159,11 @@ bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, b
 bool TypeCheck(symtable_item_t *item1, symtable_item_t *item2, int param_index, bool param_handle) {
     data_type_t param_or_func_type;
     if (param_handle) {
-        printf("name : %s\n", item1->key);
         param_or_func_type = item1->data->param_types[param_index];
     }
     else {
         param_or_func_type = item1->data->item_type;
     }
-    printf("param_or_func_type: %d\n", param_or_func_type);
     switch (param_or_func_type) {
         case TYPE_INT:
             if (param_handle) {
@@ -1184,7 +1182,6 @@ bool TypeCheck(symtable_item_t *item1, symtable_item_t *item2, int param_index, 
 
         case TYPE_DOUBLE:
                 if (param_handle) {
-                    printf("item2->data->item_type: %d\n", item2->data->item_type);
                     if (item2->data->item_type == TYPE_DOUBLE || item2->data->item_type == TYPE_INT) {
                         if (!item2->data->can_be_nil) {
                             return true;
