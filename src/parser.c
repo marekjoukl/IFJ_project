@@ -76,6 +76,11 @@ void StartParser() {
     SymtableAddItem(stack->array[stack->size - 1], rdDbl, data);
 
     // func write( term1 , term2 , …, term𝑛 )  TODO: add write function
+    data = CreateData(true, 0);
+    data->item_type = TYPE_UNDEFINED;
+    char* wrt = malloc(sizeof(char) * 15);
+    strcpy(wrt, "write");
+    SymtableAddItem(stack->array[stack->size - 1], wrt, data);
 
     // func Int2Double(_ term: Int) -> Double
     data = CreateData(true, 0);
@@ -408,7 +413,6 @@ bool SequenceN(Lexeme *token, symtable_stack_t *stack) {
 }
 
 bool AssignOrFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item) {
-    //symtable_item_t *variable = SymtableSearchAll(stack, temp_token->extra_data.string);
     // <ASSIGN_OR_FUNCTION> -> ASSIGNMENT <EXP_OR_CALL>
     if (token->kind == ASSIGNMENT) {
         if (item->data->is_function) {
@@ -424,12 +428,19 @@ bool AssignOrFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *i
     }
     // <ASSIGN_OR_FUNCTION> -> LEFT_PAR <FIRST_PARAM>
     if (token->kind == LEFT_PAR){
-        if (!item->data->is_function) {
-            ERROR_HANDLE(OTHER_SEMANTIC_ERROR, token);
+        bool is_not_write = true;
+        if (strcmp(item->key, "write") == 0) {
+            is_not_write = false;
+            WriteFunc(token, stack);
         }
-        GETTOKEN()
-        if(!FirstParam(token, stack, item))
+        if (is_not_write) {
+            if (!item->data->is_function) {
+                ERROR_HANDLE(OTHER_SEMANTIC_ERROR, token);
+            }
+            GETTOKEN()
+            if(!FirstParam(token, stack, item))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
+        }
         return true;
     }
     return false;
@@ -1302,4 +1313,30 @@ bool FuncReturnTypeCheck(data_type_t return_expression_type, data_type_t functio
             return false;
     }
     return false;
+}
+
+bool WriteFunc(Lexeme *token, symtable_stack_t *stack) {
+    GETTOKEN()
+    while (token->kind != RIGHT_PAR) {
+        if (token->kind != STRING_LIT && token->kind != IDENTIFIER && token->kind != INTEGER_LIT && token->kind != DOUBLE_LIT && token->kind != NIL) {
+            ERROR_HANDLE(PARAMETER_TYPE_ERROR, token);
+        }
+        if (token->kind == IDENTIFIER) {
+            symtable_item_t *item = SymtableSearchAll(stack, token->extra_data.string);
+            if (item == NULL) {
+                ERROR_HANDLE(UNDEFINED_VAR_ERROR, token);
+            }
+        }
+        GETTOKEN()
+        if (token->kind == RIGHT_PAR) {
+            break;
+        }
+
+        if (token->kind != COMMA) {
+            ERROR_HANDLE(SYNTAX_ERROR, token);
+        }
+        GETTOKEN()
+    }
+    GETTOKEN()
+    return true;
 }
