@@ -56,7 +56,7 @@ bool ParamsN(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item);
 bool Params(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item);
 bool ParamsName(Lexeme *token, symtable_stack_t *stack, symtable_item_t *function, Lexeme *param_name_or_id);
 bool ElseStat(Lexeme *token, symtable_stack_t *stack);
-bool IfExp(Lexeme *token, symtable_stack_t *stack, symtable_item_t *variable);
+bool IfExp(Lexeme *token, symtable_stack_t *stack, symtable_item_t **variable);
 bool Type(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, bool param, symtable_item_t *function);
 bool IdOrLit(Lexeme *token, symtable_stack_t *stack, symtable_item_t *function);
 

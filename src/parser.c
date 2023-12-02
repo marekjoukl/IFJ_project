@@ -310,7 +310,7 @@ bool Sequence(Lexeme *token, symtable_stack_t *stack) {
     else if (token->kind == IF) {
         symtable_item_t *variable = NULL;
         GETTOKEN()
-        if (!IfExp(token, stack, variable))
+        if (!IfExp(token, stack, &variable))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if (token->kind != LEFT_BRACKET)
@@ -321,6 +321,7 @@ bool Sequence(Lexeme *token, symtable_stack_t *stack) {
         CREATE_FRAME();
 
         if (variable != NULL) {
+            puts("variable is not null");
             data_t *data = malloc(sizeof(data_t));
             if (data == NULL) {
                 ERROR_HANDLE(INTERNAL_ERROR, token)
@@ -797,16 +798,16 @@ bool IdOrLit(Lexeme *token, symtable_stack_t *stack, symtable_item_t *function) 
     return false;
 }
 
-bool IfExp(Lexeme *token, symtable_stack_t *stack, symtable_item_t *variable) {
+bool IfExp(Lexeme *token, symtable_stack_t *stack, symtable_item_t **variable) {
     // <IF_EXP> -> LET IDENTIFIER
     if (token->kind == LET) {
         GETTOKEN()
         if (token->kind == IDENTIFIER) {
-            variable = SymtableSearchAll(stack, token->extra_data.string);
-            if (variable == NULL) {
+            (*variable) = SymtableSearchAll(stack, token->extra_data.string);
+            if (*variable == NULL) {
                 ERROR_HANDLE(UNDEFINED_VAR_ERROR, token);
             }
-            if (variable->data->is_modifiable) {
+            if ((*variable)->data->is_modifiable) {
                 ERROR_HANDLE(OTHER_SEMANTIC_ERROR, token); //TODO: find out what error code to use
             }
             GETTOKEN()
@@ -1107,6 +1108,11 @@ bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, b
             }
         }
         else if (expression_type != item->data->item_type) { //TODO: moze sa stat ze sa mi vrati typ napr TYPE_INT_NIL?
+            if (item->data->item_type == TYPE_DOUBLE) {
+                if (expression_type == TYPE_INT) {
+                    return true;
+                }
+            }
             ERROR_HANDLE(TYPE_ERROR, token);
         }
     }
