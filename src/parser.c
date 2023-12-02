@@ -306,7 +306,7 @@ bool VoidF(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token) 
     // <VOID_F> -> ARROW <TYPE>
     if (token->kind == ARROW) {
         GETTOKEN()
-        if (!Type(token, stack, temp_token, false))
+        if (!Type(token, stack, temp_token, false, NULL))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
         return true;
     }
@@ -390,7 +390,7 @@ bool ParamsDef(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_tok
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         GETTOKEN()
-        if (!Type(token, stack, param_id_item, true)) //TODO: finish semantics in TYPE
+        if (!Type(token, stack, param_id_item, true, temp_token)) //TODO: finish semantics in TYPE
             { ERROR_HANDLE(TYPE_DEDUCTION_ERROR, token); }
 
         return true;
@@ -719,7 +719,7 @@ bool VarTypeOrAssign(Lexeme *token, symtable_stack_t *stack, symtable_item_t *it
     // <VAR_TYPE_OR_ASSIGN> -> COLON <TYPE> <ASSIGN_VAR>
     if (token->kind == COLON) {
         GETTOKEN()
-        if (!Type(token, stack, item, false))
+        if (!Type(token, stack, item, false, NULL))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if (!AssignVar(token, stack, item))
@@ -753,21 +753,21 @@ bool AssignVar(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item) {
     return false;
 }
 
-bool Type(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, bool param) {
+bool Type(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, bool param, symtable_item_t *function) {
     //symtable_item_t *item = SymtableSearchAll(stack, temp_token->extra_data.string);
     if (param) {
-        item->data->param_types = realloc(item->data->param_types, sizeof(data_type_t) * item->data->param_count);
+        function->data->param_types = realloc(function->data->param_types, sizeof(data_type_t) * function->data->param_count);
     }
     // <TYPE> -> INT
     if (token->kind == INT) {
         if (param) {
             item->data->item_type = TYPE_INT;
             if (token->nil_type) {
-                item->data->param_types[item->data->param_count - 1] = TYPE_INT_NIL;
+                function->data->param_types[function->data->param_count - 1] = TYPE_INT_NIL;
                 item->data->can_be_nil = true;
             }
             else {
-                item->data->param_types[item->data->param_count - 1] = TYPE_INT;
+                function->data->param_types[function->data->param_count - 1] = TYPE_INT;
             }
         }
         else if (item->data->is_function) {
@@ -791,11 +791,11 @@ bool Type(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, bool pa
         if (param) {
             item->data->item_type = TYPE_STRING;
             if (token->nil_type) {
-                item->data->param_types[item->data->param_count - 1] = TYPE_STRING_NIL;
+                function->data->param_types[function->data->param_count - 1] = TYPE_STRING_NIL;
                 item->data->can_be_nil = true;
             }
             else {
-                item->data->param_types[item->data->param_count - 1] = TYPE_STRING;
+                function->data->param_types[function->data->param_count - 1] = TYPE_STRING;
             }
         }
         else if (item->data->is_function) {
@@ -819,11 +819,11 @@ bool Type(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, bool pa
         if (param) {
             item->data->item_type = TYPE_DOUBLE;
             if (token->nil_type) {
-                item->data->param_types[item->data->param_count - 1] = TYPE_DOUBLE_NIL;
+                function->data->param_types[function->data->param_count - 1] = TYPE_DOUBLE_NIL;
                 item->data->can_be_nil = true;
             }
             else {
-                item->data->param_types[item->data->param_count - 1] = TYPE_DOUBLE;
+                function->data->param_types[function->data->param_count - 1] = TYPE_DOUBLE;
             }
         }
         else if (item->data->is_function) {
