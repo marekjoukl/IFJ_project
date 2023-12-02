@@ -282,12 +282,23 @@ bool Sequence(Lexeme *token, symtable_stack_t *stack) {
         data_t *data = CreateData(false, token->line);
         data->is_modifiable = is_var;
 
-        SymtableAddItem(stack->array[stack->size - 1], token->extra_data.string, data);
-        item = SymtableSearchAll(stack, token->extra_data.string);
+        item = malloc(sizeof(symtable_item_t));
+        if (item == NULL) {
+            fprintf(stderr, "Error: symtable.c - malloc failed\n");
+            exit(INTERNAL_ERROR);      // EXIT CODE 99 - failed to allocate memory
+        }
+
+        item->data = data;
+        item->key = token->extra_data.string;
+
+        //SymtableAddItem(stack->array[stack->size - 1], token->extra_data.string, data);
+        //item = SymtableSearchAll(stack, token->extra_data.string);
 
         GETTOKEN()
         if (!VarTypeOrAssign(token, stack, item))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
+
+        SymtableAddItem(stack->array[stack->size - 1], item->key, data);
 
         return true;
     }
@@ -498,7 +509,7 @@ bool ReturnFunctionN(Lexeme *token, symtable_stack_t *stack, symtable_item_t *te
     }
 
     // <RETURN_FUNCTION_N> -> <EXPRESSION>
-    if (token->kind == IDENTIFIER || token->kind == INTEGER_LIT || token->kind == DOUBLE_LIT || token->kind == STRING_LIT || token->kind == LEFT_PAR) {
+    if (token->kind == IDENTIFIER || token->kind == INTEGER_LIT || token->kind == DOUBLE_LIT || token->kind == STRING_LIT || token->kind == LEFT_PAR || token->kind == NIL) {
         if (!Expression(token, stack, temp_token, false, true, true))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
         return true;
@@ -541,6 +552,12 @@ bool ParamsDef(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_tok
         }
         else { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
+        if (temp_token->data->param_names[temp_token->data->param_count - 1] != NULL && temp_token->data->params_id[temp_token->data->param_count_current] != NULL) {
+            if (strcmp(temp_token->data->param_names[temp_token->data->param_count - 1], temp_token->data->params_id[temp_token->data->param_count - 1]) == 0) {
+                ERROR_HANDLE(OTHER_SEMANTIC_ERROR, token);
+            }
+        }
+
         if (token->kind != COLON)
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
@@ -570,7 +587,9 @@ bool ParamsNameDef(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp
     }
     // <PARAMS_NAME_DEF> -> IDENTIFIER
     if (token->kind == IDENTIFIER) {
-        if (first_or_second) temp_token->data->param_names[temp_token->data->param_count - 1] = token->extra_data.string;
+        if (first_or_second) {
+            temp_token->data->param_names[temp_token->data->param_count - 1] = token->extra_data.string;
+        }
         else {
             temp_token->data->params_id[temp_token->data->param_count - 1] = token->extra_data.string;
             *param_id_item = SymtableSearch(stack->array[stack->size - 1], token->extra_data.string);
@@ -665,7 +684,7 @@ bool Params(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item) {
         if (item->data->param_names[item->data->param_count_current] != NULL) {
             ERROR_HANDLE(OTHER_SEMANTIC_ERROR, token);
         }
-        if (item->data->param_types[item->data->param_count_current] != TYPE_INT && item->data->param_types[item->data->param_count_current] != TYPE_INT_NIL) {
+        if (item->data->param_types[item->data->param_count_current] != TYPE_INT && item->data->param_types[item->data->param_count_current] != TYPE_INT_NIL && item->data->param_types[item->data->param_count_current] != TYPE_DOUBLE && item->data->param_types[item->data->param_count_current] != TYPE_DOUBLE_NIL) {
             ERROR_HANDLE(PARAMETER_TYPE_ERROR, token);
         }
         item->data->param_count_current++;
@@ -781,7 +800,7 @@ bool IdOrLit(Lexeme *token, symtable_stack_t *stack, symtable_item_t *function) 
         return true;
     }
     if (token->kind ==  INTEGER_LIT) {
-        if (function->data->param_types[function->data->param_count_current] != TYPE_INT && function->data->param_types[function->data->param_count_current] != TYPE_INT_NIL) {
+        if (function->data->param_types[function->data->param_count_current] != TYPE_INT && function->data->param_types[function->data->param_count_current] != TYPE_INT_NIL  && function->data->param_types[function->data->param_count_current] != TYPE_DOUBLE && function->data->param_types[function->data->param_count_current] != TYPE_DOUBLE_NIL) {
             ERROR_HANDLE(PARAMETER_TYPE_ERROR, token);
         }
         GETTOKEN()
@@ -816,7 +835,7 @@ bool IfExp(Lexeme *token, symtable_stack_t *stack, symtable_item_t **variable) {
         return false;
     }
     // <IF_EXP> -> <EXPRESSION>
-    if (token->kind == IDENTIFIER || token->kind == INTEGER_LIT || token->kind == DOUBLE_LIT || token->kind == STRING_LIT || token->kind == LEFT_PAR) {
+    if (token->kind == IDENTIFIER || token->kind == INTEGER_LIT || token->kind == DOUBLE_LIT || token->kind == STRING_LIT || token->kind == LEFT_PAR || token->kind == NIL) {
         if (!Expression(token, stack, NULL, true, false, false))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
@@ -1049,6 +1068,10 @@ bool ExpOrCall(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item_to_
                     item_to_assign->data->can_be_nil = true;
                     break;
 
+                case TYPE_UNDEFINED:
+                    ERROR_HANDLE(TYPE_DEDUCTION_ERROR, token)
+                    break;
+
                 default:
                     ERROR_HANDLE(TYPE_ERROR, token);
             }
@@ -1136,11 +1159,13 @@ bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, b
 bool TypeCheck(symtable_item_t *item1, symtable_item_t *item2, int param_index, bool param_handle) {
     data_type_t param_or_func_type;
     if (param_handle) {
+        printf("name : %s\n", item1->key);
         param_or_func_type = item1->data->param_types[param_index];
     }
     else {
         param_or_func_type = item1->data->item_type;
     }
+    printf("param_or_func_type: %d\n", param_or_func_type);
     switch (param_or_func_type) {
         case TYPE_INT:
             if (param_handle) {
@@ -1159,7 +1184,8 @@ bool TypeCheck(symtable_item_t *item1, symtable_item_t *item2, int param_index, 
 
         case TYPE_DOUBLE:
                 if (param_handle) {
-                    if (item2->data->item_type == TYPE_DOUBLE) {
+                    printf("item2->data->item_type: %d\n", item2->data->item_type);
+                    if (item2->data->item_type == TYPE_DOUBLE || item2->data->item_type == TYPE_INT) {
                         if (!item2->data->can_be_nil) {
                             return true;
                         }
@@ -1204,7 +1230,7 @@ bool TypeCheck(symtable_item_t *item1, symtable_item_t *item2, int param_index, 
 
         case TYPE_DOUBLE_NIL:
             if (param_handle) {
-                if (item2->data->item_type == TYPE_DOUBLE) {
+                if (item2->data->item_type == TYPE_DOUBLE || item2->data->item_type == TYPE_INT) {
                     return true;
                 }
             }
@@ -1247,7 +1273,7 @@ bool FuncReturnTypeCheck(data_type_t return_expression_type, data_type_t functio
             break;
 
         case TYPE_DOUBLE:
-            if (return_expression_type == TYPE_DOUBLE) {
+            if (return_expression_type == TYPE_DOUBLE || return_expression_type == TYPE_INT) {
                 return true;
             }
             break;
@@ -1259,19 +1285,19 @@ bool FuncReturnTypeCheck(data_type_t return_expression_type, data_type_t functio
             break;
 
         case TYPE_INT_NIL:
-            if (return_expression_type == TYPE_INT) {
+            if (return_expression_type == TYPE_INT || return_expression_type == TYPE_NIL) {
                 return true;
             }
             break;
 
         case TYPE_DOUBLE_NIL:
-            if (return_expression_type == TYPE_DOUBLE) {
+            if (return_expression_type == TYPE_DOUBLE || return_expression_type == TYPE_INT || return_expression_type == TYPE_NIL) {
                 return true;
             }
             break;
 
         case TYPE_STRING_NIL:
-            if (return_expression_type == TYPE_STRING) {
+            if (return_expression_type == TYPE_STRING || return_expression_type == TYPE_NIL) {
                 return true;
             }
             break;
