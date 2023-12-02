@@ -194,7 +194,7 @@ bool Sequence(Lexeme *token, symtable_stack_t *stack) {
     // <SEQUENCE> -> WHILE <EXPRESSION> LEFT_BRACKET <SEQUENCE_N> RIGHT_BRACKET
     else if (token->kind == WHILE) {
         GETTOKEN()
-        if (!Expression(token, stack, NULL, true, false))
+        if (!Expression(token, stack, NULL, true, false, false))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         if (token->kind != LEFT_BRACKET)
@@ -245,17 +245,23 @@ bool SequenceN(Lexeme *token, symtable_stack_t *stack) {
 bool AssignOrFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item) {
     //symtable_item_t *variable = SymtableSearchAll(stack, temp_token->extra_data.string);
     // <ASSIGN_OR_FUNCTION> -> ASSIGNMENT <EXP_OR_CALL>
-    if (token->kind == ASSIGNMENT){
+    if (token->kind == ASSIGNMENT) {
+        if (item->data->is_function) {
+            ERROR_HANDLE(OTHER_SEMANTIC_ERROR, token);
+        }
         if (!item->data->is_modifiable) {
             ERROR_HANDLE(OTHER_SEMANTIC_ERROR, token); //TODO: find out what error code to use
         }
         GETTOKEN()
-        if (!ExpOrCall(token, stack, item))
+        if (!ExpOrCall(token, stack, item, true))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
         return true;
     }
     // <ASSIGN_OR_FUNCTION> -> LEFT_PAR <FIRST_PARAM>
     if (token->kind == LEFT_PAR){
+        if (!item->data->is_function) {
+            ERROR_HANDLE(OTHER_SEMANTIC_ERROR, token);
+        }
         GETTOKEN()
         if(!FirstParam(token, stack, item))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
@@ -317,19 +323,28 @@ bool ReturnFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *tem
         return true;
     }
     // <RETURN_FUNCTION> -> ε
-    if (token->kind == RIGHT_BRACKET)
+    if (token->kind == RIGHT_BRACKET) {
+        if (temp_token->data->item_type != TYPE_UNDEFINED) {
+            ERROR_HANDLE(RETURN_ERROR, token);
+        }
         return true;
+    }
 
     return false;
 }
 
 bool ReturnFunctionN(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token) {
     // <RETURN_FUNCTION_N> -> ε
-    if (token->kind == RIGHT_BRACKET)
+    if (token->kind == RIGHT_BRACKET) {
+        if (temp_token->data->item_type != TYPE_UNDEFINED) {
+            ERROR_HANDLE(RETURN_ERROR, token);
+        }
         return true;
+    }
+
     // <RETURN_FUNCTION_N> -> <EXPRESSION>
     if (token->kind == IDENTIFIER || token->kind == INTEGER_LIT || token->kind == DOUBLE_LIT || token->kind == STRING_LIT || token->kind == LEFT_PAR) {
-        if (!Expression(token, stack, temp_token, false, true))
+        if (!Expression(token, stack, temp_token, false, true, true))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
         return true;
     }
@@ -360,13 +375,13 @@ bool ParamsDef(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_tok
     bool first_or_second = true;
     // <PARAMS_DEF> -> <PARAMS_NAME_DEF> <PARAMS_NAME_DEF> COLON <TYPE>
     if (token->kind == UNDERSCORE || token->kind == IDENTIFIER) {
-        if (!ParamsNameDef(token, stack, temp_token, first_or_second, param_id_item))
+        if (!ParamsNameDef(token, stack, temp_token, first_or_second, &param_id_item))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         first_or_second = false;
 
         if (token->kind == IDENTIFIER || token->kind == UNDERSCORE) {
-            if (!ParamsNameDef(token, stack, temp_token, first_or_second, param_id_item))
+            if (!ParamsNameDef(token, stack, temp_token, first_or_second, &param_id_item))
                 { ERROR_HANDLE(SYNTAX_ERROR, token); }
         }
         else { ERROR_HANDLE(SYNTAX_ERROR, token); }
@@ -383,7 +398,7 @@ bool ParamsDef(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_tok
     return false;
 }
 
-bool ParamsNameDef(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token, bool first_or_second, symtable_item_t *param_id_item) {
+bool ParamsNameDef(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token, bool first_or_second, symtable_item_t **param_id_item) {
     //symtable_item_t *item = SymtableSearchAll(stack, temp_token->extra_data.string);
     if (first_or_second) {
         temp_token->data->param_count++;
@@ -403,13 +418,13 @@ bool ParamsNameDef(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp
         if (first_or_second) temp_token->data->param_names[temp_token->data->param_count - 1] = token->extra_data.string;
         else {
             temp_token->data->params_id[temp_token->data->param_count - 1] = token->extra_data.string;
-            param_id_item = SymtableSearch(stack->array[stack->size - 1], token->extra_data.string);
-            if (param_id_item != NULL) {
+            *param_id_item = SymtableSearch(stack->array[stack->size - 1], token->extra_data.string);
+            if (*param_id_item != NULL) {
                 ERROR_HANDLE(DEFINITION_ERROR, token);
             }
             data_t *data = CreateData(false, token->line);
             SymtableAddItem(stack->array[stack->size - 1], token->extra_data.string, data);
-            param_id_item = SymtableSearchAll(stack, token->extra_data.string);
+            *param_id_item = SymtableSearchAll(stack, token->extra_data.string);
         }
         GETTOKEN()
         return true;
@@ -647,7 +662,7 @@ bool IfExp(Lexeme *token, symtable_stack_t *stack, symtable_item_t *variable) {
     }
     // <IF_EXP> -> <EXPRESSION>
     if (token->kind == IDENTIFIER || token->kind == INTEGER_LIT || token->kind == DOUBLE_LIT || token->kind == STRING_LIT || token->kind == LEFT_PAR) {
-        if (!Expression(token, stack, NULL, true, false))
+        if (!Expression(token, stack, NULL, true, false, false))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
@@ -700,6 +715,7 @@ bool VarDef(Lexeme *token, symtable_stack_t *stack, bool *is_var) {
 }
 
 bool VarTypeOrAssign(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item) {
+    bool type_was_defined = false;
     // <VAR_TYPE_OR_ASSIGN> -> COLON <TYPE> <ASSIGN_VAR>
     if (token->kind == COLON) {
         GETTOKEN()
@@ -714,7 +730,7 @@ bool VarTypeOrAssign(Lexeme *token, symtable_stack_t *stack, symtable_item_t *it
     // <VAR_TYPE_OR_ASSIGN> -> ASSIGNMENT <EXP_OR_CALL>
     else if (token->kind == ASSIGNMENT) {
         GETTOKEN()
-        if (!ExpOrCall(token, stack, item))
+        if (!ExpOrCall(token, stack, item, false))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
 
         return true;
@@ -722,9 +738,26 @@ bool VarTypeOrAssign(Lexeme *token, symtable_stack_t *stack, symtable_item_t *it
     return false;
 }
 
+bool AssignVar(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item) {
+    // <ASSIGN_VAR> -> ASSIGNMENT <EXP_OR_CALL>
+    if (token->kind == ASSIGNMENT) {
+        GETTOKEN()
+        if (!ExpOrCall(token, stack, item, true))
+        { ERROR_HANDLE(SYNTAX_ERROR, token); }
+        return true;
+    }
+        // <ASSIGN_VAR> -> ε
+    else if (token->kind == IDENTIFIER || token->kind == LEX_EOF || token->kind == FUNC || token->kind == IF || token->kind == LET || token->kind == WHILE || token->kind == VAR || token->kind == RIGHT_BRACKET || token->kind == RETURN) {
+        return true;
+    }
+    return false;
+}
+
 bool Type(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, bool param) {
     //symtable_item_t *item = SymtableSearchAll(stack, temp_token->extra_data.string);
-    item->data->param_types = realloc(item->data->param_types, sizeof(int) * item->data->param_count);
+    if (param) {
+        item->data->param_types = realloc(item->data->param_types, sizeof(data_type_t) * item->data->param_count);
+    }
     // <TYPE> -> INT
     if (token->kind == INT) {
         if (param) {
@@ -812,22 +845,7 @@ bool Type(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, bool pa
     return false;
 }
 
-bool AssignVar(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item) {
-    // <ASSIGN_VAR> -> ASSIGNMENT <EXP_OR_CALL>
-    if (token->kind == ASSIGNMENT) {
-        GETTOKEN()
-        if (!ExpOrCall(token, stack, item))
-            { ERROR_HANDLE(SYNTAX_ERROR, token); }
-        return true;
-    }
-    // <ASSIGN_VAR> -> ε
-    else if (token->kind == IDENTIFIER || token->kind == LEX_EOF || token->kind == FUNC || token->kind == IF || token->kind == LET || token->kind == WHILE || token->kind == VAR || token->kind == RIGHT_BRACKET || token->kind == RETURN) {
-        return true;
-    }
-    return false;
-}
-
-bool ExpOrCall(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item_to_assign) {
+bool ExpOrCall(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item_to_assign, bool type_was_defined) {
     symtable_item_t *item = NULL;
     if (token->kind == IDENTIFIER) {
         item = SymtableSearchAll(stack, token->extra_data.string);
@@ -842,8 +860,43 @@ bool ExpOrCall(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item_to_
 
     // <EXP_OR_CALL> -> <CALL_FUNCTION>
     if (token->kind == IDENTIFIER && item->data->is_function) {
-        if (!TypeCheck(item, item_to_assign, 0, false)) {
-            ERROR_HANDLE(TYPE_ERROR, token);
+        if (type_was_defined) {
+            if (!TypeCheck(item, item_to_assign, 0, false)) {
+                ERROR_HANDLE(TYPE_ERROR, token);
+            }
+        }
+        else {
+            switch (item->data->item_type) {
+                case TYPE_INT:
+                    item_to_assign->data->item_type = TYPE_INT;
+                    break;
+
+                case TYPE_DOUBLE:
+                    item_to_assign->data->item_type = TYPE_DOUBLE;
+                    break;
+
+                case TYPE_STRING:
+                    item_to_assign->data->item_type = TYPE_STRING;
+                    break;
+
+                case TYPE_INT_NIL:
+                    item_to_assign->data->item_type = TYPE_INT;
+                    item_to_assign->data->can_be_nil = true;
+                    break;
+
+                case TYPE_DOUBLE_NIL:
+                    item_to_assign->data->item_type = TYPE_DOUBLE;
+                    item_to_assign->data->can_be_nil = true;
+                    break;
+
+                case TYPE_STRING_NIL:
+                    item_to_assign->data->item_type = TYPE_STRING;
+                    item_to_assign->data->can_be_nil = true;
+                    break;
+
+                default:
+                    ERROR_HANDLE(TYPE_ERROR, token);
+            }
         }
         if (!CallFunction(token, stack, item))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
@@ -851,17 +904,9 @@ bool ExpOrCall(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item_to_
     }
 
     // <EXP_OR_CALL> -> <EXPRESSION>
-    else if (token->kind == IDENTIFIER || token->kind == INTEGER_LIT || token->kind == DOUBLE_LIT || token->kind == STRING_LIT || token->kind == LEFT_PAR) {
-        if (!Expression(token, stack, item_to_assign))
+    else if (token->kind == IDENTIFIER || token->kind == INTEGER_LIT || token->kind == DOUBLE_LIT || token->kind == STRING_LIT || token->kind == LEFT_PAR || token->kind == NIL) {
+        if (!Expression(token, stack, item_to_assign, false, false, type_was_defined))
             { ERROR_HANDLE(SYNTAX_ERROR, token); }
-        return true;
-    }
-
-    else if (token->kind == NIL) {
-        if (!item_to_assign->data->can_be_nil) {
-            ERROR_HANDLE(TYPE_ERROR, token); //TODO: find out what error code to use
-        }
-        GETTOKEN()
         return true;
     }
 
@@ -884,11 +929,16 @@ bool CallFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item)
     return false;
 }
 
-bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, bool is_while_or_if, bool is_return) {
+bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, bool is_while_or_if, bool is_return, bool type_was_defined) {
     data_type_t expression_type;
     //TODO: pridat stack do precedencnej + poslat tam item funkcie/premennej na kontrolu tipov pri return funkcie/priradenie do premennej
     expression_type = precedent_analysys(token, stack);
-    if (!is_while_or_if) {
+    if (is_while_or_if) {
+        if (expression_type != TYPE_BOOL) {
+            ERROR_HANDLE(TYPE_ERROR, token); //TODO: find out what error code to use
+        }
+    }
+    else if (type_was_defined) {
         if (expression_type == TYPE_BOOL) {
             ERROR_HANDLE(TYPE_ERROR, token); //TODO: find out what error code to use
         }
@@ -897,8 +947,27 @@ bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, b
                 ERROR_HANDLE(TYPE_ERROR, token); //TODO: find out what error code to use
             }
         }
+        else if (expression_type == TYPE_NIL) {
+            if (item->data->can_be_nil) {
+                return true;
+            }
+        }
         else if (expression_type != item->data->item_type) { //TODO: moze sa stat ze sa mi vrati typ napr TYPE_INT_NIL?
             ERROR_HANDLE(TYPE_ERROR, token);
+        }
+    }
+    else {
+        if (expression_type == TYPE_INT) {
+            item->data->item_type = TYPE_INT;
+        }
+        if (expression_type == TYPE_DOUBLE) {
+            item->data->item_type = TYPE_DOUBLE;
+        }
+        if (expression_type == TYPE_STRING) {
+            item->data->item_type = TYPE_STRING;
+        }
+        if (expression_type == TYPE_BOOL) {
+            ERROR_HANDLE(TYPE_ERROR, token); //TODO: find out what error code to use
         }
     }
     return true;
@@ -986,6 +1055,7 @@ bool TypeCheck(symtable_item_t *item1, symtable_item_t *item2, int param_index, 
                     }
                 }
             }
+            break;
 
         case TYPE_STRING_NIL:
             if (param_handle) {
