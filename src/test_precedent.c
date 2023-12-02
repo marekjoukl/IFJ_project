@@ -2,12 +2,12 @@
 //#include "precedent_stack.h"
 
 #define TEST(NAME, DESCRIPTION)                                                \
-  void NAME() {                                                                \
-    printf("[%s] %s\n", #NAME, DESCRIPTION);                                   \
+    void NAME() {                                                                \
+        printf("[%s] %s\n", #NAME, DESCRIPTION);                                   \
 
 #define ENDTEST                                                                \
-  printf("\n");                                                                \
-  }
+    printf("\n");                                                                \
+    }
 
 
 void print_stack(prec_stack_t *stack)
@@ -95,25 +95,15 @@ SymtableInit(table);
 SymtableStackPush(stack, table);
 data_t testdata[] = 
 {
-  {
-    TYPE_DOUBLE,
-    true,
-    false,
-    false,
-    0,
-    NULL,
-    NULL,
-    NULL,
-    0,
-    false,
-    NULL,
-    0.0,
-    false,
-    0
-  }
+    {TYPE_DOUBLE, true, false, false, 0,NULL, NULL, NULL, 0, false, NULL, 0.0, false, 0}
 };
-SymtableAddItem(table, token.extra_data.string, &(testdata[0]));
-
+while(token.kind != COMMA)
+{   
+    if(token.kind == IDENTIFIER)
+        SymtableAddItem(table, token.extra_data.string, &(testdata[0]));
+    token = get_next_non_whitespace_lexeme();
+}
+token = get_next_non_whitespace_lexeme();
 data_type_t valid = precedent_analysys(&token, stack);
 
 printf("PASS, data_type = %d, next token = %d\n", valid, token.kind);
