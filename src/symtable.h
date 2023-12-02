@@ -24,7 +24,8 @@ typedef enum {
     TYPE_INT_NIL,
     TYPE_DOUBLE_NIL,
     TYPE_STRING_NIL,
-    TYPE_BOOL,
+    TYPE_BOOL,      // precedent semantic
+    TYPE_NIL        // precedent semantic
 } data_type_t;
 
 typedef struct data {

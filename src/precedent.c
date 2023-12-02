@@ -53,6 +53,13 @@ valid_itmes_t convert_lex_term(Lexeme lex, symtable_stack_t *sym_stack)
             item.is_lit = true;
             break;
 
+        case NIL:
+            item.type = TERM_T;
+            item.var_type = TYPE_NIL;
+            item.can_be_nil = true;
+            item.is_lit = true;
+            break;
+
         default: item.type = DOLLAR_T; break;
     }
     return item;
@@ -267,7 +274,7 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
     
     case LESS_T:
         valid = rule3(stack, rule);
-        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED ||
+        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED || stack->items.var_type == TYPE_NIL ||
            stack->items.var_type != stack->next->next->items.var_type)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
 
@@ -280,7 +287,7 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
 
     case GREATER_T:
         valid = rule3(stack, rule);
-        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED ||
+        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED || stack->items.var_type == TYPE_NIL ||
            stack->items.var_type != stack->next->next->items.var_type)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
             
@@ -293,7 +300,7 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
 
     case LESS_EQUAL_T:
         valid = rule3(stack, rule);
-        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED ||
+        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED || stack->items.var_type == TYPE_NIL ||
            stack->items.var_type != stack->next->next->items.var_type)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
 
@@ -306,7 +313,7 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
 
     case GREATER_EQUAL_T:
         valid = rule3(stack, rule);
-        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED ||
+        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED || stack->items.var_type == TYPE_NIL ||
            stack->items.var_type != stack->next->next->items.var_type)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
 
@@ -319,8 +326,10 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
     
     case DOUBLE_QUESTION_MARK_T:
         valid = rule3(stack, rule);
-        if(stack->items.var_type != stack->next->next->items.var_type ||
-           stack->next->next->items.can_be_nil == true)
+        if(stack->items.var_type != stack->next->next->items.var_type && stack->next->next->items.type == TYPE_NIL)
+            {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+
+        if(stack->items.can_be_nil == true)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
 
         new_expression->can_be_nil = false;
