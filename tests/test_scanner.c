@@ -1,5 +1,4 @@
-#include "scanner.h"
-#include "automat.h"
+#include "../src/scanner.h"
 #include <stdio.h>
 
 // if INCLUDE_WHITE_SPACES is 1, then the scanner will return all lexemes, including whitespaces
