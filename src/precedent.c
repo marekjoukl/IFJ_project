@@ -1,6 +1,7 @@
 #include "precedent.h"
 #include "scanner.h"
 
+// TODO a + b == c is valid expression
 
 valid_itmes_t convert_lex_term(Lexeme lex, symtable_stack_t *sym_stack)
 {
@@ -52,6 +53,13 @@ valid_itmes_t convert_lex_term(Lexeme lex, symtable_stack_t *sym_stack)
             item.is_lit = true;
             break;
 
+        case NIL:
+            item.type = TERM_T;
+            item.var_type = TYPE_NIL;
+            item.can_be_nil = true;
+            item.is_lit = true;
+            break;
+
         default: item.type = DOLLAR_T; break;
     }
     return item;
@@ -59,17 +67,17 @@ valid_itmes_t convert_lex_term(Lexeme lex, symtable_stack_t *sym_stack)
 
 const stack_rules_t prec_table[TERMINAL_CNT_T][TERMINAL_CNT_T] = 
 { // +           -           *           /           ==          !=          <           >           <=          >=          ??          !           (           )         term        $
-    {MERGE_R   , MERGE_R   , STOPPAGE_R, STOPPAGE_R, ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , MERGE_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // +
-    {MERGE_R   , MERGE_R   , STOPPAGE_R, STOPPAGE_R, ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , MERGE_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // -
-    {MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , MERGE_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // *
-    {MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , MERGE_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // /
-    {ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // ==
-    {ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // !=
-    {ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // <  
-    {ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // >
-    {ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // <=
-    {ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // >=
-    {STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , MERGE_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // ??
+    {MERGE_R   , MERGE_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // +
+    {MERGE_R   , MERGE_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // -
+    {MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // *
+    {MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // /
+    {STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // ==
+    {STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // !=
+    {STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // <  
+    {STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // >
+    {STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // <=
+    {STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // >=
+    {STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, MERGE_R , STOPPAGE_R, MERGE_R}, // ??
     {MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , ERROR_R   , MERGE_R   , ERROR_R   , ERROR_R   , MERGE_R , ERROR_R   , MERGE_R}, // !
     {STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, STOPPAGE_R, SHIFT_R , STOPPAGE_R, ERROR_R}, // (
     {MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , MERGE_R   , ERROR_R   , MERGE_R , ERROR_R   , MERGE_R}, // )
@@ -218,9 +226,23 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
     
     case EQUAL_T:
         valid = rule3(stack, rule);    
-        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED ||
-           stack->items.var_type != stack->next->next->items.var_type)
+        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+
+        if(stack->items.var_type != stack->next->next->items.var_type)
+        {
+            if(stack->items.var_type == TYPE_INT){
+                if(stack->items.is_lit == false)
+                    {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+                // int2double TODO
+            }
+            
+            if(stack->next->next->items.var_type == TYPE_INT){
+                if(stack->next->next->items.is_lit == false)
+                    {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+                // int2double TODO
+            }
+        }
 
         new_expression->can_be_nil = false;
         new_expression->var_type = TYPE_BOOL;
@@ -228,9 +250,23 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
     
     case NOT_EQUAL_T:
         valid = rule3(stack, rule);
-        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED ||
-           stack->items.var_type != stack->next->next->items.var_type)
+        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+
+        if(stack->items.var_type != stack->next->next->items.var_type)
+        {
+            if(stack->items.var_type == TYPE_INT){
+                if(stack->items.is_lit == false)
+                    {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+                // int2double TODO
+            }
+            
+            if(stack->next->next->items.var_type == TYPE_INT){
+                if(stack->next->next->items.is_lit == false)
+                    {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+                // int2double TODO
+            }
+        }
 
         new_expression->can_be_nil = false;
         new_expression->var_type = TYPE_BOOL;
@@ -238,8 +274,11 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
     
     case LESS_T:
         valid = rule3(stack, rule);
-        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED ||
+        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED || stack->items.var_type == TYPE_NIL ||
            stack->items.var_type != stack->next->next->items.var_type)
+            {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+
+        if(stack->items.can_be_nil == true || stack->next->next->items.can_be_nil == true)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
 
         new_expression->can_be_nil = false;
@@ -248,18 +287,24 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
 
     case GREATER_T:
         valid = rule3(stack, rule);
-        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED ||
+        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED || stack->items.var_type == TYPE_NIL ||
            stack->items.var_type != stack->next->next->items.var_type)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
             
+        if(stack->items.can_be_nil == true || stack->next->next->items.can_be_nil == true)
+            {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+
         new_expression->can_be_nil = false;
         new_expression->var_type = TYPE_BOOL;
         break;
 
     case LESS_EQUAL_T:
         valid = rule3(stack, rule);
-        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED ||
+        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED || stack->items.var_type == TYPE_NIL ||
            stack->items.var_type != stack->next->next->items.var_type)
+            {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+
+        if(stack->items.can_be_nil == true || stack->next->next->items.can_be_nil == true)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
 
         new_expression->can_be_nil = false;
@@ -268,8 +313,11 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
 
     case GREATER_EQUAL_T:
         valid = rule3(stack, rule);
-        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED ||
+        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED || stack->items.var_type == TYPE_NIL ||
            stack->items.var_type != stack->next->next->items.var_type)
+            {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+
+        if(stack->items.can_be_nil == true || stack->next->next->items.can_be_nil == true)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
 
         new_expression->can_be_nil = false;
@@ -278,8 +326,10 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
     
     case DOUBLE_QUESTION_MARK_T:
         valid = rule3(stack, rule);
-        if(stack->items.var_type != stack->next->next->items.var_type ||
-           stack->next->next->items.can_be_nil == true)
+        if(stack->items.var_type != stack->next->next->items.var_type && stack->next->next->items.type == TYPE_NIL)
+            {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+
+        if(stack->items.can_be_nil == true)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
 
         new_expression->can_be_nil = false;
@@ -302,7 +352,7 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
     
     case TERM_T:
         valid = rule1(stack, rule);
-        new_expression->can_be_nil = false;
+        new_expression->can_be_nil = stack->items.can_be_nil;
         new_expression->var_type = stack->items.var_type;
         new_expression->is_lit = stack->items.is_lit;
         break;  
@@ -314,7 +364,7 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
     return valid;
 }
 
-bool precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
+data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
 {
     bool valid = true;
     bool cont = true;
@@ -324,7 +374,7 @@ bool precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
     symtable_item_t *variable;
     valid_itmes_t new_expression;
 
-    if(lexeme->kind == IDENTIFIER) //debug does not have to be in final code
+    if(lexeme->kind == IDENTIFIER)
     {
         variable = SymtableSearchAll(sym_stack, lexeme->extra_data.string);
         if(variable == NULL)
@@ -332,7 +382,7 @@ bool precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
     }
 
     valid_itmes_t input = convert_lex_term(*lexeme, sym_stack);
-
+    
     while(valid)
     {
         //check if variable was defined
@@ -344,6 +394,7 @@ bool precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
         }
 
         stack_rule = give_stack_rule(stack, input.type);
+
         switch (stack_rule)
         {
         case SHIFT_R:
@@ -376,6 +427,15 @@ bool precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
     input.type = DOLLAR_T;
     while(cont == true)
     {
+
+        // chceck if variable was defined
+        if(lexeme->kind == IDENTIFIER)
+        {
+            variable = SymtableSearchAll(sym_stack, lexeme->extra_data.string);
+            if(variable == NULL)
+                {ERROR_HANDLE_PREC(UNDEFINED_VAR_ERROR, lexeme);}
+        }
+        
         stack_rule = give_stack_rule(stack, input.type);
         if(stack_rule == MERGE_R){
             if(check_prec_rule(stack, sym_stack, &new_expression, lexeme))
@@ -388,11 +448,11 @@ bool precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
     }
 
     // check if all syntax operations valid
-    if(stack_empty(stack))
-        valid = true;
-    else
+    if(!stack_empty(stack))
         {ERROR_HANDLE_PREC(SYNTAX_ERROR, lexeme);}
-    
-    stack_dispose(&stack);  
-    return valid;
+
+    data_type_t exit_data_type = stack->items.var_type;
+    stack_dispose(&stack); 
+
+    return exit_data_type;
 }
