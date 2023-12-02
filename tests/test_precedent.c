@@ -1,4 +1,4 @@
-#include "precedent.h"
+#include "../src/precedent.h"
 //#include "precedent_stack.h"
 
 #define TEST(NAME, DESCRIPTION)                                                \
