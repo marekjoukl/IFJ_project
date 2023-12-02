@@ -43,6 +43,160 @@ void StartParser() {
 
     token = get_next_non_whitespace_lexeme();
 
+    // ###########################################
+    // adding predefined functions to global frame
+    // func readString() -> String?
+    data_t *data = CreateData(true, 0);
+    char* rdStr = malloc(sizeof(char) * 15);
+    strcpy(rdStr, "readString");
+    data->item_type = TYPE_STRING_NIL;
+    data->can_be_nil = true;
+    data->is_modifiable = false;
+    data->string_value = rdStr;
+    SymtableAddItem(stack->array[stack->size - 1], rdStr, data);
+
+    // func readInt() -> Int?
+    data = CreateData(true, 0);
+    char* rdInt = malloc(sizeof(char) * 15);
+    strcpy(rdInt, "readInt");
+    data->item_type = TYPE_INT_NIL;
+    data->can_be_nil = true;
+    data->is_modifiable = false;
+    data->string_value = rdInt;
+    SymtableAddItem(stack->array[stack->size - 1], rdInt, data);
+
+    // func readDouble() -> Double?
+    data = CreateData(true, 0);
+    char* rdDbl = malloc(sizeof(char) * 15);
+    strcpy(rdDbl, "readDouble");
+    data->item_type = TYPE_DOUBLE_NIL;
+    data->can_be_nil = true;
+    data->is_modifiable = false;
+    data->string_value = rdDbl;
+    SymtableAddItem(stack->array[stack->size - 1], rdDbl, data);
+
+    // func write( term1 , term2 , …, term𝑛 )  TODO: add write function
+
+    // func Int2Double(_ term: Int) -> Double
+    data = CreateData(true, 0);
+    char* Int2Dbl = malloc(sizeof(char) * 15);
+    strcpy(Int2Dbl, "Int2Double");
+    data->item_type = TYPE_DOUBLE;
+    data->can_be_nil = false;
+    data->is_modifiable = false;
+    data->string_value = Int2Dbl;
+    data->param_names = malloc(sizeof(char *) * 1);
+    data->param_names[0] = NULL;
+    data->param_count = 1;
+    data->param_types = malloc(sizeof(data_type_t) * 1);
+    data->param_types[0] = TYPE_INT;
+    data->params_id = malloc(sizeof(char *) * 1);
+    data->params_id[0] = malloc(sizeof(char) * 10);
+    strcpy(data->params_id[0], "term");
+    SymtableAddItem(stack->array[stack->size - 1], Int2Dbl, data);
+
+    // func Double2Int(_ term: Double) -> Int
+    data = CreateData(true, 0);
+    char* Dbl2Int = malloc(sizeof(char) * 15);
+    strcpy(Dbl2Int, "Double2Int");
+    data->item_type = TYPE_INT;
+    data->can_be_nil = false;
+    data->is_modifiable = false;
+    data->string_value = Dbl2Int;
+    data->param_names = malloc(sizeof(char *) * 1);
+    data->param_names[0] = NULL;
+    data->param_count = 1;
+    data->param_types = malloc(sizeof(data_type_t) * 1);
+    data->param_types[0] = TYPE_DOUBLE;
+    data->params_id = malloc(sizeof(char *) * 1);
+    data->params_id[0] = malloc(sizeof(char) * 10);
+    strcpy(data->params_id[0], "term");
+    SymtableAddItem(stack->array[stack->size - 1], Dbl2Int, data);
+
+    // func length(_ s: String) -> Int
+    data = CreateData(true, 0);
+    char* len = malloc(sizeof(char) * 10);
+    strcpy(len, "length");
+    data->item_type = TYPE_INT;
+    data->can_be_nil = false;
+    data->is_modifiable = false;
+    data->string_value = len;
+    data->param_names = malloc(sizeof(char *) * 1);
+    data->param_names[0] = NULL;
+    data->param_count = 1;
+    data->param_types = malloc(sizeof(data_type_t) * 1);
+    data->param_types[0] = TYPE_STRING;
+    data->params_id = malloc(sizeof(char *) * 1);
+    data->params_id[0] = malloc(sizeof(char) * 10);
+    strcpy(data->params_id[0], "s");
+    SymtableAddItem(stack->array[stack->size - 1], len, data);
+
+    // func substr(of s: String, startingAt i: Int, endingBefore j: Int) -> String?
+    data = CreateData(true, 0);
+    char* substr = malloc(sizeof(char) * 10);
+    strcpy(substr, "substr");
+    data->item_type = TYPE_STRING_NIL;
+    data->can_be_nil = true;
+    data->is_modifiable = false;
+    data->string_value = substr;
+    data->param_names = malloc(sizeof(char *) * 3);
+    data->param_names[0] = malloc(sizeof(char) * 10);
+    strcpy(data->param_names[0], "of");
+    data->param_names[1] = malloc(sizeof(char) * 15);
+    strcpy(data->param_names[1], "startingAt");
+    data->param_names[2] = malloc(sizeof(char) * 15);
+    strcpy(data->param_names[2], "endingBefore");
+    data->param_count = 3;
+    data->param_types = malloc(sizeof(data_type_t) * 3);
+    data->param_types[0] = TYPE_STRING;
+    data->param_types[1] = TYPE_INT;
+    data->param_types[2] = TYPE_INT;
+    data->params_id = malloc(sizeof(char *) * 3);
+    data->params_id[0] = malloc(sizeof(char) * 5);
+    strcpy(data->params_id[0], "s");
+    data->params_id[1] = malloc(sizeof(char) * 5);
+    strcpy(data->params_id[1], "i");
+    data->params_id[2] = malloc(sizeof(char) * 5);
+    strcpy(data->params_id[2], "j");
+    SymtableAddItem(stack->array[stack->size - 1], substr, data);
+
+    // func ord(_ c: String) -> Int
+    data = CreateData(true, 0);
+    char* ord = malloc(sizeof(char) * 10);
+    strcpy(ord, "ord");
+    data->item_type = TYPE_INT;
+    data->can_be_nil = false;
+    data->is_modifiable = false;
+    data->string_value = ord;
+    data->param_names = malloc(sizeof(char *) * 1);
+    data->param_names[0] = NULL;
+    data->param_count = 1;
+    data->param_types = malloc(sizeof(data_type_t) * 1);
+    data->param_types[0] = TYPE_STRING;
+    data->params_id = malloc(sizeof(char *) * 1);
+    data->params_id[0] = malloc(sizeof(char) * 5);
+    strcpy(data->params_id[0], "c");
+    SymtableAddItem(stack->array[stack->size - 1], ord, data);
+
+    // func chr(_ i: Int) -> String
+    data = CreateData(true, 0);
+    char* chr = malloc(sizeof(char) * 10);
+    strcpy(chr, "chr");
+    data->item_type = TYPE_STRING;
+    data->can_be_nil = false;
+    data->is_modifiable = false;
+    data->string_value = chr;
+    data->param_names = malloc(sizeof(char *) * 1);
+    data->param_names[0] = NULL;
+    data->param_count = 1;
+    data->param_types = malloc(sizeof(data_type_t) * 1);
+    data->param_types[0] = TYPE_INT;
+    data->params_id = malloc(sizeof(char *) * 1);
+    data->params_id[0] = malloc(sizeof(char) * 5);
+    strcpy(data->params_id[0], "i");
+    SymtableAddItem(stack->array[stack->size - 1], chr, data);
+    // ###########################################
+
     Prog(&token, stack);
 
     SymtableStackPop(stack);
