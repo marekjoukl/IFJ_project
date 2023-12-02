@@ -155,6 +155,7 @@ AutomatState transition(AutomatState current, char edge)
         case CommentBody:
             if (edge == '/') return NestedComment;
             if (edge == '*') return CommentEnding;
+            if (edge == EOF) return Error;
             return CommentBody;
 
         case EscSeq:
@@ -190,6 +191,7 @@ AutomatState transition(AutomatState current, char edge)
                 (counter)++;
                 return CommentBody;
             }
+            if (edge == EOF) return Error;
             return CommentBody;
 
         case CommentEnding:
@@ -198,6 +200,7 @@ AutomatState transition(AutomatState current, char edge)
                 (counter)--;
                 return CommentBody;
             }
+            if (edge == EOF) return Error;
             return CommentBody;
 
         case EscU:
@@ -237,7 +240,8 @@ AutomatState transition(AutomatState current, char edge)
 
         case MltLnStringStartEnd:
             if (edge == '"') return FirstQuote;
-            if (edge != '"') return MltLnStringLit;
+            if (edge == '\n') return MltLnStringStartEnd;
+            if ((edge != '"') && (edge != '\n')) return MltLnStringLit;
             return Error;
 
         case FirstQuoteErr:
