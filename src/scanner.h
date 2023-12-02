@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include "automat.h"
+#include "error.h"
 
 typedef struct Lexeme
 {

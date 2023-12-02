@@ -40,7 +40,7 @@ Lexeme get_lexeme(void)
             if (str == NULL)
             {
                 fprintf(stderr, "Error: scanner.c - realloc failed\n");
-                exit (99);      // EXIT CODE 99 - failed to allocate memory
+                exit (INTERNAL_ERROR);      // EXIT CODE 99 - failed to allocate memory
             }
         }
 
@@ -53,7 +53,7 @@ Lexeme get_lexeme(void)
             {
                 if (str != NULL) free(str);
                 fprintf(stderr, "Error: scanner.c - wrong lexeme structure at line %i\n", line_counter);
-                exit (1);       // EXIT CODE 1 - wrong lexeme structure
+                exit (LEXICAL_ERROR);       // EXIT CODE 1 - wrong lexeme structure
             }
 
             return lexeme;
@@ -79,15 +79,35 @@ void add_to_string(char **str, size_t *len, size_t *capacity, char edge, Automat
 
     // add string terminator, if exiting a final state
     if (next == Error && 
-       (current == EndStringLit || current == EndMltLnStringLit || current == EmptyString || 
+       (current == EmptyString || 
         current == IntLit || current == DoubleLitDec || current == DoubleLitExp || current == Id || current == IdNil))
     {
         (*str)[*len] = '\0';
         (*len)++;
         return;
     }
-    (*str)[*len] = edge;
-    (*len)++;
+    else if (next == Error)
+    {
+        if (current == EndStringLit) // remove " from the end of a string
+        {
+            (*str)[*len - 1] = '\0';
+            (*len)++;
+            return;
+        }
+        if (current == EndMltLnStringLit) // remove \n""" from the end of a multiline string 
+        {
+            (*str)[*len - 4] = '\0';
+            (*len)++;
+            return;
+        }
+    }
+    // do not add " on the beginning of a string
+    if (!(next == BeginString && current == Start) && !(next == EmptyString && current == BeginString) && 
+        !(next == MltLnStringStart && current == EmptyString) && !(next == MltLnStringLit && current == MltLnStringStart))
+    {
+        (*str)[*len] = edge;
+        (*len)++;
+    }
 }
 
 // generates lexeme from the current state
