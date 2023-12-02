@@ -93,7 +93,7 @@ stack_rules_t give_stack_rule(prec_stack_t *stack, prec_terminal_t input)
     return prec_table[top.type][input];
 }
 
-bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itmes_t *new_expression, Lexeme *token)
+bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme *token)
 {
     valid_itmes_t rule;
     stack_top_terminal(stack, &rule);
@@ -231,6 +231,9 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
 
         if(stack->items.var_type != stack->next->next->items.var_type)
         {
+            if(stack->items.var_type == TYPE_STRING || stack->next->next->items.var_type == TYPE_STRING)
+                    {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+
             if(stack->items.var_type == TYPE_INT){
                 if(stack->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
@@ -255,6 +258,9 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
 
         if(stack->items.var_type != stack->next->next->items.var_type)
         {
+            if(stack->items.var_type == TYPE_STRING || stack->next->next->items.var_type == TYPE_STRING)
+                {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+
             if(stack->items.var_type == TYPE_INT){
                 if(stack->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
@@ -274,9 +280,26 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
     
     case LESS_T:
         valid = rule3(stack, rule);
-        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED || stack->items.var_type == TYPE_NIL ||
-           stack->items.var_type != stack->next->next->items.var_type)
+        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED || stack->items.var_type == TYPE_NIL)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+
+        if(stack->items.var_type != stack->next->next->items.var_type)
+        {
+            if(stack->items.var_type == TYPE_STRING || stack->next->next->items.var_type == TYPE_STRING)
+                {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+
+            if(stack->items.var_type == TYPE_INT){
+                if(stack->items.is_lit == false)
+                    {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+                // int2double TODO
+            }
+            
+            if(stack->next->next->items.var_type == TYPE_INT){
+                if(stack->next->next->items.is_lit == false)
+                    {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+                // int2double TODO
+            }
+        }
 
         if(stack->items.can_be_nil == true || stack->next->next->items.can_be_nil == true)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
@@ -287,10 +310,27 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
 
     case GREATER_T:
         valid = rule3(stack, rule);
-        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED || stack->items.var_type == TYPE_NIL ||
-           stack->items.var_type != stack->next->next->items.var_type)
+        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED || stack->items.var_type == TYPE_NIL)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
             
+        if(stack->items.var_type != stack->next->next->items.var_type)
+        {
+            if(stack->items.var_type == TYPE_STRING || stack->next->next->items.var_type == TYPE_STRING)
+                {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+
+            if(stack->items.var_type == TYPE_INT){
+                if(stack->items.is_lit == false)
+                    {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+                // int2double TODO
+            }
+            
+            if(stack->next->next->items.var_type == TYPE_INT){
+                if(stack->next->next->items.is_lit == false)
+                    {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+                // int2double TODO
+            }
+        }
+
         if(stack->items.can_be_nil == true || stack->next->next->items.can_be_nil == true)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
 
@@ -300,9 +340,26 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
 
     case LESS_EQUAL_T:
         valid = rule3(stack, rule);
-        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED || stack->items.var_type == TYPE_NIL ||
-           stack->items.var_type != stack->next->next->items.var_type)
+        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED || stack->items.var_type == TYPE_NIL)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+
+        if(stack->items.var_type != stack->next->next->items.var_type)
+        {
+            if(stack->items.var_type == TYPE_STRING || stack->next->next->items.var_type == TYPE_STRING)
+                {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+
+            if(stack->items.var_type == TYPE_INT){
+                if(stack->items.is_lit == false)
+                    {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+                // int2double TODO
+            }
+            
+            if(stack->next->next->items.var_type == TYPE_INT){
+                if(stack->next->next->items.is_lit == false)
+                    {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+                // int2double TODO
+            }
+        }
 
         if(stack->items.can_be_nil == true || stack->next->next->items.can_be_nil == true)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
@@ -313,9 +370,26 @@ bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itm
 
     case GREATER_EQUAL_T:
         valid = rule3(stack, rule);
-        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED || stack->items.var_type == TYPE_NIL ||
-           stack->items.var_type != stack->next->next->items.var_type)
+        if(stack->items.var_type == TYPE_BOOL || stack->items.var_type == TYPE_UNDEFINED || stack->items.var_type == TYPE_NIL)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+
+        if(stack->items.var_type != stack->next->next->items.var_type)
+        {
+            if(stack->items.var_type == TYPE_STRING || stack->next->next->items.var_type == TYPE_STRING)
+                {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+
+            if(stack->items.var_type == TYPE_INT){
+                if(stack->items.is_lit == false)
+                    {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+                // int2double TODO
+            }
+            
+            if(stack->next->next->items.var_type == TYPE_INT){
+                if(stack->next->next->items.is_lit == false)
+                    {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+                // int2double TODO
+            }
+        }
 
         if(stack->items.can_be_nil == true || stack->next->next->items.can_be_nil == true)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
@@ -409,7 +483,7 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
             input = convert_lex_term(*lexeme, sym_stack);
             break;
         case MERGE_R:
-            if(check_prec_rule(stack, sym_stack, &new_expression, lexeme))
+            if(check_prec_rule(stack, &new_expression, lexeme))
                 stack_merge(&stack, new_expression);
             else
                 {ERROR_HANDLE_PREC(SYNTAX_ERROR, lexeme);}
@@ -438,7 +512,7 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
         
         stack_rule = give_stack_rule(stack, input.type);
         if(stack_rule == MERGE_R){
-            if(check_prec_rule(stack, sym_stack, &new_expression, lexeme))
+            if(check_prec_rule(stack, &new_expression, lexeme))
                 stack_merge(&stack, new_expression);
             else
                 {ERROR_HANDLE_PREC(SYNTAX_ERROR, lexeme);}
