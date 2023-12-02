@@ -43,11 +43,11 @@ bool DefFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_t
 bool VoidF(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token);
 bool FirstParamDef(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token);
 bool ParamsDef(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token);
-bool ParamsNameDef(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token, bool first_or_second);
+bool ParamsNameDef(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token, bool first_or_second, symtable_item_t *param_id_item);
 bool ParamsDefN(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token);
 bool ReturnFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token);
 bool ReturnFunctionN(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token);
-bool AssignOrFunction(Lexeme *token, symtable_stack_t *stack, Lexeme *temp_token);
+bool AssignOrFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item);
 bool ExpOrCall(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item);
 bool CallFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item);
 bool FirstParam(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token);
@@ -55,13 +55,15 @@ bool ParamsN(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item);
 bool Params(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item);
 bool ParamsName(Lexeme *token, symtable_stack_t *stack, symtable_item_t *function, Lexeme *param_name_or_id);
 bool ElseStat(Lexeme *token, symtable_stack_t *stack);
-bool IfExp(Lexeme *token, symtable_stack_t *stack);
+bool IfExp(Lexeme *token, symtable_stack_t *stack, symtable_item_t *variable);
 bool Type(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, bool param);
-bool IdOrLit(Lexeme *token, symtable_stack_t *stack, Lexeme *temp_token);
+bool IdOrLit(Lexeme *token, symtable_stack_t *stack, symtable_item_t *function);
 
+bool TypeCheck(symtable_item_t *item1, symtable_item_t *item2, int param_index, bool param_handle);
+bool FuncReturnTypeCheck(data_type_t return_expression_type, data_type_t function_type);
 
 //TODO: find out how to call precendencnu analyzu
-bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item);
+bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, bool is_while_or_if, bool is_return);
 
 #endif
 
