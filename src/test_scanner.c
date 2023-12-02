@@ -28,7 +28,6 @@ const char* lexeme_kind_to_string(int kind)
         case DOUBLE_QUESTION_MARK: return "DOUBLE_QUESTION_MARK";
         case IDENTIFIER: return "IDENTIFIER";
         case STRING_LIT: return "STRING_LIT";
-        case MULTILINE_STRING_LIT: return "MULTILINE_STRING_LIT";
         case INTEGER_LIT: return "INTEGER_LIT";
         case DOUBLE_LIT: return "DOUBLE_LIT";
         case PLUS: return "PLUS";
@@ -69,6 +68,7 @@ int main(int argc, char *argv[])
         }
     }
 
+    fprintf(stderr, "START of string or identifier ->|ID/STRING|<- END of string or identifier\n\n");
     Lexeme lexeme;
     while (true)
     {
@@ -77,10 +77,10 @@ int main(int argc, char *argv[])
 
         fprintf(stderr, "lexeme kind: %s\n", lexeme_kind_to_string(lexeme.kind));
         if (lexeme.kind == LEX_EOF) break;
-        if (lexeme.kind == IDENTIFIER || lexeme.kind == STRING_LIT || lexeme.kind == MULTILINE_STRING_LIT)
+        if (lexeme.kind == IDENTIFIER || lexeme.kind == STRING_LIT)
         {
-            fprintf(stderr, "       data: %s\n", lexeme.extra_data.string);
-            free(lexeme.extra_data.string);       //TODO: might need to be removed if we want to use the string later  
+            fprintf(stderr, "       data: ->|%s|<-\n", lexeme.extra_data.string);
+            free(lexeme.extra_data.string); // free the string, because it was allocated by the scanner
         }
         if (lexeme.kind == INTEGER_LIT) fprintf(stderr, "       data: %d\n", lexeme.extra_data.IntValue);
         if (lexeme.kind == DOUBLE_LIT) fprintf(stderr, "       data: %f\n", lexeme.extra_data.DoubleValue);
@@ -91,6 +91,8 @@ int main(int argc, char *argv[])
         fprintf(stderr, "       line: %d\n", lexeme.line);
         fprintf(stderr, "\n");
     }
+
+    fprintf(stderr, "\nSTART of string or identifier ->|ID/STRING|<- END of string or identifier\n");
 
     if (argc > 1) {
         fclose(input);

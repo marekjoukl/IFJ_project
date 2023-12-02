@@ -1,9 +1,15 @@
 #ifndef PRECEDENT_H
 #define PRECEDENT_H
 
-//#include <stdio.h>
+#include "error.h"
 #include "scanner.h"
 #include "precedent_stack.h"
+#include "symtable.h"
+#include "symtable_stack.h"
+
+#define ERROR_HANDLE_PREC(exit_code, token) \
+    fprintf(stderr, "Error: precedent.c - error code %d at line %d, with token: %d\n", exit_code, token->line, token->kind); \
+    exit(exit_code);
 
 typedef enum {
     MUL_T,
@@ -31,17 +37,18 @@ typedef enum {
     STOPPAGE_T      // not a terminal (stoppage in stack <)
 } prec_terminal_t;
 
-typedef enum prec_rules{
+typedef enum stack_rules{
     ERROR_R,
     SHIFT_R,
     STOPPAGE_R,
     MERGE_R
-} prec_rules_t;
+} stack_rules_t;
 
-extern const prec_rules_t prec_table[TERMINAL_CNT_T][TERMINAL_CNT_T];
+extern const stack_rules_t prec_table[TERMINAL_CNT_T][TERMINAL_CNT_T];
 
-prec_rules_t give_rule(prec_stack_t *stack, prec_terminal_t input);
-valid_itmes_t convert_lex_term(Lexeme lex);
-bool precedent_analysys(void);
+stack_rules_t give_stack_rule(prec_stack_t *stack, prec_terminal_t input);
+valid_itmes_t convert_lex_term(Lexeme lex, symtable_stack_t *sym_stack);
+bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itmes_t *new_expression, Lexeme *token);
+data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack);
 
 #endif // PRECEDENT_H

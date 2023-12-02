@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include "automat.h"
+#include "error.h"
 
 typedef struct Lexeme
 {
@@ -30,7 +31,6 @@ typedef struct Lexeme
         DOUBLE_QUESTION_MARK,
         IDENTIFIER,
         STRING_LIT,
-        MULTILINE_STRING_LIT,
         INTEGER_LIT,
         DOUBLE_LIT,
         PLUS,
