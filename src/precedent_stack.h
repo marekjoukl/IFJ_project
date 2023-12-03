@@ -16,6 +16,7 @@ typedef struct valid_itmes
     data_type_t var_type;
     bool can_be_nil;
     bool is_lit;
+    char* posfix_name;
 }valid_itmes_t;
 
 typedef struct prec_stack
@@ -34,5 +35,15 @@ bool rule1(prec_stack_t *stack, valid_itmes_t rule);
 bool rule3(prec_stack_t *stack, valid_itmes_t rule);
 void stack_merge(prec_stack_t **stack, valid_itmes_t new_expression);
 void stack_dispose(prec_stack_t **stack);
+
+#define POSTFIX_CHUNK 10
+typedef struct postix_array
+{
+    char* array;
+    int size;
+    int capacity;
+} postix_array_t;
+
+void add_postfix (postix_array_t *postfix ,char * name);
 
 #endif

@@ -1,5 +1,9 @@
 #include "precedent.h"
 
+// ====================================================
+//                  syntax_stack
+// ====================================================
+
 void stack_init(prec_stack_t **stack)
 {
     *stack = NULL;
@@ -104,8 +108,6 @@ bool rule3(prec_stack_t *stack, valid_itmes_t rule)
             stack->next->next->items.type == EXPRESSION_T);
 }
 
-
-
 void stack_dispose(prec_stack_t **stack)
 {
     prec_stack_t *tmp;
@@ -117,3 +119,22 @@ void stack_dispose(prec_stack_t **stack)
     }
     *stack = NULL;
 }
+
+// ====================================================
+//              postix_notation
+// ====================================================
+void add_postfix(postix_array_t *postfix ,char * name)
+{
+    int  new_size = strlen(name);
+
+    if(postfix->size + new_size >= postfix->capacity){
+        postfix->capacity += postfix->capacity + new_size + POSTFIX_CHUNK;
+        postfix->array = realloc(postfix->array, sizeof(char*) * postfix->capacity);
+    }
+
+    strcat(postfix->array, name);
+    strcat(postfix->array, ",");
+
+    (postfix->size)+= new_size;
+}
+

@@ -1,11 +1,10 @@
 #include "precedent.h"
 #include "scanner.h"
 
-// TODO a + b == c is valid expression
-
 valid_itmes_t convert_lex_term(Lexeme lex, symtable_stack_t *sym_stack)
 {
     valid_itmes_t item;
+    item.posfix_name = NULL;
     switch (lex.kind)
     {
         case LESS:                  item.type = LESS_T; break;
@@ -30,6 +29,9 @@ valid_itmes_t convert_lex_term(Lexeme lex, symtable_stack_t *sym_stack)
             item.var_type = variable->data->item_type;
             item.can_be_nil = variable->data->can_be_nil;
             item.is_lit = false;
+            item.posfix_name = malloc(sizeof(char) * strlen(lex.extra_data.string) + 1);
+            strcpy(item.posfix_name, lex.extra_data.string);
+            // printf("lex = %s, item = %s\n", lex.extra_data.string, item.posfix_name); //debug
             break;
         
         case STRING_LIT:
@@ -37,6 +39,8 @@ valid_itmes_t convert_lex_term(Lexeme lex, symtable_stack_t *sym_stack)
             item.var_type = TYPE_STRING;
             item.can_be_nil = false;
             item.is_lit = true;
+            item.posfix_name = malloc(sizeof(char) * strlen(lex.extra_data.string) + 1);
+            strcpy(item.posfix_name, lex.extra_data.string);
             break;
 
         case INTEGER_LIT:           
@@ -93,7 +97,7 @@ stack_rules_t give_stack_rule(prec_stack_t *stack, prec_terminal_t input)
     return prec_table[top.type][input];
 }
 
-bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme *token)
+bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme *token, postix_array_t *postfix)
 {
     valid_itmes_t rule;
     stack_top_terminal(stack, &rule);
@@ -134,6 +138,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         else
             new_expression->is_lit = stack->next->next->items.is_lit;
 
+        add_postfix(postfix, "*");
         break;
     
     case DIV_T:
@@ -153,6 +158,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         else
             new_expression->is_lit = stack->next->next->items.is_lit;
 
+        add_postfix(postfix, "/");
         break;
     
     case PLUS_T:
@@ -188,6 +194,8 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
             new_expression->is_lit = stack->items.is_lit;
         else
             new_expression->is_lit = stack->next->next->items.is_lit;
+
+        add_postfix(postfix, "+");
         break;
     
     case MINUS_T:
@@ -222,6 +230,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         else
             new_expression->is_lit = stack->next->next->items.is_lit;
 
+        add_postfix(postfix, "-");
         break;
     
     case EQUAL_T:
@@ -249,6 +258,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
 
         new_expression->can_be_nil = false;
         new_expression->var_type = TYPE_BOOL;
+        add_postfix(postfix, "==");
         break;
     
     case NOT_EQUAL_T:
@@ -276,6 +286,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
 
         new_expression->can_be_nil = false;
         new_expression->var_type = TYPE_BOOL;
+        add_postfix(postfix, "!=");
         break;
     
     case LESS_T:
@@ -306,6 +317,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
 
         new_expression->can_be_nil = false;
         new_expression->var_type = TYPE_BOOL;
+        add_postfix(postfix, "<");
         break;
 
     case GREATER_T:
@@ -336,6 +348,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
 
         new_expression->can_be_nil = false;
         new_expression->var_type = TYPE_BOOL;
+        add_postfix(postfix, ">");
         break;
 
     case LESS_EQUAL_T:
@@ -366,6 +379,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
 
         new_expression->can_be_nil = false;
         new_expression->var_type = TYPE_BOOL;
+        add_postfix(postfix, "<=");
         break;
 
     case GREATER_EQUAL_T:
@@ -396,6 +410,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
 
         new_expression->can_be_nil = false;
         new_expression->var_type = TYPE_BOOL;
+        add_postfix(postfix, ">=");
         break;
     
     case DOUBLE_QUESTION_MARK_T:
@@ -408,6 +423,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
 
         new_expression->can_be_nil = false;
         new_expression->var_type = stack->items.var_type;
+        add_postfix(postfix, "??");
         break;
     
     case EXCLAMATION_POINT_T:
@@ -415,6 +431,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         new_expression->can_be_nil = false;
         new_expression->var_type = stack->next->items.var_type;
         new_expression->is_lit = stack->next->items.is_lit;
+        add_postfix(postfix, "!");
         break;
     
     case RIGHT_PAR_T:
@@ -429,6 +446,8 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         new_expression->can_be_nil = stack->items.can_be_nil;
         new_expression->var_type = stack->items.var_type;
         new_expression->is_lit = stack->items.is_lit;
+        
+        add_postfix(postfix, stack->items.posfix_name);
         break;  
     
     default:
@@ -447,6 +466,7 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
     stack_rules_t stack_rule;
     symtable_item_t *variable;
     valid_itmes_t new_expression;
+    postix_array_t postfix = {NULL, 0, 0};
 
     if(lexeme->kind == IDENTIFIER)
     {
@@ -483,7 +503,7 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
             input = convert_lex_term(*lexeme, sym_stack);
             break;
         case MERGE_R:
-            if(check_prec_rule(stack, &new_expression, lexeme))
+            if(check_prec_rule(stack, &new_expression, lexeme, &postfix))
                 stack_merge(&stack, new_expression);
             else
                 {ERROR_HANDLE_PREC(SYNTAX_ERROR, lexeme);}
@@ -492,6 +512,7 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
             valid = false;
             break;
         default:
+
             ERROR_HANDLE_PREC(SYNTAX_ERROR, lexeme);
             break;
         }
@@ -512,7 +533,7 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
         
         stack_rule = give_stack_rule(stack, input.type);
         if(stack_rule == MERGE_R){
-            if(check_prec_rule(stack, &new_expression, lexeme))
+            if(check_prec_rule(stack, &new_expression, lexeme, &postfix))
                 stack_merge(&stack, new_expression);
             else
                 {ERROR_HANDLE_PREC(SYNTAX_ERROR, lexeme);}
@@ -527,6 +548,8 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
 
     data_type_t exit_data_type = stack->items.var_type;
     stack_dispose(&stack); 
+
+    printf("postfix = %s\n", postfix.array); //debug
 
     return exit_data_type;
 }
