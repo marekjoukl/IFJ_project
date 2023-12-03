@@ -1132,7 +1132,7 @@ bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, b
         }
         else if (is_return) {
             if (!FuncReturnTypeCheck(expression_type, item->data->item_type)) {
-                ERROR_HANDLE(TYPE_ERROR, token); //TODO: find out what error code to use
+                ERROR_HANDLE(PARAMETER_TYPE_ERROR, token); //TODO: find out what error code to use
             }
         }
         else if (expression_type == TYPE_NIL) {
@@ -1308,6 +1308,10 @@ bool FuncReturnTypeCheck(data_type_t return_expression_type, data_type_t functio
                 return true;
             }
             break;
+
+        case TYPE_UNDEFINED:
+            fprintf(stderr,"returning expression in a non-void function\n");
+            exit(RETURN_ERROR);
 
         default:
             return false;
