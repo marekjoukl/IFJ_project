@@ -74,6 +74,8 @@ bool ParamsBonus(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_t
 bool FirstParamBonus(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token);
 bool ParamsNBonus(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token);
 bool ParamTypeBonus(symtable_item_t *function, Lexeme *token, symtable_item_t *param_id_item);
+bool DelayedDefinitionTypeAssign(symtable_item_t *assigning_item, data_t *function_data);
+bool DelayedDefinitionTypeCheck(Lexeme *token, symtable_item_t *function);
 
 //TODO: find out how to call precendencnu analyzu
 bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, bool is_while_or_if, bool is_return, bool type_was_defined);
