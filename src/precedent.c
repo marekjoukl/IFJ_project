@@ -31,7 +31,6 @@ valid_itmes_t convert_lex_term(Lexeme lex, symtable_stack_t *sym_stack)
             item.is_lit = false;
             item.posfix_name = malloc(sizeof(char) * strlen(lex.extra_data.string) + 1);
             strcpy(item.posfix_name, lex.extra_data.string);
-            // printf("lex = %s, item = %s\n", lex.extra_data.string, item.posfix_name); //debug
             break;
         
         case STRING_LIT:
@@ -39,7 +38,7 @@ valid_itmes_t convert_lex_term(Lexeme lex, symtable_stack_t *sym_stack)
             item.var_type = TYPE_STRING;
             item.can_be_nil = false;
             item.is_lit = true;
-            item.posfix_name = malloc(sizeof(char) * strlen(lex.extra_data.string) + 1);
+            item.posfix_name = malloc(sizeof(char) * (strlen(lex.extra_data.string) + 1));
             strcpy(item.posfix_name, lex.extra_data.string);
             break;
 
@@ -48,6 +47,8 @@ valid_itmes_t convert_lex_term(Lexeme lex, symtable_stack_t *sym_stack)
             item.var_type = TYPE_INT;
             item.can_be_nil = false;
             item.is_lit = true;
+            item.posfix_name = malloc(sizeof(char) * (strlen(lex.extra_data.string) + 3));
+            strcpy(item.posfix_name, lex.extra_data.string);
             break;
 
         case DOUBLE_LIT:
@@ -55,6 +56,8 @@ valid_itmes_t convert_lex_term(Lexeme lex, symtable_stack_t *sym_stack)
             item.var_type = TYPE_DOUBLE;
             item.can_be_nil = false;
             item.is_lit = true;
+            item.posfix_name = malloc(sizeof(char) * (strlen(lex.extra_data.string) + 1));
+            strcpy(item.posfix_name, lex.extra_data.string);
             break;
 
         case NIL:
@@ -62,6 +65,8 @@ valid_itmes_t convert_lex_term(Lexeme lex, symtable_stack_t *sym_stack)
             item.var_type = TYPE_NIL;
             item.can_be_nil = true;
             item.is_lit = true;
+            item.posfix_name = malloc(sizeof(char) * (strlen(lex.extra_data.string) + 1));
+            strcpy(item.posfix_name, lex.extra_data.string);
             break;
 
         default: item.type = DOLLAR_T; break;
@@ -137,7 +142,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
             new_expression->is_lit = stack->items.is_lit;
         else
             new_expression->is_lit = stack->next->next->items.is_lit;
-
+        
         add_postfix(postfix, "*");
         break;
     
@@ -446,8 +451,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         new_expression->can_be_nil = stack->items.can_be_nil;
         new_expression->var_type = stack->items.var_type;
         new_expression->is_lit = stack->items.is_lit;
-        
-        add_postfix(postfix, stack->items.posfix_name);
+        add_postfix(postfix, stack->items.posfix_name);       
         break;  
     
     default:
@@ -488,6 +492,8 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack)
         }
 
         stack_rule = give_stack_rule(stack, input.type);
+        valid_itmes_t valid_tmp;
+        stack_top_terminal(stack, &valid_tmp);
 
         switch (stack_rule)
         {

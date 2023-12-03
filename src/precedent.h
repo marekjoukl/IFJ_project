@@ -12,10 +12,10 @@
     exit(exit_code);
 
 typedef enum {
-    MUL_T,
-    DIV_T,
     MINUS_T,
     PLUS_T,
+    MUL_T,
+    DIV_T,
     EQUAL_T,
     NOT_EQUAL_T,
     LESS_T,
