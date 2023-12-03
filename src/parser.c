@@ -332,7 +332,6 @@ bool Sequence(Lexeme *token, symtable_stack_t *stack) {
         CREATE_FRAME();
 
         if (variable != NULL) {
-            puts("variable is not null");
             data_t *data = malloc(sizeof(data_t));
             if (data == NULL) {
                 ERROR_HANDLE(INTERNAL_ERROR, token)
