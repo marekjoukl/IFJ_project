@@ -56,6 +56,19 @@ test_precedent.o: ../tests/test_precedent.c
 test_precedent: test_precedent.o precedent_stack.o precedent.o scanner.o automat.o symtable.o symtable_stack.o
 	$(CC) $(CFLAGS) -o test_precedent test_precedent.o precedent_stack.o precedent.o scanner.o automat.o symtable.o symtable_stack.o
 
+#generator files
+generator.o: generator.c
+	$(CC) $(CFLAGS) -c generator.c
+
+builtin_func.o: builtin_func.c
+	$(CC) $(CFLAGS) -c builtin_func.c
+
+test_generator.o: test_generator.c
+	$(CC) $(CFLAGS) -c test_generator.c
+
+test_generator: test_generator.o generator.o builtin_func.o scanner.o automat.o symtable.o symtable_stack.o precedent.o precedent_stack.o
+	$(CC) $(CFLAGS) -o test_generator test_generator.o generator.o builtin_func.o scanner.o automat.o symtable.o symtable_stack.o precedent.o precedent_stack.o
+
 #clean
 clean:
 	rm -f *.o test_scanner test_parser test_precedent test_symtable
