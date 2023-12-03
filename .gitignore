@@ -6,6 +6,7 @@
 test_scanner
 .DS_Store
 build
+main
 
 #precedent analysys
 test_precedent

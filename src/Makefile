@@ -1,6 +1,11 @@
 CC=gcc
 CFLAGS=-std=c99 -Wall -Wextra -pedantic -g
 
+main: main.o scanner.o automat.o parser.o precedent.o precedent_stack.o symtable.o symtable_stack.o
+	$(CC) $(CFLAGS) -o main main.o scanner.o automat.o parser.o precedent.o precedent_stack.o symtable.o symtable_stack.o
+
+main.o: main.c
+
 #scanner files
 scanner.o: scanner.c
 	$(CC) $(CFLAGS) -c scanner.c
