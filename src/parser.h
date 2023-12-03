@@ -33,14 +33,14 @@
     SymtableInit(table); \
     SymtableStackPush(stack, table); \
 
-void StartParser();
-bool Prog(Lexeme *token, symtable_stack_t *stack);
+void StartParser(bool is_first_analysis);
+bool Prog(Lexeme *token, symtable_stack_t *stack, bool is_first_analysis);
 bool Sequence(Lexeme *token, symtable_stack_t *stack);
 bool SequenceN(Lexeme *token, symtable_stack_t *stack);
 bool VarDef(Lexeme *token, symtable_stack_t *stack, bool *is_let);
 bool VarTypeOrAssign(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item);
 bool AssignVar(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item);
-bool DefFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token);
+bool DefFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token, bool is_first_analysis);
 bool VoidF(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token);
 bool FirstParamDef(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token);
 bool ParamsDef(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token);
