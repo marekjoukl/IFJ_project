@@ -501,6 +501,7 @@ bool DefFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_t
         CREATE_FRAME()
 
         for (int i = 0; i < temp_token->data->param_count; i++) {
+            temp_token->params[i]->data->was_initialized = true;
             SymtableAddItem(stack->array[stack->size - 1], temp_token->params[i]->key, temp_token->params[i]->data);
         }
 
@@ -1411,6 +1412,7 @@ bool WriteFunc(Lexeme *token, symtable_stack_t *stack) {
         if (token->kind == IDENTIFIER) {
             symtable_item_t *item = SymtableSearchAll(stack, token->extra_data.string);
             if (item == NULL) {
+                printf("undefined variable\n");
                 ERROR_HANDLE(UNDEFINED_VAR_ERROR, token)
             }
             if (!item->data->was_initialized) {
