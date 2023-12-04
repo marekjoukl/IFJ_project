@@ -80,6 +80,7 @@ typedef struct Buffer
 Lexeme make_lexeme(AutomatState current, char *str);
 Lexeme get_lexeme(void);
 Lexeme get_next_non_whitespace_lexeme(void);
+Lexeme get_next_new_line_or_lexeme(void);
 void add_to_string(char **str, size_t *len, size_t *capacity, char edge, AutomatState current, AutomatState next);
 
 #endif // SCANNER_H
