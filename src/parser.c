@@ -1208,8 +1208,8 @@ bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, b
             }
         }
         else if (expression_type == TYPE_NIL) {
-            if (item->data->can_be_nil) {
-                return true;
+            if (!item->data->can_be_nil) {
+                return false;
             }
         }
         else if (expression_type != item->data->item_type) { //TODO: moze sa stat ze sa mi vrati typ napr TYPE_INT_NIL?
