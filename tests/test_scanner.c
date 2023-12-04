@@ -78,13 +78,11 @@ int main(int argc, char *argv[])
 
         fprintf(stderr, "lexeme kind: %s\n", lexeme_kind_to_string(lexeme.kind));
         if (lexeme.kind == LEX_EOF) break;
-        if (lexeme.kind == IDENTIFIER || lexeme.kind == STRING_LIT)
+        if (lexeme.kind == IDENTIFIER || lexeme.kind == STRING_LIT || lexeme.kind == INTEGER_LIT || lexeme.kind == DOUBLE_LIT)
         {
             fprintf(stderr, "       data: ->|%s|<-\n", lexeme.extra_data.string);
             //free(lexeme.extra_data.string); // free the string, because it was allocated by the scanner
         }
-        if (lexeme.kind == INTEGER_LIT) fprintf(stderr, "       data: %d\n", lexeme.extra_data.IntValue);
-        if (lexeme.kind == DOUBLE_LIT) fprintf(stderr, "       data: %f\n", lexeme.extra_data.DoubleValue);
         if (lexeme.kind == DOUBLE) fprintf(stderr, "       nil_type: %s\n", lexeme.nil_type ? "true" : "false");
         if (lexeme.kind == INT) fprintf(stderr, "       nil_type: %s\n", lexeme.nil_type ? "true" : "false");
         if (lexeme.kind == STRING) fprintf(stderr, "       nil_type: %s\n", lexeme.nil_type ? "true" : "false");

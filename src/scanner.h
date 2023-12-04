@@ -59,9 +59,9 @@ typedef struct Lexeme
 
     union extra_data
     {
-        char* string;
-        int IntValue;
-        double DoubleValue;
+        char* string; // used for all literals and identifiers
+        int IntValue; // probably unused
+        double DoubleValue; // probably unused
     }   extra_data;
 
     unsigned int line;

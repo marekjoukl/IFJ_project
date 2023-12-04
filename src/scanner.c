@@ -258,18 +258,15 @@ Lexeme make_lexeme(AutomatState current, char *str)
             break;
         case IntLit:
             lexeme.kind = INTEGER_LIT;
-            lexeme.extra_data.IntValue = atoi(str);
-            free(str);
+            lexeme.extra_data.string = str;
             break;
         case DoubleLitDec:
             lexeme.kind = DOUBLE_LIT;
-            lexeme.extra_data.DoubleValue = atof(str);
-            free(str);
+            lexeme.extra_data.string = str;
             break;
         case DoubleLitExp:
             lexeme.kind = DOUBLE_LIT;
-            lexeme.extra_data.DoubleValue = atof(str);
-            free(str);
+            lexeme.extra_data.string = str;
             break;
         case Plus:
             lexeme.kind = PLUS;
