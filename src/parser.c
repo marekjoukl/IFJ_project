@@ -512,6 +512,9 @@ bool DefFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_t
         if (!ReturnFunction(token, stack, temp_token))
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
 
+        if (!SequenceN(token, stack))
+            { ERROR_HANDLE(SYNTAX_ERROR, token) }
+
         //deleting assigned frame
         SymtableStackPop(stack);
 
@@ -545,7 +548,7 @@ bool VoidF(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token) 
 bool ReturnFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token) {
     // <RETURN_FUNCTION> -> RETURN <RETURN_FUNCTION_N>
     if (token->kind == RETURN){
-        GETTOKEN()
+        *token = get_next_new_line_or_lexeme();
         if (!ReturnFunctionN(token, stack, temp_token))
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
 
@@ -564,7 +567,7 @@ bool ReturnFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *tem
 
 bool ReturnFunctionN(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token) {
     // <RETURN_FUNCTION_N> -> ε
-    if (token->kind == RIGHT_BRACKET) {
+    if (token->kind == RIGHT_BRACKET || token->kind == NEWLINE) {
         if (temp_token->data->item_type != TYPE_UNDEFINED) {
             ERROR_HANDLE(RETURN_ERROR, token)
         }
