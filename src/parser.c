@@ -334,7 +334,16 @@ bool Sequence(Lexeme *token, symtable_stack_t *stack) {
         item = SymtableSearchAll(stack, token->extra_data.string);
 
         if (item == NULL) {
-            ERROR_HANDLE(UNDEFINED_VAR_ERROR, token)
+            GETTOKEN()
+            if (token->kind == ASSIGNMENT) {
+                ERROR_HANDLE(UNDEFINED_VAR_ERROR, token)
+            }
+            else if (token->kind == LEFT_PAR) {
+                ERROR_HANDLE(DEFINITION_ERROR, token)
+            }
+            else {
+                ERROR_HANDLE(SYNTAX_ERROR, token)
+            }
         }
 
         GETTOKEN()
