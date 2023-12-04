@@ -35,6 +35,7 @@ typedef struct data {
     bool can_be_nil;
     bool value_is_nil;
     //bool is_defined;
+    bool was_initialized;
     bool is_modifiable;
     int param_count;
     char **param_names;
@@ -47,7 +48,6 @@ typedef struct data {
     bool blinded_sign;
     int param_count_current;
     bool can_be_redefined;
-    bool was_defined;
     bool check_function_type;
 } data_t;
 
