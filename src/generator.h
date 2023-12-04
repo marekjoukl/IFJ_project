@@ -98,7 +98,7 @@ void while_loop_end(Generator *g);
  * @param g 
  * @param token 
  */
-void extract_value(Generator *g, Lexeme *token);
+void extract_value(String *s, Lexeme *token);
 /**
  * @brief Call builtin write function
  * @param g 
@@ -116,6 +116,8 @@ void exp_postfix(Generator *g, Lexeme *token);
  * @param token 
  */
 void function_gen(Generator *g, Lexeme *token);
+
+void function_param_gen(Generator *g, Lexeme *token);
 
 
 #endif //GENERATOR_H
