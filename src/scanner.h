@@ -68,6 +68,15 @@ typedef struct Lexeme
     bool nil_type;
 } Lexeme;
 
+typedef struct Buffer 
+{
+    Lexeme *tokens;
+    int capacity;
+    int size;
+    int index;
+} Buffer;
+
+
 Lexeme make_lexeme(AutomatState current, char *str);
 Lexeme get_lexeme(void);
 Lexeme get_next_non_whitespace_lexeme(void);

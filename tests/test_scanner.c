@@ -69,6 +69,8 @@ int main(int argc, char *argv[])
 
     fprintf(stderr, "START of string or identifier ->|ID/STRING|<- END of string or identifier\n\n");
     Lexeme lexeme;
+    for (int i = 0; i < 2; i++)
+    {
     while (true)
     {
         if (INCLUDE_WHITE_SPACES == 1) lexeme = get_lexeme();
@@ -79,7 +81,7 @@ int main(int argc, char *argv[])
         if (lexeme.kind == IDENTIFIER || lexeme.kind == STRING_LIT)
         {
             fprintf(stderr, "       data: ->|%s|<-\n", lexeme.extra_data.string);
-            free(lexeme.extra_data.string); // free the string, because it was allocated by the scanner
+            //free(lexeme.extra_data.string); // free the string, because it was allocated by the scanner
         }
         if (lexeme.kind == INTEGER_LIT) fprintf(stderr, "       data: %d\n", lexeme.extra_data.IntValue);
         if (lexeme.kind == DOUBLE_LIT) fprintf(stderr, "       data: %f\n", lexeme.extra_data.DoubleValue);
@@ -90,7 +92,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "       line: %d\n", lexeme.line);
         fprintf(stderr, "\n");
     }
-
+    }
     fprintf(stderr, "\nSTART of string or identifier ->|ID/STRING|<- END of string or identifier\n");
 
     if (argc > 1) {

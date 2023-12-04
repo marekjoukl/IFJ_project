@@ -1,6 +1,9 @@
 #include "scanner.h"
 
 #define STRING_CHUNK 10   // how much new space to allocate when reallocating space for a string
+#define BUFFER_CHUNK 10   // how much new space to allocate when reallocating space for the buffer
+
+Buffer buffer = { .tokens = NULL, .capacity = 0, .size = 0, .index = 0 }; // global buffer for storing lexemes
 
 // return the next lexeme, skipping whitespaces
 Lexeme get_next_non_whitespace_lexeme(void)
@@ -16,6 +19,11 @@ Lexeme get_next_non_whitespace_lexeme(void)
 // return the next lexeme, including whitespaces
 Lexeme get_lexeme(void)
 {
+    if (buffer.index < buffer.size)
+    {
+        return buffer.tokens[buffer.index++];
+    }
+
     static unsigned int line_counter = 1;   // helper variable for counting lines
     Lexeme lexeme;              // the lexeme we are going to return
     AutomatState current = Start;
@@ -56,6 +64,25 @@ Lexeme get_lexeme(void)
                 exit (LEXICAL_ERROR);       // EXIT CODE 1 - wrong lexeme structure
             }
 
+            // allocate more space for the buffer if needed
+            if (buffer.size >= buffer.capacity)
+            {
+                buffer.tokens = realloc(buffer.tokens, sizeof(Lexeme) * (buffer.size + BUFFER_CHUNK));
+                if (buffer.tokens == NULL)
+                {
+                    fprintf(stderr, "Error: scanner.c - realloc failed\n");
+                    exit (INTERNAL_ERROR);      // EXIT CODE 99 - failed to allocate memory
+                }
+                buffer.capacity += BUFFER_CHUNK;
+
+            }
+            buffer.tokens[buffer.size++] = lexeme;
+            buffer.index = buffer.size;
+
+            if (lexeme.kind == LEX_EOF) 
+            {
+                buffer.index = 0;
+            }
             return lexeme;
         }
         current = next;
