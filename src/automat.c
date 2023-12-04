@@ -241,7 +241,7 @@ AutomatState transition(AutomatState current, char edge)
 
         case MltLnStringStartEnd:
             if (edge == '"') return FirstQuote;
-            if (edge == '\n') return MltLnStringStartEnd;
+            if (edge == '\n' || edge == ' ' || edge == '\t' || edge == '\f') return MltLnStringStartEnd;
             if ((edge != '"') && (edge != '\n')) return MltLnStringLit;
             return Error;
 

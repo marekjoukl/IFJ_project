@@ -141,7 +141,7 @@ void StartParser(bool is_first_analysis, symtable_stack_t *stack) {
         // func substr(of s: String, startingAt i: Int, endingBefore j: Int) -> String?
         data = CreateData(true, 0);
         char *substr = malloc(sizeof(char) * 10);
-        strcpy(substr, "substr");
+        strcpy(substr, "substring");
         data->item_type = TYPE_STRING_NIL;
         data->can_be_nil = true;
         data->is_modifiable = false;
