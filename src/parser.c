@@ -775,7 +775,7 @@ bool Params(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item) {
     //  <PARAMS> -> INT_LIT
     if (token->kind == INTEGER_LIT) {
         if (item->data->param_names[item->data->param_count_current] != NULL) {
-            ERROR_HANDLE(OTHER_SEMANTIC_ERROR, token)
+            ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
         }
         if (item->data->param_types[item->data->param_count_current] != TYPE_INT && item->data->param_types[item->data->param_count_current] != TYPE_INT_NIL && item->data->param_types[item->data->param_count_current] != TYPE_DOUBLE && item->data->param_types[item->data->param_count_current] != TYPE_DOUBLE_NIL) {
             ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
@@ -787,7 +787,7 @@ bool Params(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item) {
     //  <PARAMS> -> STRING_LIT
     if (token->kind == STRING_LIT) {
         if (item->data->param_names[item->data->param_count_current] != NULL) {
-            ERROR_HANDLE(OTHER_SEMANTIC_ERROR, token)
+            ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
         }
         if (item->data->param_types[item->data->param_count_current] != TYPE_STRING && item->data->param_types[item->data->param_count_current] != TYPE_STRING_NIL) {
             ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
@@ -799,7 +799,7 @@ bool Params(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item) {
     //  <PARAMS> -> DOUBLE_LIT
     if (token->kind == DOUBLE_LIT) {
         if (item->data->param_names[item->data->param_count_current] != NULL) {
-            ERROR_HANDLE(OTHER_SEMANTIC_ERROR, token)
+            ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
         }
         if (item->data->param_types[item->data->param_count_current] != TYPE_DOUBLE && item->data->param_types[item->data->param_count_current] != TYPE_DOUBLE_NIL) {
             ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
@@ -820,7 +820,7 @@ bool Params(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item) {
     // <PARAMS> -> NIL
     if (token->kind == NIL) { //TODO: finish semantics in NIL case
         if (item->data->param_names[item->data->param_count_current] != NULL) {
-            ERROR_HANDLE(OTHER_SEMANTIC_ERROR, token)
+            ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
         }
         data_type_t type = item->data->param_types[item->data->param_count_current];
         if (type != TYPE_INT_NIL && type != TYPE_DOUBLE_NIL && type != TYPE_STRING_NIL) {
@@ -839,7 +839,7 @@ bool ParamsName(Lexeme *token, symtable_stack_t *stack, symtable_item_t *functio
     // <PARAMS_NAME> -> COLON <ID_OR_LIT>
     if (token->kind == COLON){
         if (strcmp(param_name_or_id->extra_data.string, function->data->param_names[function->data->param_count_current]) != 0) {
-            ERROR_HANDLE(OTHER_SEMANTIC_ERROR, token)
+            ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
         }
         GETTOKEN()
         if(!IdOrLit(token, stack, function))
@@ -854,7 +854,7 @@ bool ParamsName(Lexeme *token, symtable_stack_t *stack, symtable_item_t *functio
             ERROR_HANDLE(UNDEFINED_VAR_ERROR, token)
         }
         if (function->data->param_names[function->data->param_count_current] != NULL) {
-            ERROR_HANDLE(OTHER_SEMANTIC_ERROR, token)
+            ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
         }
         if (!TypeCheck(function, param_item, function->data->param_count_current, true)) {
             ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
