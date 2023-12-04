@@ -30,7 +30,7 @@ void SymtableAddItem(Symtable *table, char *key, data_t *data) {
     unsigned int counter = 0;
     symtable_item_t *item = SymtableSearch(table, key);
     if (item != NULL) {
-        fprintf(stderr, "Error: symtable.c - redefinition of variable\n");
+        fprintf(stderr, "Error: symtable.c - redefinition of variable : line : %d, key: %s\n", item->data->line, key);
         exit(DEFINITION_ERROR);    // EXIT CODE 3 - redefinition of variable
     }
 
@@ -103,23 +103,11 @@ void SymtableDeleteAll(Symtable *table) {
             }
 
             if ((*table)[i]->data->param_names != NULL) {
-                for (int j = 0; j < (*table)[i]->data->param_count; j++) {
-                    if ((*table)[i]->data->param_names[j] != NULL) {
-                        free((*table)[i]->data->param_names[j]);
-                        (*table)[i]->data->param_names[j] = NULL;
-                    }
-                }
                 free((*table)[i]->data->param_names);
                 (*table)[i]->data->param_names = NULL;
             }
 
             if ((*table)[i]->data->params_id != NULL) {
-                for (int j = 0; j < (*table)[i]->data->param_count; j++) {
-                    if ((*table)[i]->data->params_id[j] != NULL) {
-                        free((*table)[i]->data->params_id[j]);
-                        (*table)[i]->data->params_id[j] = NULL;
-                    }
-                }
                 free((*table)[i]->data->params_id);
                 (*table)[i]->data->params_id = NULL;
             }
@@ -128,10 +116,6 @@ void SymtableDeleteAll(Symtable *table) {
             if ((*table)[i]->params != NULL) {
                 for (int j = 0; j < (*table)[i]->data->param_count; j++) {
                     if ((*table)[i]->params[j] != NULL) {
-                        free((*table)[i]->params[j]->key);
-                        (*table)[i]->params[j]->key = NULL;
-                        free((*table)[i]->params[j]->data);
-                        (*table)[i]->params[j]->data = NULL;
                         free((*table)[i]->params[j]);
                         (*table)[i]->params[j] = NULL;
                     }
@@ -145,10 +129,10 @@ void SymtableDeleteAll(Symtable *table) {
                 (*table)[i]->data->param_types = NULL;
             }
 
-            if ((*table)[i]->data->string_value != NULL) {
-                free((*table)[i]->data->string_value);
-                (*table)[i]->data->string_value = NULL;
-            }
+//            if ((*table)[i]->data->string_value != NULL) {
+//                //free((*table)[i]->data->string_value);
+//                (*table)[i]->data->string_value = NULL;
+//            }
 
             free((*table)[i]->data);
             (*table)[i]->data = NULL;

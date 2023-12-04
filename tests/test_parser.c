@@ -11,7 +11,15 @@ int main(int argc, char *argv[]){
              return 1;
         }
     }
-    StartParser(false);
+    symtable_stack_t *stack = SymtableStackInit();
+
+    CREATE_FRAME()
+    StartParser(true, stack);
+    StartParser(false, stack);
+
+    SymtableStackPop(stack);
+    SymtableStackDispose(stack);
+
     printf("funguje\n");
     fclose(input);
     return 0;
