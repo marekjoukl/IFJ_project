@@ -27,9 +27,7 @@ data_t *CreateData(bool function, int line) {
     data->numeric_value = 0;
     data->blinded_sign = false;
     data->param_count_current = 0;
-    data->can_be_redefined = false;
-    data->was_defined = true;
-    data->check_function_type = false;
+    data->was_initialized = false;
     return data;
 }
 
@@ -448,6 +446,7 @@ bool AssignOrFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *i
         if (!item->data->is_modifiable) {
             ERROR_HANDLE(OTHER_SEMANTIC_ERROR, token) //TODO: find out what error code to use
         }
+        item->data->was_initialized = true;
         GETTOKEN()
         if (!ExpOrCall(token, stack, item, true))
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
@@ -517,8 +516,6 @@ bool DefFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_t
 bool VoidF(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token) {
     // <VOID_F> -> ε
     if (token->kind == LEFT_BRACKET) {
-        if (temp_token->data->check_function_type)
-            { ERROR_HANDLE(TYPE_ERROR, token) } //TODO: find out what error code to use
         return true;
     }
     // <VOID_F> -> ARROW <TYPE>
@@ -989,6 +986,7 @@ bool VarTypeOrAssign(Lexeme *token, symtable_stack_t *stack, symtable_item_t *it
     }
     // <VAR_TYPE_OR_ASSIGN> -> ASSIGNMENT <EXP_OR_CALL>
     else if (token->kind == ASSIGNMENT) {
+        item->data->was_initialized = true;
         GETTOKEN()
         if (!ExpOrCall(token, stack, item, false))
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
@@ -1001,6 +999,7 @@ bool VarTypeOrAssign(Lexeme *token, symtable_stack_t *stack, symtable_item_t *it
 bool AssignVar(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item) {
     // <ASSIGN_VAR> -> ASSIGNMENT <EXP_OR_CALL>
     if (token->kind == ASSIGNMENT) {
+        item->data->was_initialized = true;
         GETTOKEN()
         if (!ExpOrCall(token, stack, item, true))
         { ERROR_HANDLE(SYNTAX_ERROR, token) }
@@ -1403,6 +1402,9 @@ bool WriteFunc(Lexeme *token, symtable_stack_t *stack) {
         if (token->kind == IDENTIFIER) {
             symtable_item_t *item = SymtableSearchAll(stack, token->extra_data.string);
             if (item == NULL) {
+                ERROR_HANDLE(UNDEFINED_VAR_ERROR, token)
+            }
+            if (!item->data->was_initialized) {
                 ERROR_HANDLE(UNDEFINED_VAR_ERROR, token)
             }
         }
