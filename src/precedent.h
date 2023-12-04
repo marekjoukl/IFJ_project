@@ -12,10 +12,10 @@
     exit(exit_code);
 
 typedef enum {
-    MUL_T,
-    DIV_T,
     MINUS_T,
     PLUS_T,
+    MUL_T,
+    DIV_T,
     EQUAL_T,
     NOT_EQUAL_T,
     LESS_T,
@@ -48,7 +48,7 @@ extern const stack_rules_t prec_table[TERMINAL_CNT_T][TERMINAL_CNT_T];
 
 stack_rules_t give_stack_rule(prec_stack_t *stack, prec_terminal_t input);
 valid_itmes_t convert_lex_term(Lexeme lex, symtable_stack_t *sym_stack);
-bool check_prec_rule(prec_stack_t *stack, symtable_stack_t *sym_stack, valid_itmes_t *new_expression, Lexeme *token);
+bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme *token, postix_array_t *postfix, prec_stack_t **postfix_front);
 data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack);
 
 #endif // PRECEDENT_H
