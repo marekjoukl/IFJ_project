@@ -294,6 +294,7 @@ bool Sequence(Lexeme *token, symtable_stack_t *stack) {
     // <SEQUENCE> -> <VAR_DEF> IDENTIFIER <VAR_TYPE_OR_ASSIGN>
     if (token->kind == LET || token->kind == VAR) {
         bool is_var = false;
+
         if (!VarDef(token, stack, &is_var))
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
 
@@ -306,6 +307,7 @@ bool Sequence(Lexeme *token, symtable_stack_t *stack) {
         }
 
         data_t *data = CreateData(false, token->line);
+
         data->is_modifiable = is_var;
 
         item = malloc(sizeof(symtable_item_t));
@@ -453,7 +455,9 @@ bool AssignOrFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *i
             ERROR_HANDLE(OTHER_SEMANTIC_ERROR, token)
         }
         if (!item->data->is_modifiable) {
-            ERROR_HANDLE(OTHER_SEMANTIC_ERROR, token) //TODO: find out what error code to use
+            if (item->data->was_initialized) {
+                ERROR_HANDLE(OTHER_SEMANTIC_ERROR, token) //TODO: find out what error code to use
+            }
         }
         item->data->was_initialized = true;
         GETTOKEN()
@@ -1423,7 +1427,6 @@ bool WriteFunc(Lexeme *token, symtable_stack_t *stack) {
         if (token->kind == IDENTIFIER) {
             symtable_item_t *item = SymtableSearchAll(stack, token->extra_data.string);
             if (item == NULL) {
-                printf("undefined variable\n");
                 ERROR_HANDLE(UNDEFINED_VAR_ERROR, token)
             }
             if (!item->data->was_initialized) {
