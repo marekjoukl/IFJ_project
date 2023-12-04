@@ -137,6 +137,7 @@ AutomatState transition(AutomatState current, char edge)
         case StringLit:
             if (edge == '"') return EndStringLit;
             if (edge == '\\') return EscSeq;
+            if (edge == '\n') return Error;
             return StringLit;
 
         case DecPoint:
