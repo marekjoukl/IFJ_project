@@ -31,5 +31,10 @@ void builtin_chr(Generator *g);
 void eval_bool(Generator *g);
 // check if expressions are equal
 void eval_equals(Generator *g);
+// check if first expression is greater or equal than second
+void eval_greater_equal(Generator *g);
+// check if first expression is greater than second
+void eval_greater(Generator *g);
+
 
 #endif // BUILTIN_FUNC_H

@@ -159,7 +159,9 @@ void eval_bool(Generator *g){
 void eval_equals(Generator *g){
     add_to_str(&g->header,  "LABEL $eval_equals\n"
                             "CREATEFRAME\n"
-                            "PUSHFRAME\n"           // TODO: maybe check for types (if not already checked in parser)
+                            "PUSHFRAME\n"        
+                            "POPS GF@!tmp1\n"                           // must be pushed before call
+                            "POPS GF@!tmp2\n"                           // must be pushed before call
                             "JUMPIFEQ $equals_true GF@!tmp1 GF@!tmp2\n"     // tmps must be already stored
                             "MOVE GF@!tmp1 bool@false\n"
                             "POPFRAME\n"
@@ -170,5 +172,40 @@ void eval_equals(Generator *g){
                             "RETURN\n");
 }
 
+void eval_greater_equal(Generator *g){
+    add_to_str(&g->header,  "LABEL $eval_greater_equal\n"
+                            "CREATEFRAME\n"
+                            "PUSHFRAME\n"        
+                            "POPS GF@!tmp1\n"                                      // must be pushed before call
+                            "POPS GF@!tmp2\n"                                      // must be pushed before call
+                            "JUMPIFEQ $greater_equal_true GF@!tmp1 GF@!tmp2\n"     // tmps must be already stored
+                            "DEFVAR LF@?type1\n"
+                            "GT LF@?type1 GF@!tmp1 GF@!tmp2"                       // if tmp1 > tmp2, return true
+                            "JUMPIFEQ $greater_equal_true LF@?type1 bool@true\n"
+                            "MOVE GF@!tmp1 bool@false\n"
+                            "POPFRAME\n"
+                            "RETURN\n"
+                            "LABEL $greater_equal_true\n"
+                            "MOVE GF@!tmp1 bool@true\n"
+                            "POPFRAME\n"
+                            "RETURN\n");
+}
 
+void eval_greater(Generator *g){
+    add_to_str(&g->header,  "LABEL $eval_greater\n"
+                            "CREATEFRAME\n"
+                            "PUSHFRAME\n"        
+                            "POPS GF@!tmp1\n"                                      // must be pushed before call
+                            "POPS GF@!tmp2\n"                                      // must be pushed before call
+                            "DEFVAR LF@?type1\n"
+                            "GT LF@?type1 GF@!tmp1 GF@!tmp2"                       // if tmp1 > tmp2, return true
+                            "JUMPIFEQ $greater_equal_true LF@?type1 bool@true\n"
+                            "MOVE GF@!tmp1 bool@false\n"
+                            "POPFRAME\n"
+                            "RETURN\n"
+                            "LABEL $greater_equal_true\n"
+                            "MOVE GF@!tmp1 bool@true\n"
+                            "POPFRAME\n"
+                            "RETURN\n");
+}
 
