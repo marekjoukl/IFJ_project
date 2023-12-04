@@ -136,8 +136,7 @@ void print_footer(Generator *g){
 }
 
 void if_stat(Generator *g){
-    add_to_str(&g->instructions, 
-                                 "CALL $eval_bool\n"
+    add_to_str(&g->instructions, "CALL $eval_bool\n"
                                  "JUMPIFEQ $else GF@!tmp1 bool@false\n");       // if false, jump to else
 }
 
@@ -178,13 +177,13 @@ void extract_value(Generator *g, Lexeme *token){
         break;
         }
     case STRING_LIT:{
+        // TODO
         add_to_str(&g->instructions, "PUSHS string@");
         }
-        // TODO
         break;
     case IDENTIFIER:
         // TODO
-        add_to_str(&g->instructions, "PUSHS LF@");
+        //add_to_str(&g->instructions, "PUSHS LF@");
         //add_to_str(&g->instructions, token->extra_data.IntValue);
         add_to_str(&g->instructions, "\n");
         break;
