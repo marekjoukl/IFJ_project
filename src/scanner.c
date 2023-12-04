@@ -5,6 +5,17 @@
 
 Buffer buffer = { .tokens = NULL, .capacity = 0, .size = 0, .index = 0 }; // global buffer for storing lexemes
 
+// returns the next lexeme or new line, skipping whitespaces and comments
+Lexeme get_next_new_line_or_lexeme(void)
+{
+    Lexeme lexeme;
+    do 
+    {
+        lexeme = get_lexeme();
+    } while (lexeme.kind == SPACE || lexeme.kind == COMMENT || lexeme.kind == BLOCK_COMMENT);
+    return lexeme;
+}
+
 // return the next lexeme, skipping whitespaces
 Lexeme get_next_non_whitespace_lexeme(void)
 {
