@@ -501,6 +501,7 @@ bool DefFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_t
         CREATE_FRAME()
 
         for (int i = 0; i < temp_token->data->param_count; i++) {
+            temp_token->params[i]->data->is_modifiable = false;
             temp_token->params[i]->data->was_initialized = true;
             SymtableAddItem(stack->array[stack->size - 1], temp_token->params[i]->key, temp_token->params[i]->data);
         }
@@ -853,6 +854,9 @@ bool ParamsName(Lexeme *token, symtable_stack_t *stack, symtable_item_t *functio
         if (param_item == NULL) {
             ERROR_HANDLE(UNDEFINED_VAR_ERROR, token)
         }
+        if (!param_item->data->was_initialized) {
+            ERROR_HANDLE(UNDEFINED_VAR_ERROR, token) //TODO: find out what error code to use
+        }
         if (function->data->param_names[function->data->param_count_current] != NULL) {
             ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
         }
@@ -871,6 +875,9 @@ bool IdOrLit(Lexeme *token, symtable_stack_t *stack, symtable_item_t *function) 
         symtable_item_t *param = SymtableSearchAll(stack, token->extra_data.string);
         if (param == NULL) {
             ERROR_HANDLE(UNDEFINED_VAR_ERROR, token)
+        }
+        if(!param->data->was_initialized) {
+            ERROR_HANDLE(UNDEFINED_VAR_ERROR, token) //TODO: find out what error code to use
         }
         if (!TypeCheck(function, param, function->data->param_count_current, true)) {
             ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
