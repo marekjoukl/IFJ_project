@@ -571,6 +571,7 @@ bool ReturnFunctionN(Lexeme *token, symtable_stack_t *stack, symtable_item_t *te
         if (temp_token->data->item_type != TYPE_UNDEFINED) {
             ERROR_HANDLE(RETURN_ERROR, token)
         }
+        GETTOKEN()
         return true;
     }
 
