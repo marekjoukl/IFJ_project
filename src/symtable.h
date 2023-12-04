@@ -44,6 +44,9 @@ typedef struct data {
     double numeric_value;
     bool blinded_sign;
     int param_count_current;
+    bool can_be_redefined;
+    bool was_defined;
+    bool check_function_type;
 } data_t;
 
 //one item in symtable
