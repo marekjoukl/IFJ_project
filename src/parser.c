@@ -1234,6 +1234,9 @@ bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, b
         if (expression_type == TYPE_BOOL) {
             ERROR_HANDLE(TYPE_ERROR, token) //TODO: find out what error code to use
         }
+        if (expression_type == TYPE_NIL) {
+            ERROR_HANDLE(TYPE_DEDUCTION_ERROR, token)
+        }
     }
     return true;
 }
