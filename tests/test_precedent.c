@@ -77,11 +77,13 @@ TEST(basic, "test basic precedent and seamnatic without variables")
 Lexeme token = get_next_non_whitespace_lexeme();
 symtable_stack_t *stack = SymtableStackInit();
 Symtable *table = malloc(sizeof(Symtable));
+ast_t *astree = NULL;
 SymtableInit(table);
 SymtableStackPush(stack, table);
 
-data_type_t valid = precedent_analysys(&token, stack);
-printf("PASS, data_type = %d, next token = %d", valid, token.kind);
+data_type_t valid = precedent_analysys(&token, stack, &astree);
+tree_postorder(astree);
+printf("\nPASS, data_type = %d, next token = %d", valid, token.kind);
 
 SymtableStackPop(stack);
 SymtableStackDispose(stack);
@@ -91,11 +93,12 @@ TEST(advanced, "test with premade variables")
 Lexeme token = get_next_non_whitespace_lexeme();
 symtable_stack_t *stack = SymtableStackInit();
 Symtable *table = malloc(sizeof(Symtable));
+ast_t * astree = NULL;
 SymtableInit(table);
 SymtableStackPush(stack, table);
 data_t testdata[] = 
 {
-    {TYPE_STRING, true, false, false, 0,NULL, NULL, NULL, 0, false, NULL, 0.0, false, 0}
+    {TYPE_INT, true, false, false, 0,NULL, NULL, NULL, 0, false, NULL, 0.0, false, 0}
 };
 while(token.kind != COMMA)
 {   
@@ -104,9 +107,10 @@ while(token.kind != COMMA)
     token = get_next_non_whitespace_lexeme();
 }
 token = get_next_non_whitespace_lexeme();
-data_type_t valid = precedent_analysys(&token, stack);
+data_type_t valid = precedent_analysys(&token, stack, &astree);
 
-printf("PASS, data_type = %d, next token = %d\n", valid, token.kind);
+tree_postorder(astree);
+printf("\nPASS, data_type = %d, next token = %d", valid, token.kind);
 
 SymtableStackPop(stack);
 SymtableStackDispose(stack);
