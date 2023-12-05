@@ -286,7 +286,7 @@ void exp_postfix(Generator *g, ast_t *tree){
 }
 
 void function_gen(Generator *g, Lexeme *token){
-    add_to_str(&g->instructions, "LABEL ");
+    add_to_str(&g->instructions, "LABEL $");
     add_to_str(&g->instructions, token->extra_data.string);
     add_to_str(&g->instructions, "\n");
     add_to_str(&g->instructions, "CREATEFRAME\n");

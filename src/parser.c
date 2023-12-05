@@ -1259,6 +1259,11 @@ bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, b
     //TODO: pridat stack do precedencnej + poslat tam item funkcie/premennej na kontrolu tipov pri return funkcie/priradenie do premennej
     expression_type = precedent_analysys(token, stack, &asttree);
 
+    if (asttree == NULL){
+        printf("jebemti\n");
+    }
+    tree_postorder(asttree);
+
     if (is_while_or_if) {
         if (expression_type != TYPE_BOOL) {
             ERROR_HANDLE(TYPE_ERROR, token) //TODO: find out what error code to use
