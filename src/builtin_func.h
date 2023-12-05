@@ -35,6 +35,10 @@ void eval_equals(Generator *g);
 void eval_greater_equal(Generator *g);
 // check if first expression is greater than second
 void eval_greater(Generator *g);
+// check if first expression is less than second
+void eval_less_equal(Generator *g);
+// check if first expression is less than second
+void eval_less(Generator *g);
 
 
 #endif // BUILTIN_FUNC_H
