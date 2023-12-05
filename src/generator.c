@@ -13,6 +13,10 @@ void StartGenerator(Generator *g){
     str_init(&g->footer);
     str_init(&g->stack_values);
     str_init(&g->vars);
+    str_init(&g->function_call_tmps);
+    str_init(&g->temp_string);
+    g->parameters_count = 0;
+    //str_init(&g->parameters);
     print_header(g);
     print_footer(g);
 }
@@ -87,6 +91,7 @@ void cleanup_generator(Generator *g){
     str_dtor(&g->footer);
     str_dtor(&g->stack_values);
     str_dtor(&g->vars);
+    //str_dtor(&g->parameters);
 }
 
 /************** FUNCTIONS FOR GENERATOR **************/
@@ -99,6 +104,7 @@ void print_header(Generator *g){
     add_to_str(&g->header, "DEFVAR GF@!var1\n");
     add_to_str(&g->header, "DEFVAR GF@!var2\n");
     add_to_str(&g->header, "DEFVAR GF@!var3\n");
+    add_to_str(&g->header, "DEFVAR GF@!stack_var\n");
     add_to_str(&g->header, "JUMP $main\n");
 
     // FUNCTIONS
@@ -161,37 +167,59 @@ void call_builtin_write(Generator *g){
     // TODO
 }
 
-void extract_value(String *s, Lexeme *token){
+void extract_value(Generator *g, Lexeme *token, symtable_item_t *item){
     switch (token->kind)
     {
     case INTEGER_LIT:{
-        add_to_str(s, "PUSHS int@");
-        add_to_str(s, token->extra_data.string);
-        add_to_str(s, "\n");
+        add_to_str(&g->temp_string, "PUSHS int@");
+        add_to_str(&g->temp_string, token->extra_data.string);
+        add_to_str(&g->temp_string, "\n");
+        g->parameters[g->parameters_count-1] = malloc(sizeof(char) * (g->temp_string.length+1));
+        strcpy(g->parameters[g->parameters_count-1], g->temp_string.str);
+        str_clear(&g->temp_string);
         break;
         }
     case DOUBLE_LIT:{
-        add_to_str(s, "PUSHS float@");
-        add_to_str(s, token->extra_data.string);
-        add_to_str(s, "\n");
+        add_to_str(&g->temp_string, "PUSHS float@");
+        add_to_str(&g->temp_string, token->extra_data.string);
+        add_to_str(&g->temp_string, "\n");
+        g->parameters[g->parameters_count-1] = malloc(sizeof(char) * (g->temp_string.length+1));
+        strcpy(g->parameters[g->parameters_count-1], g->temp_string.str);
+        str_clear(&g->temp_string);
         break;
         }
     case STRING_LIT:{
-        add_to_str(s, "PUSHS string@");
-        add_to_str(s, token->extra_data.string);
-        add_to_str(s, "\n");
+        add_to_str(&g->temp_string, "PUSHS string@");
+        add_to_str(&g->temp_string, token->extra_data.string);
+        add_to_str(&g->temp_string, "\n");
+        g->parameters[g->parameters_count-1] = malloc(sizeof(char) * (g->temp_string.length+1));
+        strcpy(g->parameters[g->parameters_count-1], g->temp_string.str);
+        str_clear(&g->temp_string);
         }
         break;
-    case IDENTIFIER:
-        // TODO
-        add_to_str(s, "PUSHS ");
-        add_to_str(s, token->extra_data.string);
-        add_to_str(s, "\n");
-        break;
-    case NIL:{
-        add_to_str(s, "PUSHS nil@nil\n");
-        break;
-        }
+    // case IDENTIFIER:
+    //     switch (item->data->item_type)
+    //     {
+    //     case TYPE_INT:
+    //         add_to_str(s, "PUSHS int@");
+            
+    //         break;
+    //     case TYPE_DOUBLE:
+    //         add_to_str(s, "PUSHS float@");
+    //         break;
+    //     case TYPE_STRING:
+    //         add_to_str(s, "PUSHS string@");
+    //         break;
+    //     default:   // TYPE_NIL
+    //         break;
+    //     }
+    //     add_to_str(s, token->extra_data.string);
+    //     add_to_str(s, "\n");
+    //     break;
+    // case NIL:{
+    //     add_to_str(s, "PUSHS nil@nil\n");
+    //     break;
+    //     }
     default:
         fprintf(stderr, "Error: generator.c - extract_value() - unknown token type\n");
         exit(99);
@@ -200,49 +228,54 @@ void extract_value(String *s, Lexeme *token){
 }
 
 void exp_postfix(Generator *g, ast_t *tree){
+    if(tree == NULL){
+        return;
+    }
+    exp_postfix(g, tree->left);
+    exp_postfix(g, tree->right);
 
-    // IF EXPRESSION IS JUST A NUMBER, INSERT IT TO STACK, ELSE DO OPERATIONS
-    if(token->kind == INTEGER_LIT || token->kind == DOUBLE_LIT || token->kind == STRING_LIT || token->kind == NIL){
-        extract_value(&g->instructions, token);
-        break;
-    }else{
-        switch (token->kind)
-        {
-            case PLUS:
-                add_to_str(&g->instructions, "ADDS\n");
-                break;
-            case MINUS:
-                add_to_str(&g->instructions, "SUBS\n");
-                break;
-            case ASTERISK:
-                add_to_str(&g->instructions, "MULS\n");
-                break;
-            case SLASH:
-                add_to_str(&g->instructions, "DIVS\n");
-                break;
-            case LESS:
-                add_to_str(&g->instructions, "CALL $eval_greater_equal\n");  // NEGATE
-                break;
-            case GREATER:
-                add_to_str(&g->instructions, "CALL $eval_greater\n");
-                break;
-            case LESS_EQUAL:
-                add_to_str(&g->instructions, "CALL $eval_greater\n");        // NEGATE
-                break;
-            case GREATER_EQUAL:
-                add_to_str(&g->instructions, "CALL $eval_greater_equal\n");
-                break;
-            case EQUAL:
-                add_to_str(&g->instructions, "CALL $eval_equals\n");
-                break;
-            case NOT_EQUAL:
-                add_to_str(&g->instructions, "CALL $eval_equals\n");
-                break;
-            default:
-                fprintf(stderr, "Error: generator.c - exp_postfix() - unknown token type\n");
-                exit(99);
-                break;
-        }   
+    if (strcmp(tree->data, "+") == 0){
+        add_to_str(&g->instructions, "ADDS\n");
+    } else if (strcmp(tree->data, "+") == 0){
+        add_to_str(&g->instructions, "CALL $concat_prep\n");    // TODO
+    }
+    else if (strcmp(tree->data, "-") == 0)
+    {
+        add_to_str(&g->instructions, "SUBS\n");
+    } else if (strcmp(tree->data, "*") == 0)
+    {
+        add_to_str(&g->instructions, "MULS\n");
+    } else if (strcmp(tree->data, "/") == 0)
+    {
+        add_to_str(&g->instructions, "DIVS\n");
+    } else if (strcmp(tree->data, ">=") == 0)
+    {
+        add_to_str(&g->instructions, "CALL $eval_greater_equal\n");
+    } else if (strcmp(tree->data, ">") == 0)
+    {
+        add_to_str(&g->instructions, "CALL $eval_greater\n");
+    } else if (strcmp(tree->data, "<=") == 0)
+    {
+        add_to_str(&g->instructions, "CALL $eval_less_equal\n");   // TODO
+    } else if (strcmp(tree->data, "<") == 0)
+    {
+        add_to_str(&g->instructions, "CALL $eval_less\n");   // TODO
+    } else if (strcmp(tree->data, "==") == 0)
+    {
+        add_to_str(&g->instructions, "CALL $eval_equals\n");
+    } else if (strcmp(tree->data, "!=") == 0)
+    {
+        add_to_str(&g->instructions, "CALL $eval_not_equals\n");   // TODO
+    } else if(strcmp(tree->data, ";")){
+        add_to_str(&g->instructions, "INT2FLOATS\n");
+    } else if(strcmp(tree->data, "??") == 0){
+        add_to_str(&g->instructions, "CALL $double_questmark\n");   // TODO
+    } else if(strcmp(tree->data, "!") == 0){
+        add_to_str(&g->instructions, "CALL $not_nil\n");   // TODO
+    }
+    else {
+        add_to_str(&g->instructions, "PUSHS ");
+        add_to_str(&g->instructions, tree->data);
     }
 }
 
@@ -284,24 +317,43 @@ void assign_var_0(Generator *g, Lexeme *token, symtable_stack_t *stack){
         add_to_str(&g->instructions, "float@");
         break;
     case TYPE_STRING:
-        add_to_str(&g->instructions, "string@");
+        add_to_str(&g->instructions, "string@!stack_var");
         break;
     default:
         break;
     }
 }
 
-void assign_var_1(Generator *g, Lexeme *token, symtable_stack_t *stack){
+void assign_var_1(Generator *g, Lexeme *token, symtable_stack_t *stack, ast_t *tree, bool is_expression){
+    if (is_expression){
+        exp_postfix(g, tree);
+    } else {
+        func_call(g);
+        add_to_str(&g->instructions, "CALL $");
+        add_to_str(&g->instructions, token->extra_data.string);
+    }
+    if (stack->size == 1){
+        add_to_str(&g->instructions, "POPS GF@");    
+    } else {
+        add_to_str(&g->instructions, "POPS LF@");
+    }
     add_to_str(&g->instructions, token->extra_data.string);
     add_to_str(&g->instructions, "\n");
 }
 
-void function_call_gen_prep(Generator *g, Lexeme *token){
-    // PUSH PARAMETERS TO STACK
+
+
+void function_call_gen_prep(Generator *g, Lexeme *token, int params_count){
+    for (int i = g->parameters_count-1; i >= 0; i--) {
+        add_to_str(&g->instructions, g->parameters[i]);
+    }
     
     // CALL WRITE FUNC
     if(strcmp(token->extra_data.string, "write") == 0){
-        add_to_str(&g->instructions, "PUSHS int@");     
+        add_to_str(&g->instructions, "PUSHS int@");
+        char buffer[16];
+        sprintf(buffer, "%d", params_count);
+        add_to_str(&g->instructions, buffer);     
         // TODO: PUSH NUMBER OF PARAMETERS TO WRITE
         add_to_str(&g->instructions, "\n");
     }
@@ -309,19 +361,25 @@ void function_call_gen_prep(Generator *g, Lexeme *token){
     add_to_str(&g->function_call_tmps, "CALL $");
     add_to_str(&g->function_call_tmps, token->extra_data.string);     // func name
     add_to_str(&g->function_call_tmps, "\n");
-    // TODO
+
+    for (int i = 0; i < g->parameters_count; i++) {
+        free(g->parameters[i]);
+    }
+    g->parameters_count = 0;
+    // TODO 
 }
 
 void func_call(Generator *g){
     add_to_str(&g->instructions, g->stack_values.str);
-    add_to_str(&g->instructions, "\n");
+    str_clear(&g->stack_values);
     add_to_str(&g->instructions, g->function_call_tmps.str);
-    add_to_str(&g->instructions, "\n");
-    // TODO
+    str_clear(&g->function_call_tmps);
 }
 
-void func_load_params(Generator *g, Lexeme *token){
-    extract_value(&g->stack_values, token);
+void func_load_params(Generator *g, Lexeme *token, symtable_item_t *item){
+    g->parameters_count++;
+    g->parameters = realloc(g->parameters, g->parameters_count * sizeof(char*));
+    extract_value(g, token, item);
 }
 
 

@@ -62,7 +62,7 @@ bool IdOrLit(Lexeme *token, symtable_stack_t *stack, symtable_item_t *function);
 
 bool TypeCheck(symtable_item_t *item1, symtable_item_t *item2, int param_index, bool param_handle);
 bool FuncReturnTypeCheck(data_type_t return_expression_type, data_type_t function_type);
-bool WriteFunc(Lexeme *token, symtable_stack_t *stack);
+bool WriteFunc(Lexeme *token, symtable_stack_t *stack, int *counter);
 
 //TODO: find out how to call precendencnu analyzu
 bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, bool is_while_or_if, bool is_return, bool type_was_defined);
