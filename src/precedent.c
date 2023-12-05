@@ -141,13 +141,14 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         new_expression->var_type = stack->items.var_type;
         new_expression->can_be_nil = false;
 
-        // printf("right: %s\n", stack->items.posfix_name); //debug
+
+        printf("right: %s:%d\n", stack->items.posfix_name, stack->items.is_lit); //debug
         if(stack->items.posfix_name != NULL)
             tree_insert(&new_right, stack->items.posfix_name);
         else
             new_right = stack->items.tree;
         
-        // printf("left: %s\n", stack->next->next->items.posfix_name); //debug
+        printf("left: %s:%d\n", stack->next->next->items.posfix_name, stack->next->next->items.is_lit); //debug
         if(stack->next->next->items.posfix_name != NULL)
             tree_insert(&new_left, stack->next->next->items.posfix_name);
         else
@@ -158,15 +159,15 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         if(stack->items.var_type != stack->next->next->items.var_type)
         {
             if(stack->next->next->items.var_type == TYPE_INT){
-                if(stack->items.is_lit == false)
+                if(stack->next->next->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-                tree_insert(&new_left, "i2d");
+                tree_insert(&new_left, ";");
             }
 
             if(stack->items.var_type == TYPE_INT){
-                if(stack->next->next->items.is_lit == false)
+                if(stack->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-                tree_insert(&new_right, "i2d");
+                tree_insert(&new_right, ";");
             }
 
             new_expression->var_type = TYPE_DOUBLE;
@@ -179,6 +180,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         
         tree_insert(&new_parent, "*");
         tree_link(&new_parent, new_left, new_right);
+        new_parent->type = new_expression->var_type;
         new_expression->tree = new_parent;
 
         break;
@@ -213,6 +215,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
 
         tree_insert(&new_parent, "/");
         tree_link(&new_parent, new_left, new_right);
+        new_parent->type = new_expression->var_type;
         new_expression->tree = new_parent;
 
         break;
@@ -244,16 +247,16 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
                 {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
 
             if(stack->next->next->items.var_type == TYPE_INT){
-                if(stack->items.is_lit == false)
+                if(stack->next->next->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
                 if(new_left != NULL)
-                    tree_insert(&new_left, "i2d");
+                    tree_insert(&new_left, ";");
             }
 
             if(stack->items.var_type == TYPE_INT){
-                if(stack->next->next->items.is_lit == false)
+                if(stack->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-                tree_insert(&new_right, "i2d");
+                tree_insert(&new_right, ";");
             }
 
             new_expression->var_type = TYPE_DOUBLE;
@@ -266,6 +269,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
 
         tree_insert(&new_parent, "+");
         tree_link(&new_parent, new_left, new_right);
+        new_parent->type = new_expression->var_type;
         new_expression->tree = new_parent;
         break;
     
@@ -294,15 +298,15 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         if(stack->items.var_type != stack->next->next->items.var_type)
         {
             if(stack->next->next->items.var_type == TYPE_INT){
-                if(stack->items.is_lit == false)
+                if(stack->next->next->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-                tree_insert(&new_left, "i2d");
+                tree_insert(&new_left, ";");
             }
             
             if(stack->items.var_type == TYPE_INT){
-                if(stack->next->next->items.is_lit == false)
+                if(stack->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-                tree_insert(&new_right, "i2d");
+                tree_insert(&new_right, ";");
             }
 
             new_expression->var_type = TYPE_DOUBLE;
@@ -315,6 +319,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
 
         tree_insert(&new_parent, "-");
         tree_link(&new_parent, new_left, new_right);
+        new_parent->type = new_expression->var_type;
         new_expression->tree = new_parent;
         break;
     
@@ -342,24 +347,25 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
 
             if(stack->next->next->items.var_type == TYPE_INT){
-                if(stack->items.is_lit == false)
+                if(stack->next->next->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-                tree_insert(&new_left, "i2d");
+                tree_insert(&new_left, ";");
             }
             
             if(stack->items.var_type == TYPE_INT){
-                if(stack->next->next->items.is_lit == false)
+                if(stack->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-                tree_insert(&new_right, "i2d");
+                tree_insert(&new_right, ";");
             }
         }
 
+        new_expression->var_type = TYPE_BOOL;
         tree_insert(&new_parent, "==");
         tree_link(&new_parent, new_left, new_right);
+        new_parent->type = new_expression->var_type;
         new_expression->tree = new_parent;
 
         new_expression->can_be_nil = false;
-        new_expression->var_type = TYPE_BOOL;
         break;
     
 /*=========================================================================================================*/    
@@ -385,15 +391,15 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
                 {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
 
             if(stack->next->next->items.var_type == TYPE_INT){
-                if(stack->items.is_lit == false)
+                if(stack->next->next->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-                tree_insert(&new_left, "i2d");
+                tree_insert(&new_left, ";");
             }
             
             if(stack->items.var_type == TYPE_INT){
-                if(stack->next->next->items.is_lit == false)
+                if(stack->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-                tree_insert(&new_right, "i2d");
+                tree_insert(&new_right, ";");
             }
         }
 
@@ -401,6 +407,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         new_expression->var_type = TYPE_BOOL;
         tree_insert(&new_parent, "!=");
         tree_link(&new_parent, new_left, new_right);
+        new_parent->type = new_expression->var_type;
         new_expression->tree = new_parent;
         break;
     
@@ -441,11 +448,12 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
             tree_insert(&new_left, stack->next->next->items.posfix_name);
         else
             new_left = stack->next->next->items.tree;
+        new_expression->var_type = TYPE_BOOL;
         tree_insert(&new_parent, "<");
         tree_link(&new_parent, new_left, new_right);
+        new_parent->type = new_expression->var_type;
         new_expression->tree = new_parent;
         new_expression->can_be_nil = false;
-        new_expression->var_type = TYPE_BOOL;
         break;
 
 /*=========================================================================================================*/    
@@ -484,11 +492,12 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
             tree_insert(&new_left, stack->next->next->items.posfix_name);
         else
             new_left = stack->next->next->items.tree;
+        new_expression->var_type = TYPE_BOOL;
         tree_insert(&new_parent, ">");
         tree_link(&new_parent, new_left, new_right);
+        new_parent->type = new_expression->var_type;
         new_expression->tree = new_parent;
         new_expression->can_be_nil = false;
-        new_expression->var_type = TYPE_BOOL;
         break;
 
 /*=========================================================================================================*/    
@@ -527,11 +536,12 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
             tree_insert(&new_left, stack->next->next->items.posfix_name);
         else
             new_left = stack->next->next->items.tree;
+        new_expression->var_type = TYPE_BOOL;
         tree_insert(&new_parent, "<=");
         tree_link(&new_parent, new_left, new_right);
+        new_parent->type = new_expression->var_type;
         new_expression->tree = new_parent;
         new_expression->can_be_nil = false;
-        new_expression->var_type = TYPE_BOOL;
         break;
 
 /*=========================================================================================================*/    
@@ -570,11 +580,12 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
             tree_insert(&new_left, stack->next->next->items.posfix_name);
         else
             new_left = stack->next->next->items.tree;
+        new_expression->var_type = TYPE_BOOL;
         tree_insert(&new_parent, ">=");
         tree_link(&new_parent, new_left, new_right);
+        new_parent->type = new_expression->var_type;
         new_expression->tree = new_parent;
         new_expression->can_be_nil = false;
-        new_expression->var_type = TYPE_BOOL;
         break;
     
 /*=========================================================================================================*/    
@@ -597,6 +608,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
             new_left = stack->next->next->items.tree;
         tree_insert(&new_parent, "??");
         tree_link(&new_parent, new_left, new_right);
+        new_parent->type = new_expression->var_type;
         new_expression->tree = new_parent;
         new_expression->can_be_nil = false;
         new_expression->var_type = stack->items.var_type;
@@ -614,6 +626,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
             new_left = stack->next->items.tree;
         tree_insert(&new_parent, "!");
         tree_link(&new_parent, new_left, NULL);
+        new_parent->type = new_expression->var_type;
         new_expression->tree = new_parent;
         break;
     
@@ -632,7 +645,9 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         new_expression->var_type = stack->items.var_type;
         new_expression->is_lit = stack->items.is_lit;
         // puts("\nTERM"); //debug
-        new_expression->posfix_name = stack->items.posfix_name;
+        tree_insert(&new_parent, stack->items.posfix_name);
+        new_parent->type = new_expression->var_type;
+        new_expression->tree = new_parent;
         // printf("new_term = %s\n", new_expression->posfix_name); //debug
         break;  
     
@@ -684,6 +699,7 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack, ast_
             input = convert_lex_term(*lexeme);
             break;
         case STOPPAGE_R:
+            // puts("stop"); //debug
             modify_terminal(&input, *lexeme, sym_stack);
             stack_push_stoppage(&stack);
             stack_push(&stack, &input);
@@ -691,6 +707,7 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack, ast_
             input = convert_lex_term(*lexeme);
             break;
         case MERGE_R:
+            // puts("merge");
             if(check_prec_rule(stack, &new_expression, lexeme)){
                 // printf("new_e:%s\n\n\n", new_expression.posfix_name); //debug
                 stack_merge(&stack, new_expression);}
@@ -707,6 +724,7 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack, ast_
         }
     }
 
+    // puts("2nd"); //debug
     // second traverse with input = $
     input.type = DOLLAR_T;
     while(cont == true)
@@ -733,6 +751,5 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack, ast_
     *asttree = stack->items.tree;
     data_type_t exit_data_type = stack->items.var_type;
     stack_dispose(&stack); 
-
     return exit_data_type;
 }

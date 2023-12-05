@@ -192,6 +192,7 @@ void tree_postorder(ast_t *tree)
     printf("%s,", tree->data);
 }
 
+//TODO
 void tree_dispose(ast_t **tree)
 {
     if(*tree == NULL)
@@ -199,6 +200,9 @@ void tree_dispose(ast_t **tree)
     tree_dispose(&((*tree)->left));
     tree_dispose(&((*tree)->right));
 
-    free((*tree)->data);
+    // free((*tree)->data);
+    (*tree)->data = NULL;
     free(*tree);
+    *tree = NULL;
+    tree = NULL;
 }
