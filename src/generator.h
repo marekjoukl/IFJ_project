@@ -91,7 +91,7 @@ void if_stat(Generator *g, ast_t *asttree, symtable_stack_t *stack, int if_count
 /**
  * @brief Generate label for else statement
  */
-void else_stat(Generator *g);
+void else_stat(Generator *g, bool is_else_start, int else_counter);
 /**
  * @brief Generate label for while loop
  */

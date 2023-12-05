@@ -418,28 +418,12 @@ bool Sequence(Lexeme *token, symtable_stack_t *stack) {
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
         GETTOKEN()
 
-        char buffer[11];
-        sprintf(buffer, "%d", current_if_stat);
-
-        add_to_str(&g.instructions, "POPFRAME\n");
-        add_to_str(&g.instructions, "JUMP $else_end");
-        add_to_str(&g.instructions, buffer);
-        add_to_str(&g.instructions, "\n");
-        add_to_str(&g.instructions, "LABEL $else");
-        add_to_str(&g.instructions, buffer);
-        add_to_str(&g.instructions, "\n");
-        add_to_str(&g.instructions, "CREATEFRAME\n");
-        add_to_str(&g.instructions, "PUSHFRAME\n");
-
+        else_stat(&g, true, current_if_stat);
 
         if (!ElseStat(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
 
-        add_to_str(&g.instructions, "POPFRAME\n");
-        add_to_str(&g.instructions, "LABEL $else_end");
-        add_to_str(&g.instructions, buffer);
-        add_to_str(&g.instructions, "\n");
-
+        else_stat(&g, false, current_if_stat);
 
         return true;
     }
@@ -831,7 +815,6 @@ bool ParamsN(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item) {
 
 bool Params(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item) {
     Lexeme param_id;
-    
     func_call(&g);
     if (item->data->param_count_current >= item->data->param_count) {
         ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)

@@ -151,7 +151,7 @@ void print_footer(Generator *g){
 void if_stat(Generator *g, ast_t *asttree, symtable_stack_t *stack, int if_counter){
     exp_postfix(g, asttree, stack);
     add_to_str(&g->instructions, "CALL $eval_bool\n"
-                                 "JUMPIFEQS $else");       // if false, jump to else
+                                 "JUMPIFNEQS $else");       // if false, jump to else
     char buffer[11];
     sprintf(buffer, "%d", if_counter);
     add_to_str(&g->instructions, buffer);
@@ -160,8 +160,26 @@ void if_stat(Generator *g, ast_t *asttree, symtable_stack_t *stack, int if_count
     add_to_str(&g->instructions, "PUSHFRAME\n");
 }
 
-void else_stat(Generator *g){
-    add_to_str(&g->instructions, "LABEL $else\n");
+void else_stat(Generator *g, bool is_else_start, int else_counter){
+    char buffer[11];
+    sprintf(buffer, "%d", else_counter);
+    if (is_else_start) {
+        add_to_str(&g->instructions, "POPFRAME\n");
+        add_to_str(&g->instructions, "JUMP $else_end");
+        add_to_str(&g->instructions, buffer);
+        add_to_str(&g->instructions, "\n");
+        add_to_str(&g->instructions, "LABEL $else");
+        add_to_str(&g->instructions, buffer);
+        add_to_str(&g->instructions, "\n");
+        add_to_str(&g->instructions, "CREATEFRAME\n");
+        add_to_str(&g->instructions, "PUSHFRAME\n");
+    }
+    else {
+        add_to_str(&g->instructions, "POPFRAME\n");
+        add_to_str(&g->instructions, "LABEL $else_end");
+        add_to_str(&g->instructions, buffer);
+        add_to_str(&g->instructions, "\n");
+    }
 }
 
 void while_loop_gen(Generator *g){
