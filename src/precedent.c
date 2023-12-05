@@ -1,12 +1,9 @@
 #include "precedent.h"
 #include "scanner.h"
 
-valid_itmes_t convert_lex_term(Lexeme lex, symtable_stack_t *sym_stack)
+valid_itmes_t convert_lex_term(Lexeme lex)
 {
     valid_itmes_t item;
-    symtable_item_t *variable = NULL;
-    item.posfix_name = NULL;
-    item.tree = NULL;
     switch (lex.kind)
     {
         case LESS:                  item.type = LESS_T; break;
@@ -23,64 +20,65 @@ valid_itmes_t convert_lex_term(Lexeme lex, symtable_stack_t *sym_stack)
         case MINUS:                 item.type = MINUS_T; break;
         case ASTERISK:              item.type = MUL_T; break;
         case SLASH:                 item.type = DIV_T; break;
+        case IDENTIFIER:            item.type = TERM_T;
+                                    item.var_type = TYPE_UNDEFINED;
+                                    break;
+        case STRING_LIT:            item.type = TERM_T; 
+                                    item.var_type = TYPE_STRING;
+                                    break;
+        case INTEGER_LIT:           item.type = TERM_T; 
+                                    item.var_type = TYPE_INT;
+                                    break;
+        case DOUBLE_LIT:            item.type = TERM_T;
+                                    item.var_type = TYPE_DOUBLE;
+                                    break;
+        case NIL:                   item.type = TERM_T; 
+                                    item.var_type = TYPE_NIL;
+                                    break;
+        default:                    item.type = DOLLAR_T; break;
+    }
+    return item;
+}
 
-        case IDENTIFIER:
+void modify_terminal(valid_itmes_t *item, Lexeme lex, symtable_stack_t *sym_stack)
+{
+    symtable_item_t *variable = NULL;
+    item->posfix_name = NULL;
+    item->tree = NULL;
+
+    if(item->type == TERM_T)
+    {
+        switch (item->var_type)
+        {
+        case TYPE_UNDEFINED:
             variable = SymtableSearchAll(sym_stack, lex.extra_data.string);
             if(variable == NULL){
                 Lexeme *token = &lex;
                 ERROR_HANDLE_PREC(UNDEFINED_VAR_ERROR,token);
             }
 
-            item.type = TERM_T; 
-
-            symtable_item_t *variable = SymtableSearchAll(sym_stack, lex.extra_data.string);
-
-            item.var_type = variable->data->item_type;
-            item.can_be_nil = variable->data->can_be_nil;
-            item.is_lit = false;
-            item.posfix_name = malloc(sizeof(char) * strlen(lex.extra_data.string) + 1);
-            strcpy(item.posfix_name, lex.extra_data.string);
+            item->var_type = variable->data->item_type;
+            item->can_be_nil = variable->data->can_be_nil;
+            item->is_lit = false;
+            item->posfix_name = malloc(sizeof(char) * strlen(lex.extra_data.string) + 1);
+            strcpy(item->posfix_name, lex.extra_data.string);
             break;
         
-        case STRING_LIT:
-            item.type = TERM_T; 
-            item.var_type = TYPE_STRING;
-            item.can_be_nil = false;
-            item.is_lit = true;
-            item.posfix_name = malloc(sizeof(char) * (strlen(lex.extra_data.string) + 1));
-            strcpy(item.posfix_name, lex.extra_data.string);
-            break;
+        case TYPE_NIL:
+            item->is_lit = true;
+            item->can_be_nil = true;
+            item->posfix_name = malloc(sizeof(char) * (4));
+            strcpy(item->posfix_name, "nil");
+            break;;
 
-        case INTEGER_LIT:           
-            item.type = TERM_T;
-            item.var_type = TYPE_INT;
-            item.can_be_nil = false;
-            item.is_lit = true;
-            item.posfix_name = malloc(sizeof(char) * (strlen(lex.extra_data.string) + 3));
-            strcpy(item.posfix_name, lex.extra_data.string);
+        default:
+            item->can_be_nil = false;
+            item->is_lit = true;
+            item->posfix_name = malloc(sizeof(char) * (strlen(lex.extra_data.string) + 1));
+            strcpy(item->posfix_name, lex.extra_data.string);
             break;
-
-        case DOUBLE_LIT:
-            item.type = TERM_T;
-            item.var_type = TYPE_DOUBLE;
-            item.can_be_nil = false;
-            item.is_lit = true;
-            item.posfix_name = malloc(sizeof(char) * (strlen(lex.extra_data.string) + 1));
-            strcpy(item.posfix_name, lex.extra_data.string);
-            break;
-
-        case NIL:
-            item.type = TERM_T;
-            item.var_type = TYPE_NIL;
-            item.can_be_nil = true;
-            item.is_lit = true;
-            item.posfix_name = malloc(sizeof(char) * (4));
-            strcpy(item.posfix_name, "nil");
-            break;
-
-        default: item.type = DOLLAR_T; break;
+        }               
     }
-    return item;
 }
 
 const stack_rules_t prec_table[TERMINAL_CNT_T][TERMINAL_CNT_T] = 
@@ -663,32 +661,34 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack, ast_
             {ERROR_HANDLE_PREC(UNDEFINED_VAR_ERROR, lexeme);}
     }
 
-    valid_itmes_t input = convert_lex_term(*lexeme, sym_stack);
+    valid_itmes_t input = convert_lex_term(*lexeme);
     
     while(valid)
     {
         //check if variable was defined
-        if(lexeme->kind == IDENTIFIER)
-        {
-            variable = SymtableSearchAll(sym_stack, lexeme->extra_data.string);
-            if(variable == NULL)
-                {ERROR_HANDLE_PREC(UNDEFINED_VAR_ERROR, lexeme);}
-        }
+        // if(lexeme->kind == IDENTIFIER)
+        // {
+        //     variable = SymtableSearchAll(sym_stack, lexeme->extra_data.string);
+        //     if(variable == NULL)
+        //         {ERROR_HANDLE_PREC(UNDEFINED_VAR_ERROR, lexeme);}
+        // }
 
         stack_rule = give_stack_rule(stack, input.type);
 
         switch (stack_rule)
         {
         case SHIFT_R:
+            modify_terminal(&input, *lexeme, sym_stack);
             stack_push(&stack, &input);
             *lexeme = get_next_non_whitespace_lexeme();
-            input = convert_lex_term(*lexeme, sym_stack);
+            input = convert_lex_term(*lexeme);
             break;
         case STOPPAGE_R:
+            modify_terminal(&input, *lexeme, sym_stack);
             stack_push_stoppage(&stack);
             stack_push(&stack, &input);
             *lexeme = get_next_non_whitespace_lexeme();
-            input = convert_lex_term(*lexeme, sym_stack);
+            input = convert_lex_term(*lexeme);
             break;
         case MERGE_R:
             if(check_prec_rule(stack, &new_expression, lexeme)){
@@ -711,15 +711,6 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack, ast_
     input.type = DOLLAR_T;
     while(cont == true)
     {
-
-        // chceck if variable was defined
-        if(lexeme->kind == IDENTIFIER)
-        {
-            variable = SymtableSearchAll(sym_stack, lexeme->extra_data.string);
-            if(variable == NULL)
-                {ERROR_HANDLE_PREC(UNDEFINED_VAR_ERROR, lexeme);}
-        }
-        
         stack_rule = give_stack_rule(stack, input.type);
         if(stack_rule == MERGE_R){
             if(check_prec_rule(stack, &new_expression, lexeme))
@@ -742,8 +733,6 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack, ast_
     *asttree = stack->items.tree;
     data_type_t exit_data_type = stack->items.var_type;
     stack_dispose(&stack); 
-
-    
 
     return exit_data_type;
 }
