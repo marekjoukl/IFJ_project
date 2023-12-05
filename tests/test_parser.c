@@ -20,7 +20,7 @@ int main(int argc, char *argv[]){
     SymtableStackPop(stack);
     SymtableStackDispose(stack);
 
-    printf("funguje\n");
+    //printf("funguje\n");
     fclose(input);
     return 0;
 }

@@ -167,7 +167,7 @@ void call_builtin_write(Generator *g){
     // TODO
 }
 
-void extract_value(Generator *g, Lexeme *token, symtable_item_t *item){
+void extract_value(Generator *g, Lexeme *token, symtable_item_t *item, symtable_stack_t *stack){
     switch (token->kind)
     {
     case INTEGER_LIT:{
@@ -198,20 +198,11 @@ void extract_value(Generator *g, Lexeme *token, symtable_item_t *item){
         }
         break;
     case IDENTIFIER:
-        switch (item->data->item_type)
-        {
-        case TYPE_INT:
-            add_to_str(&g->temp_string, "PUSHS intg@");
-            
-            break;
-        case TYPE_DOUBLE:
-            add_to_str(&g->temp_string, "PUSHS float@");
-            break;
-        case TYPE_STRING:
-            add_to_str(&g->temp_string, "PUSHS string@");
-            break;
-        default:   // TYPE_NIL
-            break;
+        if (stack->size == 1) {
+            // We are in global frame
+            add_to_str(&g->temp_string, "PUSHS GF@");
+        } else {
+            add_to_str(&g->temp_string, "PUSHS LF@");
         }
         add_to_str(&g->temp_string, token->extra_data.string);
         add_to_str(&g->temp_string, "\n");
@@ -233,12 +224,12 @@ void extract_value(Generator *g, Lexeme *token, symtable_item_t *item){
     }
 }
 
-void exp_postfix(Generator *g, ast_t *tree){
+void exp_postfix(Generator *g, ast_t *tree, symtable_stack_t *stack){
     if(tree == NULL){
         return;
     }
-    exp_postfix(g, tree->left);
-    exp_postfix(g, tree->right);
+    exp_postfix(g, tree->right, stack);
+    exp_postfix(g, tree->left, stack);
 
     if (strcmp(tree->data, "+") == 0){
         add_to_str(&g->instructions, "ADDS\n");
@@ -272,7 +263,7 @@ void exp_postfix(Generator *g, ast_t *tree){
     } else if (strcmp(tree->data, "!=") == 0)
     {
         add_to_str(&g->instructions, "CALL $eval_not_equals\n");   // TODO
-    } else if(strcmp(tree->data, ";")){
+    } else if(strcmp(tree->data, ";") == 0){
         add_to_str(&g->instructions, "INT2FLOATS\n");
     } else if(strcmp(tree->data, "??") == 0){
         add_to_str(&g->instructions, "CALL $double_questmark\n");   // TODO
@@ -280,17 +271,56 @@ void exp_postfix(Generator *g, ast_t *tree){
         add_to_str(&g->instructions, "CALL $not_nil\n");   // TODO
     }
     else {
-        add_to_str(&g->instructions, "PUSHS ");
+        symtable_item_t *item = SymtableSearchAll(stack, tree->data);
+        if (item != NULL) {
+            if (stack->size == 1) {
+                // We are in global frame
+                add_to_str(&g->instructions, "PUSHS GF@");
+            } else {
+                add_to_str(&g->instructions, "PUSHS LF@");
+            }
+        }
+        else if (tree->type == TYPE_INT) {
+            add_to_str(&g->instructions, "PUSHS int@");
+        }
+        else if (tree->type == TYPE_DOUBLE) {
+            add_to_str(&g->instructions, "PUSHS float@");
+        }
+        else if (tree->type == TYPE_STRING) {
+            add_to_str(&g->instructions, "PUSHS string@");
+        }
+        else if (tree->type == TYPE_BOOL) {
+            add_to_str(&g->instructions, "PUSHS bool@");
+        }
+        else if (tree->type == TYPE_NIL) {
+            add_to_str(&g->instructions, "PUSHS nil@");
+        }
         add_to_str(&g->instructions, tree->data);
+        add_to_str(&g->instructions, "\n");
     }
 }
 
-void function_gen(Generator *g, Lexeme *token){
+void function_gen(Generator *g, Lexeme *token, symtable_item_t *function){
+    add_to_str(&g->instructions, "JUMP $");
+    add_to_str(&g->instructions, token->extra_data.string);
+    add_to_str(&g->instructions, "_end");
+    add_to_str(&g->instructions, "\n");
     add_to_str(&g->instructions, "LABEL $");
     add_to_str(&g->instructions, token->extra_data.string);
     add_to_str(&g->instructions, "\n");
     add_to_str(&g->instructions, "CREATEFRAME\n");
+    for (int i = 0; i < function->data->param_count; i++) {
+        add_to_str(&g->instructions, "DEFVAR TF@");
+        add_to_str(&g->instructions, function->data->params_id[i]);
+        add_to_str(&g->instructions, "\n");
+    }
     add_to_str(&g->instructions, "PUSHFRAME\n");
+    for (int i = 0; i < function->data->param_count; i++) {
+        add_to_str(&g->instructions, "POPS LF@");
+        add_to_str(&g->instructions, function->data->params_id[i]);
+        add_to_str(&g->instructions, "\n");
+    }
+
     // TODO
 }
 
@@ -330,30 +360,41 @@ void assign_var_0(Generator *g, Lexeme *token, symtable_stack_t *stack){
     }
 }
 
-void assign_var_1(Generator *g, Lexeme *token, symtable_stack_t *stack, ast_t *tree, bool is_expression){
+void assign_var_1(Generator *g, char *key, symtable_stack_t *stack, ast_t *tree, bool is_expression, char *key_func){
     if (is_expression){
-        exp_postfix(g, tree);
+        exp_postfix(g, tree, stack);
     } else {
-        func_call(g);
+        function_call_gen_prep(g, key_func, g->parameters_count);
         add_to_str(&g->instructions, "CALL $");
-        add_to_str(&g->instructions, token->extra_data.string);
+        add_to_str(&g->instructions, key_func);
+        add_to_str(&g->instructions, "\n");
     }
     if (stack->size == 1){
         add_to_str(&g->instructions, "POPS GF@");    
     } else {
         add_to_str(&g->instructions, "POPS LF@");
     }
-    add_to_str(&g->instructions, token->extra_data.string);
+    add_to_str(&g->instructions, key);
     add_to_str(&g->instructions, "\n");
 }
 
-void function_call_gen_prep(Generator *g, Lexeme *token, int params_count){
+void return_func_exp(Generator *g, ast_t *tree, symtable_stack_t *stack, char *key_func){
+    exp_postfix(g, tree, stack);
+    //add_to_str(&g->instructions, "POPS LF@!retval\n");
+    add_to_str(&g->instructions, "POPFRAME\n");
+    add_to_str(&g->instructions, "RETURN\n");
+    add_to_str(&g->instructions, "LABEL $");
+    add_to_str(&g->instructions, key_func);
+    add_to_str(&g->instructions, "_end\n");
+}
+
+void function_call_gen_prep(Generator *g, char *key_func, int params_count){
     for (int i = g->parameters_count-1; i >= 0; i--) {
         add_to_str(&g->instructions, g->parameters[i]);
     }
     
     // CALL WRITE FUNC
-    if(strcmp(token->extra_data.string, "write") == 0){
+    if(strcmp(key_func, "write") == 0){
         add_to_str(&g->instructions, "PUSHS int@");
         char buffer[16];
         sprintf(buffer, "%d", params_count);
@@ -363,7 +404,7 @@ void function_call_gen_prep(Generator *g, Lexeme *token, int params_count){
     }
 
     add_to_str(&g->function_call_tmps, "CALL $");
-    add_to_str(&g->function_call_tmps, token->extra_data.string);     // func name
+    add_to_str(&g->function_call_tmps, key_func);     // func name
     add_to_str(&g->function_call_tmps, "\n");
 
     for (int i = 0; i < g->parameters_count; i++) {
@@ -380,13 +421,8 @@ void func_call(Generator *g){
     str_clear(&g->function_call_tmps);
 }
 
-void func_load_params(Generator *g, Lexeme *token, symtable_item_t *item){
+void func_load_params(Generator *g, Lexeme *token, symtable_item_t *item, symtable_stack_t *stack){
     g->parameters_count++;
     g->parameters = realloc(g->parameters, g->parameters_count * sizeof(char*));
-    printf("ahoj\n");
-    extract_value(g, token, item);
-    printf("ahoj2\n");
+    extract_value(g, token, item, stack);
 }
-
-
-

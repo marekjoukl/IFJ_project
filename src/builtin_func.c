@@ -118,7 +118,7 @@ void builtin_ord(Generator *g){
                             "TYPE LF@?type LF@str\n"
                             "JUMPIFNEQ $ordError_end LF@?type string@string\n"        // TODO: find out how to return 58, now just returns 0
                             "JUMPIFEQ $ordError_end LF@str string@\n"                 // if empty string, return 0
-                            "STRI2INT LF@str LF@str int@int\n"          // Finds value of first char in string
+                            "STRI2INT LF@str LF@str int@0\n"          // Finds value of first char in string
                             "PUSHS LF@str\n"
                             "JUMP $ord_end\n"
                             "LABEL $ordError_end\n"
@@ -180,7 +180,7 @@ void eval_greater_equal(Generator *g){
                             "POPS GF@!tmp2\n"                                      // must be pushed before call
                             "JUMPIFEQ $greater_equal_true GF@!tmp1 GF@!tmp2\n"     // tmps must be already stored
                             "DEFVAR LF@?type1\n"
-                            "GT LF@?type1 GF@!tmp1 GF@!tmp2"                       // if tmp1 > tmp2, return true
+                            "GT LF@?type1 GF@!tmp1 GF@!tmp2\n"                       // if tmp1 > tmp2, return true
                             "JUMPIFEQ $greater_equal_true LF@?type1 bool@true\n"
                             "MOVE GF@!tmp1 bool@false\n"
                             "POPFRAME\n"
@@ -198,12 +198,12 @@ void eval_greater(Generator *g){
                             "POPS GF@!tmp1\n"                                      // must be pushed before call
                             "POPS GF@!tmp2\n"                                      // must be pushed before call
                             "DEFVAR LF@?type1\n"
-                            "GT LF@?type1 GF@!tmp1 GF@!tmp2"                       // if tmp1 > tmp2, return true
+                            "GT LF@?type1 GF@!tmp1 GF@!tmp2\n"                       // if tmp1 > tmp2, return true
                             "JUMPIFEQ $greater_equal_true LF@?type1 bool@true\n"
                             "MOVE GF@!tmp1 bool@false\n"
                             "POPFRAME\n"
                             "RETURN\n"
-                            "LABEL $greater_equal_true\n"
+                            "LABEL $greater_true\n"
                             "MOVE GF@!tmp1 bool@true\n"
                             "POPFRAME\n"
                             "RETURN\n");

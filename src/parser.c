@@ -213,7 +213,13 @@ void StartParser(bool is_first_analysis, symtable_stack_t *stack) {
 
 //    SymtableStackPop(stack);
 //    SymtableStackDispose(stack);
-     printf("%s", g.instructions.str);
+    if(is_first_analysis){
+        printf("%s", g.header.str);
+    }
+    printf("%s", g.instructions.str);
+    if (!is_first_analysis) {
+        printf("%s", g.footer.str);
+    }
     // printf("%s", g.function_call_tmps.str);
     // printf("%s", g.stack_values.str);
     cleanup_generator(&g);
@@ -247,9 +253,9 @@ bool Prog(Lexeme *token, symtable_stack_t *stack, bool is_first_analysis) {
     if (token->kind == FUNC) {
         GETTOKEN()
         if (is_first_analysis) {
-            function_gen(&g, token);
-            if (token->kind != IDENTIFIER) { ERROR_HANDLE(SYNTAX_ERROR, token) }
 
+            if (token->kind != IDENTIFIER) { ERROR_HANDLE(SYNTAX_ERROR, token) }
+            Lexeme temp_token = *token;
             item = SymtableSearchAll(stack, token->extra_data.string);
             if (item != NULL) {
                 ERROR_HANDLE(DEFINITION_ERROR, token) //TODO: find out what error code to use
@@ -270,6 +276,7 @@ bool Prog(Lexeme *token, symtable_stack_t *stack, bool is_first_analysis) {
             if (!FirstParamDef(token, stack, item)) {
                 ERROR_HANDLE(SYNTAX_ERROR, token)
             }
+            function_gen(&g, &temp_token, item);
 
             SymtableStackPop(stack);
         }
@@ -493,7 +500,7 @@ bool AssignOrFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *i
             GETTOKEN()
             if (!FirstParam(token, stack, item)) { ERROR_HANDLE(SYNTAX_ERROR, token) }
         }
-        function_call_gen_prep(&g, temp_token, counter);
+        function_call_gen_prep(&g, temp_token->extra_data.string, counter);
         func_call(&g);
         return true;
     }
@@ -813,8 +820,7 @@ bool Params(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item) {
             ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
         }
         item->data->param_count_current++;
-        printf("AJAJAJAJAJAJ\n");
-        func_load_params(&g, token, NULL);
+        func_load_params(&g, token, NULL, stack);
         GETTOKEN()
         return true;
     }
@@ -827,7 +833,7 @@ bool Params(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item) {
             ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
         }
         item->data->param_count_current++;
-        func_load_params(&g, token, NULL);
+        func_load_params(&g, token, NULL, stack);
         GETTOKEN()
         return true;
     }
@@ -840,7 +846,7 @@ bool Params(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item) {
             ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
         }
         item->data->param_count_current++;
-        func_load_params(&g, token, NULL);
+        func_load_params(&g, token, NULL, stack);
         GETTOKEN()
         return true;
     }
@@ -863,7 +869,7 @@ bool Params(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item) {
             ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
         }
         item->data->param_count_current++;
-        func_load_params(&g, token, NULL);
+        func_load_params(&g, token, NULL, stack);
         GETTOKEN()
         return true;
     }
@@ -899,7 +905,7 @@ bool ParamsName(Lexeme *token, symtable_stack_t *stack, symtable_item_t *functio
         if (!TypeCheck(function, param_item, function->data->param_count_current, true)) {
             ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
         }
-        func_load_params(&g, param_name_or_id, param_item);
+        func_load_params(&g, param_name_or_id, param_item, stack);
         return true;
     }
 
@@ -919,7 +925,7 @@ bool IdOrLit(Lexeme *token, symtable_stack_t *stack, symtable_item_t *function) 
         if (!TypeCheck(function, param, function->data->param_count_current, true)) {
             ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
         }
-        func_load_params(&g, token, param);
+        func_load_params(&g, token, param, stack);
         GETTOKEN()
         return true;
     }
@@ -927,7 +933,7 @@ bool IdOrLit(Lexeme *token, symtable_stack_t *stack, symtable_item_t *function) 
         if (function->data->param_types[function->data->param_count_current] != TYPE_STRING && function->data->param_types[function->data->param_count_current] != TYPE_STRING_NIL) {
             ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
         }
-        func_load_params(&g, token, NULL);
+        func_load_params(&g, token, NULL, stack);
         GETTOKEN()
         return true;
     }
@@ -936,7 +942,7 @@ bool IdOrLit(Lexeme *token, symtable_stack_t *stack, symtable_item_t *function) 
         if (function->data->param_types[function->data->param_count_current] != TYPE_DOUBLE && function->data->param_types[function->data->param_count_current] != TYPE_DOUBLE_NIL) {
             ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
         }
-        func_load_params(&g, token, NULL);
+        func_load_params(&g, token, NULL, stack);
         GETTOKEN()
         return true;
     }
@@ -944,7 +950,7 @@ bool IdOrLit(Lexeme *token, symtable_stack_t *stack, symtable_item_t *function) 
         if (function->data->param_types[function->data->param_count_current] != TYPE_INT && function->data->param_types[function->data->param_count_current] != TYPE_INT_NIL  && function->data->param_types[function->data->param_count_current] != TYPE_DOUBLE && function->data->param_types[function->data->param_count_current] != TYPE_DOUBLE_NIL) {
             ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
         }
-        func_load_params(&g, token, NULL);
+        func_load_params(&g, token, NULL, stack);
         GETTOKEN()
         return true;
     }
@@ -953,7 +959,7 @@ bool IdOrLit(Lexeme *token, symtable_stack_t *stack, symtable_item_t *function) 
         if (type != TYPE_INT_NIL && type != TYPE_DOUBLE_NIL && type != TYPE_STRING_NIL) {
             ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
         }
-        func_load_params(&g, token, NULL);
+        func_load_params(&g, token, NULL, stack);
         GETTOKEN()
         return true;
     }
@@ -1219,7 +1225,7 @@ bool ExpOrCall(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item_to_
                     ERROR_HANDLE(TYPE_ERROR, token)
             }
         }
-        if (!CallFunction(token, stack, item))
+        if (!CallFunction(token, stack, item, item_to_assign))
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
 
         return true;
@@ -1236,7 +1242,7 @@ bool ExpOrCall(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item_to_
     return false;
 }
 
-bool CallFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item) {
+bool CallFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, symtable_item_t *item_to_assign) {
     // <CALL_FUNCTION> -> IDENTIFIER LEFT_PAR <FIRST_PARAM>
     if (token->kind == IDENTIFIER) {
         GETTOKEN()
@@ -1247,7 +1253,7 @@ bool CallFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item)
 
         if (!FirstParam(token, stack, item))
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
-        assign_var_1(&g, token, stack, NULL, false);
+        assign_var_1(&g, item_to_assign->key, stack, NULL, false, item->key);
         return true;
     }
     return false;
@@ -1258,11 +1264,6 @@ bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, b
     data_type_t expression_type;
     //TODO: pridat stack do precedencnej + poslat tam item funkcie/premennej na kontrolu tipov pri return funkcie/priradenie do premennej
     expression_type = precedent_analysys(token, stack, &asttree);
-
-    if (asttree == NULL){
-        printf("jebemti\n");
-    }
-    tree_postorder(asttree);
 
     if (is_while_or_if) {
         if (expression_type != TYPE_BOOL) {
@@ -1310,7 +1311,12 @@ bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, b
         }
     }
 
-    assign_var_1(&g, token, stack, asttree, true);
+    if (!is_while_or_if && !is_return) {
+        assign_var_1(&g, item->key, stack, asttree, true, NULL);
+    }
+    if (is_return) {
+        return_func_exp(&g, asttree, stack, item->key);
+    }
     return true;
 }
 
@@ -1472,7 +1478,7 @@ bool WriteFunc(Lexeme *token, symtable_stack_t *stack, int *counter) {
     *counter = 0;
     while (token->kind != RIGHT_PAR) {
         if (token->kind == STRING_LIT || token->kind == INTEGER_LIT || token->kind == DOUBLE_LIT || token->kind == NIL) {
-            func_load_params(&g, token, NULL);
+            func_load_params(&g, token, NULL, stack);
         } else if(token->kind == IDENTIFIER) {
             symtable_item_t *item = SymtableSearchAll(stack, token->extra_data.string);
             if (item == NULL) {
@@ -1481,8 +1487,7 @@ bool WriteFunc(Lexeme *token, symtable_stack_t *stack, int *counter) {
             if (!item->data->was_initialized) {
                 ERROR_HANDLE(UNDEFINED_VAR_ERROR, token)
             }
-            printf("ahoj3\n");
-            func_load_params(&g, token, item);
+            func_load_params(&g, token, item, stack);
         } else {
             ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
         }

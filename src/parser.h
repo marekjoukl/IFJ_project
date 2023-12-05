@@ -50,7 +50,7 @@ bool ReturnFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *tem
 bool ReturnFunctionN(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token);
 bool AssignOrFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, Lexeme *temp_token);
 bool ExpOrCall(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, bool type_was_defined);
-bool CallFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item);
+bool CallFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, symtable_item_t *item_to_assign);
 bool FirstParam(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_token);
 bool ParamsN(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item);
 bool Params(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item);

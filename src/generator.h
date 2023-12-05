@@ -30,6 +30,7 @@ typedef struct{
     String stack_values;        // values on stack
     String function_call_tmps;  // tmps for function call
     String vars;                // global variables
+    String function_definitions;// function definitions
     char **parameters;          // parameters of function
     int parameters_count;       // count of parameters
     String temp_string;         // temporary string for one param
@@ -104,7 +105,7 @@ void while_loop_end(Generator *g);
  * @param g 
  * @param token 
  */
-void extract_value(Generator *g, Lexeme *token, symtable_item_t *item);
+void extract_value(Generator *g, Lexeme *token, symtable_item_t *item, symtable_stack_t *stack);
 /**
  * @brief Call builtin write function
  * @param g 
@@ -115,20 +116,21 @@ void call_builtin_write(Generator *g);
  * @param g 
  * @param token 
  */
-void assign_var_1(Generator *g, Lexeme *token, symtable_stack_t *stack, ast_t *tree, bool is_expression);
+void assign_var_1(Generator *g, char* key, symtable_stack_t *stack, ast_t *tree, bool is_expression, char *key_func);
 /**
  * @brief Generate label for function
  * @param g 
  * @param token 
  */
-void function_gen(Generator *g, Lexeme *token);
+void function_gen(Generator *g, Lexeme *token, symtable_item_t *function);
 
-void function_call_gen_prep(Generator *g, Lexeme *token, int param_count);
-void func_load_params(Generator *g, Lexeme *token, symtable_item_t *item);
+void function_call_gen_prep(Generator *g, char *key_func, int param_count);
+void func_load_params(Generator *g, Lexeme *token, symtable_item_t *item, symtable_stack_t *stack);
 void func_call(Generator *g);
 void define_var(Generator *g, Lexeme *token, symtable_stack_t *stack);
 void assign_var_0(Generator *g, Lexeme *token, symtable_stack_t *stack);
-void exp_postfix(Generator *g, ast_t *tree);
+void exp_postfix(Generator *g, ast_t *tree, symtable_stack_t *stack);
+void return_func_exp(Generator *g, ast_t *tree, symtable_stack_t *stack, char *key);
 
 
 #endif //GENERATOR_H
