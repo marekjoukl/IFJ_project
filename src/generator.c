@@ -195,10 +195,6 @@ void while_loop_end(Generator *g){
                                  "LABEL $end_while\n");
 }
 
-void call_builtin_write(Generator *g){
-    // TODO
-}
-
 void extract_value(Generator *g, Lexeme *token, symtable_item_t *item, symtable_stack_t *stack){
     switch (token->kind)
     {

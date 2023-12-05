@@ -107,11 +107,6 @@ void while_loop_end(Generator *g);
  */
 void extract_value(Generator *g, Lexeme *token, symtable_item_t *item, symtable_stack_t *stack);
 /**
- * @brief Call builtin write function
- * @param g 
- */
-void call_builtin_write(Generator *g);
-/**
  * @brief Handle expression in postfix notation given by precedent analysis
  * @param g 
  * @param token 

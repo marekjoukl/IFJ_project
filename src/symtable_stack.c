@@ -6,7 +6,7 @@
 
 #include "symtable_stack.h"
 
-symtable_stack_t* SymtableStackInit() {
+symtable_stack_t* SymtableStackInit(void) {
     symtable_stack_t *stack = malloc(sizeof(symtable_stack_t));
     if (stack == NULL) {
         fprintf(stderr, "Error: symtable_stack.c - SymtableStackInit() - malloc failed\n");

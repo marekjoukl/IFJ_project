@@ -20,7 +20,7 @@ typedef struct symtable_stack {
     Symtable **array;
 } symtable_stack_t;
 
-symtable_stack_t* SymtableStackInit();  //initialize stack
+symtable_stack_t* SymtableStackInit(void);  //initialize stack
 void SymtableStackPush(symtable_stack_t *stack, Symtable *table);   //push symtable to stack
 void SymtableStackPop(symtable_stack_t *stack); //pop symtable from stack
 symtable_item_t* SymtableSearchAll(symtable_stack_t *stack, char *key); //search for item with given key in all symtables in stack
