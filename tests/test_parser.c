@@ -1,4 +1,4 @@
-#include "parser.h"
+#include "../src/parser.h"
 #include <stdio.h>
 
 int main(int argc, char *argv[]){
@@ -11,8 +11,16 @@ int main(int argc, char *argv[]){
              return 1;
         }
     }
-    StartParser();
-    printf("funguje\n");
+    symtable_stack_t *stack = SymtableStackInit();
+
+    CREATE_FRAME()
+    StartParser(true, stack);
+    StartParser(false, stack);
+
+    SymtableStackPop(stack);
+    SymtableStackDispose(stack);
+
+    //printf("funguje\n");
     fclose(input);
     return 0;
 }

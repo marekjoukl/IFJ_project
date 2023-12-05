@@ -83,6 +83,7 @@ AutomatState transition(AutomatState current, char edge)
             if (isdigit(edge)) return IntLit;
             if (edge == '.') return DecPoint;
             if (edge == 'e' || edge == 'E') return Exp;
+            if (isalpha(edge)) return InvalidInt;
             return Error;
 
         case Plus:
@@ -113,8 +114,11 @@ AutomatState transition(AutomatState current, char edge)
 
         //##############################
         // Second level states
-        // LsEqual, GtEqual, NotEqual, Equal, DoubleQmark, EmptyString, StringLit, DecPoint, Exp, Comment, CommentBody, EscSeq, IdNil, Arrow
+        // LsEqual, GtEqual, NotEqual, Equal, DoubleQmark, EmptyString, StringLit, DecPoint, Exp, Comment, CommentBody, EscSeq, IdNil, Arrow, InvalidInt
         //##############################
+        case InvalidInt:
+            return Error;
+
         case LsEqual:
             return Error;
 
@@ -137,6 +141,7 @@ AutomatState transition(AutomatState current, char edge)
         case StringLit:
             if (edge == '"') return EndStringLit;
             if (edge == '\\') return EscSeq;
+            if (edge == '\n') return Error;
             return StringLit;
 
         case DecPoint:
@@ -240,11 +245,12 @@ AutomatState transition(AutomatState current, char edge)
 
         case MltLnStringStartEnd:
             if (edge == '"') return FirstQuote;
-            if (edge == '\n') return MltLnStringStartEnd;
+            if (edge == '\n' || edge == ' ' || edge == '\t' || edge == '\f') return MltLnStringStartEnd;
             if ((edge != '"') && (edge != '\n')) return MltLnStringLit;
             return Error;
 
         case FirstQuoteErr:
+            if (edge == '\n') return MltLnStringStartEnd; 
             if (edge == '"') return SecondQuoteErr;
             return MltLnStringLit;
 
@@ -261,6 +267,7 @@ AutomatState transition(AutomatState current, char edge)
             return MltLnStringLit;
 
         case SecondQuoteErr:
+            if (edge == '\n') return MltLnStringStartEnd;
             if (edge == '"') return ThirdQuoteErr;
             return MltLnStringLit;
 

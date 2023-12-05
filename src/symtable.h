@@ -16,6 +16,8 @@
 
 #define MAX_HT_SIZE 20011   //Prime number for hash table size (20011 is the closest prime number to 20000)
 
+typedef struct symtable_item symtable_item_t;
+
 typedef enum {
     TYPE_INT,
     TYPE_DOUBLE,
@@ -44,14 +46,16 @@ typedef struct data {
     double numeric_value;
     bool blinded_sign;
     int param_count_current;
+    bool was_initialized;
 } data_t;
 
 //one item in symtable
-typedef struct symtable_item
+struct symtable_item
 {
     char *key;
     data_t *data;
-} symtable_item_t;
+    symtable_item_t **params;
+};
 
 typedef symtable_item_t *Symtable[MAX_HT_SIZE];
 

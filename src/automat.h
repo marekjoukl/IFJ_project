@@ -48,6 +48,7 @@ typedef enum AutomatState
     ThirdQuoteErr,
     EndMltLnStringLit,
     IntLit,
+    InvalidInt,
     DecPoint,
     DoubleLitDec,
     DoubleLitExp,

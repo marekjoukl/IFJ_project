@@ -1,5 +1,5 @@
 #include <assert.h>
-#include "symtable.h"
+#include "../src/symtable.h"
 
 void test_symtable_init(void) {
     // Test symtable initialization

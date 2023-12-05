@@ -1,10 +1,16 @@
 #include "precedent.h"
 
+// ====================================================
+//                  syntax_stack
+// ====================================================
+
 void stack_init(prec_stack_t **stack)
 {
     *stack = NULL;
     valid_itmes_t first;
     first.type = DOLLAR_T;
+    first.posfix_name = NULL;
+    first.tree = NULL;
     stack_push(stack, &first);
 }
 
@@ -25,18 +31,33 @@ void stack_push(prec_stack_t **stack, valid_itmes_t *item)
     *stack = new;
 }
 
-void stack_top_terminal(prec_stack_t *stack, valid_itmes_t *destination)
+bool stack_top(prec_stack_t *stack, valid_itmes_t *dst)
+{   
+    if(stack == NULL || stack->items.type == DOLLAR_T)
+        return false;
+    *dst = (stack->items);
+    return true;
+}
+
+void stack_top_terminal(prec_stack_t *stack, valid_itmes_t *dst)
 {   
     while(stack != NULL)
     {
         if(stack->items.type != EXPRESSION_T)
         {
-            *destination = (stack->items);
+            *dst = (stack->items);
             return;
         }
         else
         stack = stack->next;
     }
+}
+
+void stack_pop(prec_stack_t **stack)
+{
+    prec_stack_t *tmp = *stack;
+    *stack = (*stack)->next;
+    free(tmp);
 }
 
 void stack_push_stoppage(prec_stack_t **stack)
@@ -104,8 +125,6 @@ bool rule3(prec_stack_t *stack, valid_itmes_t rule)
             stack->next->next->items.type == EXPRESSION_T);
 }
 
-
-
 void stack_dispose(prec_stack_t **stack)
 {
     prec_stack_t *tmp;
@@ -116,4 +135,74 @@ void stack_dispose(prec_stack_t **stack)
         free(tmp);
     }
     *stack = NULL;
+}
+
+//================ astree =====================
+
+void tree_init(ast_t **tree)
+{
+    *tree = NULL;
+}
+
+void tree_link(ast_t **parent, ast_t *left, ast_t *right)
+{
+    if(*parent == NULL || (*parent)->left != NULL || (*parent)->right != NULL){
+        fprintf(stderr, "error tree link\n"); //debug
+        exit(INTERNAL_ERROR);
+    }
+
+    // puts("link left");
+    // tree_postorder(left);
+    // puts("");
+
+    // puts("link right");
+    // tree_postorder(right);
+    // puts("");
+
+    (*parent)->left = left;
+    (*parent)->right = right;
+
+    // puts("link");
+    // tree_postorder(*parent);
+    // puts("");
+}
+
+void tree_insert(ast_t **tree, char *data)
+{
+    ast_t *new = malloc(sizeof(ast_t));
+    if(new == NULL)
+        {ERROR_HANDLE_PREC_STACK(INTERNAL_ERROR);}
+    
+    new->data = malloc(sizeof(char) *(strlen(data) + 1));
+    new-> data = data;
+    new->left = *tree;
+    new->right = NULL;
+
+    *tree = new;
+}
+
+void tree_postorder(ast_t *tree)
+{   
+    if(tree == NULL)
+        return;
+    tree_postorder(tree->left);
+    tree_postorder(tree->right);
+
+    //TODO
+    printf("%s,", tree->data);
+}
+
+//TODO
+void tree_dispose(ast_t **tree)
+{
+    if(*tree == NULL)
+        return;
+    tree_dispose(&((*tree)->left));
+    tree_dispose(&((*tree)->right));
+
+    // free((*tree)->data);
+    (*tree)->data = NULL;
+    free(*tree);
+    *tree = NULL;
+    tree = NULL;
 }
