@@ -1219,9 +1219,11 @@ bool CallFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item)
 }
 
 bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, bool is_while_or_if, bool is_return, bool type_was_defined) {
+    ast_t *asttree = NULL;
     data_type_t expression_type;
     //TODO: pridat stack do precedencnej + poslat tam item funkcie/premennej na kontrolu tipov pri return funkcie/priradenie do premennej
-    expression_type = precedent_analysys(token, stack);
+    expression_type = precedent_analysys(token, stack, &asttree);
+
     if (is_while_or_if) {
         if (expression_type != TYPE_BOOL) {
             ERROR_HANDLE(TYPE_ERROR, token) //TODO: find out what error code to use
