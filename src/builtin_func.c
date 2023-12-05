@@ -147,11 +147,11 @@ void eval_bool(Generator *g){
                             "LABEL $bool_double\n"
                             "JUMPIFEQ $bool_false GF@!tmp1 float@0x0p+0\n"  // if double == 0.0
                             "LABEL $bool_true\n"
-                            "MOVE GF@!tmp1 bool@true\n"
+                            "PUSHS bool@true\n"
                             "POPFRAME\n"
                             "RETURN\n"
                             "LABEL $bool_fasle\n"
-                            "MOVE GF@!tmp1 bool@false\n"
+                            "PUSHS bool@false\n"
                             "POPFRAME\n"
                             "RETURN\n");
 }
@@ -160,14 +160,14 @@ void eval_equals(Generator *g){
     add_to_str(&g->header,  "LABEL $eval_equals\n"
                             "CREATEFRAME\n"
                             "PUSHFRAME\n"        
-                            "POPS GF@!tmp1\n"                           // must be pushed before call
-                            "POPS GF@!tmp2\n"                           // must be pushed before call
+                            "POPS GF@!tmp1\n"                               // must be pushed before call
+                            "POPS GF@!tmp2\n"                               // must be pushed before call
                             "JUMPIFEQ $equals_true GF@!tmp1 GF@!tmp2\n"     // tmps must be already stored
-                            "MOVE GF@!tmp1 bool@false\n"
+                            "PUSHS bool@false\n"
                             "POPFRAME\n"
                             "RETURN\n"
                             "LABEL $equals_true\n"
-                            "MOVE GF@!tmp1 bool@true\n"
+                            "PUSHS bool@true\n"
                             "POPFRAME\n"
                             "RETURN\n");
 }
@@ -182,11 +182,11 @@ void eval_greater_equal(Generator *g){
                             "DEFVAR LF@?type1\n"
                             "GT LF@?type1 GF@!tmp1 GF@!tmp2\n"                       // if tmp1 > tmp2, return true
                             "JUMPIFEQ $greater_equal_true LF@?type1 bool@true\n"
-                            "MOVE GF@!tmp1 bool@false\n"
+                            "PUSHS bool@false\n"
                             "POPFRAME\n"
                             "RETURN\n"
                             "LABEL $greater_equal_true\n"
-                            "MOVE GF@!tmp1 bool@true\n"
+                            "PUSHS bool@true\n"
                             "POPFRAME\n"
                             "RETURN\n");
 }
@@ -199,12 +199,49 @@ void eval_greater(Generator *g){
                             "POPS GF@!tmp2\n"                                      // must be pushed before call
                             "DEFVAR LF@?type1\n"
                             "GT LF@?type1 GF@!tmp1 GF@!tmp2\n"                       // if tmp1 > tmp2, return true
-                            "JUMPIFEQ $greater_equal_true LF@?type1 bool@true\n"
-                            "MOVE GF@!tmp1 bool@false\n"
+                            "JUMPIFEQ $greater_true LF@?type1 bool@true\n"
+                            "PUSHS bool@false\n"
                             "POPFRAME\n"
                             "RETURN\n"
                             "LABEL $greater_true\n"
-                            "MOVE GF@!tmp1 bool@true\n"
+                            "PUSHS bool@true\n"
+                            "POPFRAME\n"
+                            "RETURN\n");
+}
+
+void eval_less_equal(Generator *g){
+    add_to_str(&g->header,  "LABEL $eval_less_equal\n"
+                            "CREATEFRAME\n"
+                            "PUSHFRAME\n"        
+                            "POPS GF@!tmp1\n"                                      // must be pushed before call
+                            "POPS GF@!tmp2\n"                                      // must be pushed before call
+                            "JUMPIFEQ $greater_less_true GF@!tmp1 GF@!tmp2\n"     // tmps must be already stored
+                            "DEFVAR LF@?type1\n"
+                            "LT LF@?type1 GF@!tmp1 GF@!tmp2\n"                       // if tmp1 > tmp2, return true
+                            "JUMPIFEQ $greater_less_true LF@?type1 bool@true\n"
+                            "PUSHS bool@false\n"
+                            "POPFRAME\n"
+                            "RETURN\n"
+                            "LABEL $greater_less_true\n"
+                            "PUSHS bool@true\n"
+                            "POPFRAME\n"
+                            "RETURN\n");
+}
+
+void eval_less(Generator *g){
+    add_to_str(&g->header,  "LABEL $eval_less\n"
+                            "CREATEFRAME\n"
+                            "PUSHFRAME\n"        
+                            "POPS GF@!tmp1\n"                                      // must be pushed before call
+                            "POPS GF@!tmp2\n"                                      // must be pushed before call
+                            "DEFVAR LF@?type1\n"
+                            "LT LF@?type1 GF@!tmp1 GF@!tmp2\n"                       // if tmp1 > tmp2, return true
+                            "JUMPIFEQ $less_true LF@?type1 bool@true\n"
+                            "PUSHS bool@false\n"
+                            "POPFRAME\n"
+                            "RETURN\n"
+                            "LABEL $less_true\n"
+                            "PUSHS bool@true\n"
                             "POPFRAME\n"
                             "RETURN\n");
 }
