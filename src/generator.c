@@ -143,9 +143,12 @@ void print_footer(Generator *g){
                             "EXIT int@4\n");
 }
 
-void if_stat(Generator *g){
+void if_stat(Generator *g, ast_t *asttree, symtable_stack_t *stack){
+    exp_postfix(g, asttree, stack);
     add_to_str(&g->instructions, "CALL $eval_bool\n"
-                                 "JUMPIFEQ $else GF@!tmp1 bool@false\n");       // if false, jump to else
+                                 "JUMPIFEQS $else GF@!tmp1 bool@false\n");       // if false, jump to else
+
+
 }
 
 void else_stat(Generator *g){
@@ -335,6 +338,32 @@ void define_var(Generator *g, Lexeme *token, symtable_stack_t *stack){
 }
 
 void assign_var_0(Generator *g, Lexeme *token, symtable_stack_t *stack){
+    if (stack->size == 1) {
+        // We are in global frame
+        add_to_str(&g->instructions, "MOVE GF@");
+    } else {
+        add_to_str(&g->instructions, "MOVE LF@");
+    }
+    add_to_str(&g->instructions, token->extra_data.string);
+    add_to_str(&g->instructions, " ");
+    symtable_item_t *item = SymtableSearchAll(stack, token->extra_data.string);
+    switch (item->data->item_type)
+    {
+    case TYPE_INT:
+        add_to_str(&g->instructions, "int@");
+        break;
+    case TYPE_DOUBLE:
+        add_to_str(&g->instructions, "float@");
+        break;
+    case TYPE_STRING:
+        add_to_str(&g->instructions, "string@!stack_var");
+        break;
+    default:
+        break;
+    }
+}
+
+void if_handle(Generator *g, Lexeme *token, symtable_stack_t *stack){
     if (stack->size == 1) {
         // We are in global frame
         add_to_str(&g->instructions, "MOVE GF@");

@@ -1314,6 +1314,9 @@ bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, b
     if (!is_while_or_if && !is_return) {
         assign_var_1(&g, item->key, stack, asttree, true, NULL);
     }
+    if (is_while_or_if) {
+        if_stat(&g, asttree, stack);
+    }
     if (is_return) {
         return_func_exp(&g, asttree, stack, item->key);
     }
