@@ -9,6 +9,8 @@ void stack_init(prec_stack_t **stack)
     *stack = NULL;
     valid_itmes_t first;
     first.type = DOLLAR_T;
+    first.posfix_name = NULL;
+    first.tree = NULL;
     stack_push(stack, &first);
 }
 
@@ -135,68 +137,68 @@ void stack_dispose(prec_stack_t **stack)
     *stack = NULL;
 }
 
-// ====================================================
-//              postix_notation
-// ====================================================
-void add_postfix(postix_array_t *postfix ,char * name)
-{
-    int  new_size = strlen(name);
+//================ astree =====================
 
-    if(postfix->size + new_size >= postfix->capacity){
-        postfix->capacity += postfix->capacity + new_size + POSTFIX_CHUNK;
-        postfix->array = realloc(postfix->array, sizeof(char*) * postfix->capacity);
+void tree_init(ast_t **tree)
+{
+    *tree = NULL;
+}
+
+void tree_link(ast_t **parent, ast_t *left, ast_t *right)
+{
+    if(*parent == NULL || (*parent)->left != NULL || (*parent)->right != NULL){
+        fprintf(stderr, "error tree link\n"); //debug
+        exit(INTERNAL_ERROR);
     }
 
-    strcat(postfix->array, name);
-    strcat(postfix->array, ",");
+    // puts("link left");
+    // tree_postorder(left);
+    // puts("");
 
-    (postfix->size)+= new_size;
+    // puts("link right");
+    // tree_postorder(right);
+    // puts("");
+
+    (*parent)->left = left;
+    (*parent)->right = right;
+
+    // puts("link");
+    // tree_postorder(*parent);
+    // puts("");
 }
 
-void front_init(prec_stack_t **front)
+void tree_insert(ast_t **tree, char *data)
 {
-    *front = NULL;
-}
-
-void front_front(prec_stack_t **front, valid_itmes_t *item)
-{
-    prec_stack_t *tmp = *front;
-    prec_stack_t *new = malloc(sizeof(prec_stack_t));
+    ast_t *new = malloc(sizeof(ast_t));
     if(new == NULL)
         {ERROR_HANDLE_PREC_STACK(INTERNAL_ERROR);}
-    new->items = *item;
-    new->next = NULL;
+    
+    new->data = malloc(sizeof(char) *(strlen(data) + 1));
+    new-> data = data;
+    new->left = *tree;
+    new->right = NULL;
 
-    if(*front == NULL)
-        *front = new;
-    else
-    {
-        while(tmp->next != NULL)
-        {
-            tmp = tmp->next;
-        }
-        tmp->next = new;
-    }
+    *tree = new;
 }
 
-bool front_top(prec_stack_t *front, valid_itmes_t *dst)
+void tree_postorder(ast_t *tree)
+{   
+    if(tree == NULL)
+        return;
+    tree_postorder(tree->left);
+    tree_postorder(tree->right);
+
+    //TODO
+    printf("%s,", tree->data);
+}
+
+void tree_dispose(ast_t **tree)
 {
-    if(front == NULL)
-        return false;
-    *dst = front->items;
-    return true;
-}
+    if(*tree == NULL)
+        return;
+    tree_dispose(&((*tree)->left));
+    tree_dispose(&((*tree)->right));
 
-void front_pop(prec_stack_t **front)
-{
-    prec_stack_t *tmp = *front;
-    *front = (*front)->next;
-    free(tmp);
+    free((*tree)->data);
+    free(*tree);
 }
-
-bool front_one(prec_stack_t *front)
-{
-    return (front != NULL && front->next == NULL);
-}
-
-// void front_dipose(){}
