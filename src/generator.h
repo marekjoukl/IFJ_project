@@ -11,6 +11,7 @@
 
 #include "parser.h"
 #include "error.h"
+#include "precedent_stack.h"
 
 
 
@@ -23,10 +24,12 @@ typedef struct{
 
 // Structure of generator
 typedef struct{
-    String header;          // header of code
-    String instructions;    // instructions
-    String footer;          // footer of code
-    String stack_values;    // values on stack
+    String header;              // header of code
+    String instructions;        // instructions
+    String footer;              // footer of code
+    String stack_values;        // values on stack
+    String function_call_tmps;  // tmps for function call
+    String vars;         // global variables
 } Generator;
 
 /**
@@ -109,7 +112,7 @@ void call_builtin_write(Generator *g);
  * @param g 
  * @param token 
  */
-void exp_postfix(Generator *g, Lexeme *token);
+void exp_postfix(Generator *g, ast_t *tree);
 /**
  * @brief Generate label for function
  * @param g 
@@ -117,7 +120,12 @@ void exp_postfix(Generator *g, Lexeme *token);
  */
 void function_gen(Generator *g, Lexeme *token);
 
-void function_param_gen(Generator *g, Lexeme *token);
+void function_call_gen_prep(Generator *g, Lexeme *token);
+void func_load_params(Generator *g, Lexeme *token);
+void func_call(Generator *g);
+void define_var(Generator *g, Lexeme *token, symtable_stack_t *stack);
+void assign_var_0(Generator *g, Lexeme *token, symtable_stack_t *stack);
+void assign_var_1(Generator *g, Lexeme *token, symtable_stack_t *stack);
 
 
 #endif //GENERATOR_H

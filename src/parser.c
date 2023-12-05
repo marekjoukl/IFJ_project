@@ -5,6 +5,7 @@
  */
 
 #include "parser.h"
+#include "generator.h"
 
 data_t *CreateData(bool function, int line) {
     data_t *data = malloc(sizeof(data_t));
@@ -30,7 +31,7 @@ data_t *CreateData(bool function, int line) {
     data->was_initialized = false;
     return data;
 }
-
+Generator g;
 void StartParser(bool is_first_analysis, symtable_stack_t *stack) {
     //Symtable *table = malloc(sizeof(Symtable));
 //    if (table == NULL) {
@@ -40,6 +41,9 @@ void StartParser(bool is_first_analysis, symtable_stack_t *stack) {
     Lexeme token;
 //    SymtableInit(table);
 //    SymtableStackPush(stack, table);
+
+    
+    StartGenerator(&g);
 
     token = get_next_non_whitespace_lexeme();
 
@@ -209,6 +213,10 @@ void StartParser(bool is_first_analysis, symtable_stack_t *stack) {
 
 //    SymtableStackPop(stack);
 //    SymtableStackDispose(stack);
+     printf("%s", g.instructions.str);
+    // printf("%s", g.function_call_tmps.str);
+    // printf("%s", g.stack_values.str);
+    cleanup_generator(&g);
 }
 
 bool Prog(Lexeme *token, symtable_stack_t *stack, bool is_first_analysis) {
@@ -239,6 +247,7 @@ bool Prog(Lexeme *token, symtable_stack_t *stack, bool is_first_analysis) {
     if (token->kind == FUNC) {
         GETTOKEN()
         if (is_first_analysis) {
+            function_gen(&g, token);
             if (token->kind != IDENTIFIER) { ERROR_HANDLE(SYNTAX_ERROR, token) }
 
             item = SymtableSearchAll(stack, token->extra_data.string);
@@ -294,11 +303,12 @@ bool Sequence(Lexeme *token, symtable_stack_t *stack) {
     // <SEQUENCE> -> <VAR_DEF> IDENTIFIER <VAR_TYPE_OR_ASSIGN>
     if (token->kind == LET || token->kind == VAR) {
         bool is_var = false;
+        
         if (!VarDef(token, stack, &is_var))
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
-
         if (token->kind != IDENTIFIER)
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
+        define_var(&g, token, stack);
 
         item = SymtableSearch(stack->array[stack->size - 1], token->extra_data.string);
         if (item != NULL) {
@@ -346,7 +356,12 @@ bool Sequence(Lexeme *token, symtable_stack_t *stack) {
             }
         }
 
+        if (!item->data->is_function) {
+            assign_var_0(&g, token, stack);
+        }
+
         GETTOKEN()
+        function_call_gen_prep(&g, token);
         if (!AssignOrFunction(token, stack, item, &temp_token))
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
 
@@ -773,6 +788,8 @@ bool ParamsN(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item) {
 
 bool Params(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item) {
     Lexeme param_id;
+    func_load_params(&g, token);
+        func_call(&g);
     if (item->data->param_count_current >= item->data->param_count) {
         ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
     }
@@ -1128,6 +1145,7 @@ bool Type(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, bool pa
 bool ExpOrCall(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item_to_assign, bool type_was_defined) {
     symtable_item_t *item = NULL;
     if (token->kind == IDENTIFIER) {
+
         item = SymtableSearchAll(stack, token->extra_data.string);
         if (item == NULL) {
                 ERROR_HANDLE(UNDEFINED_VAR_ERROR, token)
@@ -1135,6 +1153,7 @@ bool ExpOrCall(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item_to_
     }
 
     // <EXP_OR_CALL> -> <CALL_FUNCTION>
+    
     if (token->kind == IDENTIFIER && item->data->is_function) {
         if (type_was_defined) {
             if (!TypeCheck(item, item_to_assign, 0, false)) {
@@ -1185,6 +1204,7 @@ bool ExpOrCall(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item_to_
 
     // <EXP_OR_CALL> -> <EXPRESSION>
     else if (token->kind == IDENTIFIER || token->kind == INTEGER_LIT || token->kind == DOUBLE_LIT || token->kind == STRING_LIT || token->kind == LEFT_PAR || token->kind == NIL) {
+        assign_var_1(&g, token, stack);
         if (!Expression(token, stack, item_to_assign, false, false, type_was_defined))
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
         return true;
@@ -1197,6 +1217,7 @@ bool CallFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item)
     // <CALL_FUNCTION> -> IDENTIFIER LEFT_PAR <FIRST_PARAM>
     if (token->kind == IDENTIFIER) {
         GETTOKEN()
+        
         if (token->kind != LEFT_PAR)
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
         GETTOKEN()
@@ -1421,6 +1442,7 @@ bool WriteFunc(Lexeme *token, symtable_stack_t *stack) {
             ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
         }
         if (token->kind == IDENTIFIER) {
+            func_load_params(&g, token);
             symtable_item_t *item = SymtableSearchAll(stack, token->extra_data.string);
             if (item == NULL) {
                 printf("undefined variable\n");

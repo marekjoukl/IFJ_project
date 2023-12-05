@@ -12,6 +12,7 @@ void StartGenerator(Generator *g){
     str_init(&g->instructions);
     str_init(&g->footer);
     str_init(&g->stack_values);
+    str_init(&g->vars);
     print_header(g);
     print_footer(g);
 }
@@ -85,6 +86,7 @@ void cleanup_generator(Generator *g){
     str_dtor(&g->instructions);
     str_dtor(&g->footer);
     str_dtor(&g->stack_values);
+    str_dtor(&g->vars);
 }
 
 /************** FUNCTIONS FOR GENERATOR **************/
@@ -164,28 +166,27 @@ void extract_value(String *s, Lexeme *token){
     {
     case INTEGER_LIT:{
         add_to_str(s, "PUSHS int@");
-        char buffer[16];
-        sprintf(buffer, "%d", token->extra_data.IntValue);
-        add_to_str(s, buffer);
+        add_to_str(s, token->extra_data.string);
+        add_to_str(s, "\n");
         break;
         }
     case DOUBLE_LIT:{
         add_to_str(s, "PUSHS float@");
-        char buffer[32];
-        sprintf(buffer, "%f", token->extra_data.DoubleValue);
-        add_to_str(s, buffer);
+        add_to_str(s, token->extra_data.string);
+        add_to_str(s, "\n");
         break;
         }
     case STRING_LIT:{
-        // TODO
         add_to_str(s, "PUSHS string@");
+        add_to_str(s, token->extra_data.string);
+        add_to_str(s, "\n");
         }
         break;
     case IDENTIFIER:
         // TODO
-        //add_to_str(s, "PUSHS LF@");
-        //add_to_str(s, token->extra_data.IntValue);
-        //add_to_str(s, "\n");
+        add_to_str(s, "PUSHS ");
+        add_to_str(s, token->extra_data.string);
+        add_to_str(s, "\n");
         break;
     case NIL:{
         add_to_str(s, "PUSHS nil@nil\n");
@@ -198,52 +199,50 @@ void extract_value(String *s, Lexeme *token){
     }
 }
 
-void exp_postfix(Generator *g, Lexeme *token){
+void exp_postfix(Generator *g, ast_t *tree){
 
     // IF EXPRESSION IS JUST A NUMBER, INSERT IT TO STACK, ELSE DO OPERATIONS
-    while(token != NULL){
-        if(token->kind == INTEGER_LIT || token->kind == DOUBLE_LIT || token->kind == STRING_LIT || token->kind == NIL){
-            extract_value(&g->instructions, token);
-            break;
-        }else{
-            switch (token->kind)
-            {
-                case PLUS:
-                    add_to_str(&g->instructions, "ADDS\n");
-                    break;
-                case MINUS:
-                    add_to_str(&g->instructions, "SUBS\n");
-                    break;
-                case ASTERISK:
-                    add_to_str(&g->instructions, "MULS\n");
-                    break;
-                case SLASH:
-                    add_to_str(&g->instructions, "DIVS\n");
-                    break;
-                case LESS:
-                    add_to_str(&g->instructions, "CALL $eval_greater_equal\n");  // NEGATE
-                    break;
-                case GREATER:
-                    add_to_str(&g->instructions, "CALL $eval_greater\n");
-                    break;
-                case LESS_EQUAL:
-                    add_to_str(&g->instructions, "CALL $eval_greater\n");        // NEGATE
-                    break;
-                case GREATER_EQUAL:
-                    add_to_str(&g->instructions, "CALL $eval_greater_equal\n");
-                    break;
-                case EQUAL:
-                    add_to_str(&g->instructions, "CALL $eval_equals\n");
-                    break;
-                case NOT_EQUAL:
-                    add_to_str(&g->instructions, "CALL $eval_equals\n");
-                    break;
-                default:
-                    fprintf(stderr, "Error: generator.c - exp_postfix() - unknown token type\n");
-                    exit(99);
-                    break;
-            }   
-        }
+    if(token->kind == INTEGER_LIT || token->kind == DOUBLE_LIT || token->kind == STRING_LIT || token->kind == NIL){
+        extract_value(&g->instructions, token);
+        break;
+    }else{
+        switch (token->kind)
+        {
+            case PLUS:
+                add_to_str(&g->instructions, "ADDS\n");
+                break;
+            case MINUS:
+                add_to_str(&g->instructions, "SUBS\n");
+                break;
+            case ASTERISK:
+                add_to_str(&g->instructions, "MULS\n");
+                break;
+            case SLASH:
+                add_to_str(&g->instructions, "DIVS\n");
+                break;
+            case LESS:
+                add_to_str(&g->instructions, "CALL $eval_greater_equal\n");  // NEGATE
+                break;
+            case GREATER:
+                add_to_str(&g->instructions, "CALL $eval_greater\n");
+                break;
+            case LESS_EQUAL:
+                add_to_str(&g->instructions, "CALL $eval_greater\n");        // NEGATE
+                break;
+            case GREATER_EQUAL:
+                add_to_str(&g->instructions, "CALL $eval_greater_equal\n");
+                break;
+            case EQUAL:
+                add_to_str(&g->instructions, "CALL $eval_equals\n");
+                break;
+            case NOT_EQUAL:
+                add_to_str(&g->instructions, "CALL $eval_equals\n");
+                break;
+            default:
+                fprintf(stderr, "Error: generator.c - exp_postfix() - unknown token type\n");
+                exit(99);
+                break;
+        }   
     }
 }
 
@@ -251,14 +250,78 @@ void function_gen(Generator *g, Lexeme *token){
     add_to_str(&g->instructions, "LABEL ");
     add_to_str(&g->instructions, token->extra_data.string);
     add_to_str(&g->instructions, "\n");
-
+    add_to_str(&g->instructions, "CREATEFRAME\n");
+    add_to_str(&g->instructions, "PUSHFRAME\n");
     // TODO
 }
 
-void function_param_gen(Generator *g, Lexeme *token){
-    extract_value(&g->stack_values, token);
-    add_to_str(&g->stack_values, "\n");
+void define_var(Generator *g, Lexeme *token, symtable_stack_t *stack){
+    if (stack->size == 1) {
+        add_to_str(&g->instructions, "DEFVAR GF@");
+    } else {
+        add_to_str(&g->instructions, "DEFVAR LF@");
+    }
+    add_to_str(&g->instructions, token->extra_data.string);
+    add_to_str(&g->instructions, "\n");
+}
+
+void assign_var_0(Generator *g, Lexeme *token, symtable_stack_t *stack){
+    if (stack->size == 1) {
+        // We are in global frame
+        add_to_str(&g->instructions, "MOVE GF@");
+    } else {
+        add_to_str(&g->instructions, "MOVE LF@");
+    }
+    add_to_str(&g->instructions, token->extra_data.string);
+    add_to_str(&g->instructions, " ");
+    symtable_item_t *item = SymtableSearchAll(stack, token->extra_data.string);
+    switch (item->data->item_type)
+    {
+    case TYPE_INT:
+        add_to_str(&g->instructions, "int@");
+        break;
+    case TYPE_DOUBLE:
+        add_to_str(&g->instructions, "float@");
+        break;
+    case TYPE_STRING:
+        add_to_str(&g->instructions, "string@");
+        break;
+    default:
+        break;
+    }
+}
+
+void assign_var_1(Generator *g, Lexeme *token, symtable_stack_t *stack){
+    add_to_str(&g->instructions, token->extra_data.string);
+    add_to_str(&g->instructions, "\n");
+}
+
+void function_call_gen_prep(Generator *g, Lexeme *token){
+    // PUSH PARAMETERS TO STACK
+    
+    // CALL WRITE FUNC
+    if(strcmp(token->extra_data.string, "write") == 0){
+        add_to_str(&g->instructions, "PUSHS int@");     
+        // TODO: PUSH NUMBER OF PARAMETERS TO WRITE
+        add_to_str(&g->instructions, "\n");
+    }
+
+    add_to_str(&g->function_call_tmps, "CALL $");
+    add_to_str(&g->function_call_tmps, token->extra_data.string);     // func name
+    add_to_str(&g->function_call_tmps, "\n");
     // TODO
+}
+
+void func_call(Generator *g){
+    add_to_str(&g->instructions, g->stack_values.str);
+    add_to_str(&g->instructions, "\n");
+    add_to_str(&g->instructions, g->function_call_tmps.str);
+    add_to_str(&g->instructions, "\n");
+    // TODO
+}
+
+void func_load_params(Generator *g, Lexeme *token){
+    extract_value(&g->stack_values, token);
 }
 
 

@@ -26,8 +26,8 @@ parser.o: precedent.c
 test_parser.o: ../tests/test_parser.c
 	$(CC) $(CFLAGS) -c ../tests/test_parser.c
 
-test_parser: clean test_parser.o parser.o scanner.o precedent.o precedent_stack.o symtable.o symtable_stack.o automat.o
-	$(CC) $(CFLAGS) -o test_parser test_parser.o parser.o scanner.o precedent.o precedent_stack.o symtable.o symtable_stack.o automat.o
+test_parser: clean test_parser.o parser.o scanner.o precedent.o precedent_stack.o symtable.o symtable_stack.o automat.o generator.o builtin_func.o
+	$(CC) $(CFLAGS) -o test_parser test_parser.o parser.o scanner.o precedent.o precedent_stack.o symtable.o symtable_stack.o automat.o generator.o builtin_func.o
 
 #symtable files
 symtable.o: symtable.c
