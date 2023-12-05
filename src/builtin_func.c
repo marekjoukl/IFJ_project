@@ -246,3 +246,19 @@ void eval_less(Generator *g){
                             "RETURN\n");
 }
 
+void eval_not_equals(Generator *g){
+    add_to_str(&g->header,  "LABEL $eval_not_equals\n"
+                            "CREATEFRAME\n"
+                            "PUSHFRAME\n"        
+                            "POPS GF@!tmp1\n"                               // must be pushed before call
+                            "POPS GF@!tmp2\n"                               // must be pushed before call
+                            "JUMPIFNEQ $equals_true GF@!tmp1 GF@!tmp2\n"     // tmps must be already stored
+                            "PUSHS bool@false\n"
+                            "POPFRAME\n"
+                            "RETURN\n"
+                            "LABEL $equals_true\n"
+                            "PUSHS bool@true\n"
+                            "POPFRAME\n"
+                            "RETURN\n");
+}
+
