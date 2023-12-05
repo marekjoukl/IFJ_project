@@ -17,6 +17,7 @@
 #include "symtable.h"
 #include "symtable_stack.h"
 
+
 #define GETTOKEN() \
     *token = get_next_non_whitespace_lexeme();
 

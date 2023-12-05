@@ -852,6 +852,9 @@ bool ParamsName(Lexeme *token, symtable_stack_t *stack, symtable_item_t *functio
     //symtable_item_t *function = SymtableSearchAll(stack, temp_token->extra_data.string);
     // <PARAMS_NAME> -> COLON <ID_OR_LIT>
     if (token->kind == COLON){
+        if (function->data->param_names[function->data->param_count_current] == NULL) {
+            ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
+        }
         if (strcmp(param_name_or_id->extra_data.string, function->data->param_names[function->data->param_count_current]) != 0) {
             ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
         }
