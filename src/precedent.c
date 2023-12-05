@@ -633,7 +633,8 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         new_expression->var_type = stack->items.var_type;
         new_expression->is_lit = stack->items.is_lit;
         // puts("\nTERM"); //debug
-        new_expression->posfix_name = stack->items.posfix_name;
+        tree_insert(&new_parent, stack->items.posfix_name);
+        new_expression->tree = new_parent;
         // printf("new_term = %s\n", new_expression->posfix_name); //debug
         break;  
     
@@ -685,6 +686,7 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack, ast_
             input = convert_lex_term(*lexeme);
             break;
         case STOPPAGE_R:
+            // puts("stop"); //debug
             modify_terminal(&input, *lexeme, sym_stack);
             stack_push_stoppage(&stack);
             stack_push(&stack, &input);
@@ -692,6 +694,7 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack, ast_
             input = convert_lex_term(*lexeme);
             break;
         case MERGE_R:
+            // puts("merge");
             if(check_prec_rule(stack, &new_expression, lexeme)){
                 // printf("new_e:%s\n\n\n", new_expression.posfix_name); //debug
                 stack_merge(&stack, new_expression);}
@@ -708,6 +711,7 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack, ast_
         }
     }
 
+    // puts("2nd"); //debug
     // second traverse with input = $
     input.type = DOLLAR_T;
     while(cont == true)
@@ -734,6 +738,5 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack, ast_
     *asttree = stack->items.tree;
     data_type_t exit_data_type = stack->items.var_type;
     stack_dispose(&stack); 
-
     return exit_data_type;
 }
