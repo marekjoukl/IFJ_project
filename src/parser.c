@@ -1476,6 +1476,7 @@ bool WriteFunc(Lexeme *token, symtable_stack_t *stack, int *counter) {
             if (!item->data->was_initialized) {
                 ERROR_HANDLE(UNDEFINED_VAR_ERROR, token)
             }
+            printf("ahoj3\n");
             func_load_params(&g, token, item);
         } else {
             ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)

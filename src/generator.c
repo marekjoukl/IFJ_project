@@ -197,29 +197,35 @@ void extract_value(Generator *g, Lexeme *token, symtable_item_t *item){
         str_clear(&g->temp_string);
         }
         break;
-    // case IDENTIFIER:
-    //     switch (item->data->item_type)
-    //     {
-    //     case TYPE_INT:
-    //         add_to_str(s, "PUSHS int@");
+    case IDENTIFIER:
+        switch (item->data->item_type)
+        {
+        case TYPE_INT:
+            add_to_str(&g->temp_string, "PUSHS intg@");
             
-    //         break;
-    //     case TYPE_DOUBLE:
-    //         add_to_str(s, "PUSHS float@");
-    //         break;
-    //     case TYPE_STRING:
-    //         add_to_str(s, "PUSHS string@");
-    //         break;
-    //     default:   // TYPE_NIL
-    //         break;
-    //     }
-    //     add_to_str(s, token->extra_data.string);
-    //     add_to_str(s, "\n");
-    //     break;
-    // case NIL:{
-    //     add_to_str(s, "PUSHS nil@nil\n");
-    //     break;
-    //     }
+            break;
+        case TYPE_DOUBLE:
+            add_to_str(&g->temp_string, "PUSHS float@");
+            break;
+        case TYPE_STRING:
+            add_to_str(&g->temp_string, "PUSHS string@");
+            break;
+        default:   // TYPE_NIL
+            break;
+        }
+        add_to_str(&g->temp_string, token->extra_data.string);
+        add_to_str(&g->temp_string, "\n");
+        g->parameters[g->parameters_count-1] = malloc(sizeof(char) * (g->temp_string.length+1));
+        strcpy(g->parameters[g->parameters_count-1], g->temp_string.str);
+        str_clear(&g->temp_string);
+        break;
+    case NIL:{
+        add_to_str(&g->temp_string, "PUSHS nil@nil\n");
+        g->parameters[g->parameters_count-1] = malloc(sizeof(char) * (g->temp_string.length+1));
+        strcpy(g->parameters[g->parameters_count-1], g->temp_string.str);
+        str_clear(&g->temp_string);
+        break;
+        }
     default:
         fprintf(stderr, "Error: generator.c - extract_value() - unknown token type\n");
         exit(99);
@@ -341,8 +347,6 @@ void assign_var_1(Generator *g, Lexeme *token, symtable_stack_t *stack, ast_t *t
     add_to_str(&g->instructions, "\n");
 }
 
-
-
 void function_call_gen_prep(Generator *g, Lexeme *token, int params_count){
     for (int i = g->parameters_count-1; i >= 0; i--) {
         add_to_str(&g->instructions, g->parameters[i]);
@@ -379,7 +383,9 @@ void func_call(Generator *g){
 void func_load_params(Generator *g, Lexeme *token, symtable_item_t *item){
     g->parameters_count++;
     g->parameters = realloc(g->parameters, g->parameters_count * sizeof(char*));
+    printf("ahoj\n");
     extract_value(g, token, item);
+    printf("ahoj2\n");
 }
 
 
