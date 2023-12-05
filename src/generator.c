@@ -132,6 +132,10 @@ void print_header(Generator *g){
     add_to_str(&g->header, "\n");
     eval_greater_equal(g);
     add_to_str(&g->header, "\n");
+    eval_less(g);
+    add_to_str(&g->header, "\n");
+    eval_less_equal(g);
+    add_to_str(&g->header, "\n");
     add_to_str(&g->header, "LABEL $main\n");
 }
 
