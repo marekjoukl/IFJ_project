@@ -161,13 +161,13 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
             if(stack->next->next->items.var_type == TYPE_INT){
                 if(stack->next->next->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-                tree_insert(&new_left, "i2d");
+                tree_insert(&new_left, ";");
             }
 
             if(stack->items.var_type == TYPE_INT){
                 if(stack->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-                tree_insert(&new_right, "i2d");
+                tree_insert(&new_right, ";");
             }
 
             new_expression->var_type = TYPE_DOUBLE;
@@ -248,13 +248,13 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
                 if(stack->next->next->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
                 if(new_left != NULL)
-                    tree_insert(&new_left, "i2d");
+                    tree_insert(&new_left, ";");
             }
 
             if(stack->items.var_type == TYPE_INT){
                 if(stack->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-                tree_insert(&new_right, "i2d");
+                tree_insert(&new_right, ";");
             }
 
             new_expression->var_type = TYPE_DOUBLE;
@@ -297,13 +297,13 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
             if(stack->next->next->items.var_type == TYPE_INT){
                 if(stack->next->next->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-                tree_insert(&new_left, "i2d");
+                tree_insert(&new_left, ";");
             }
             
             if(stack->items.var_type == TYPE_INT){
                 if(stack->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-                tree_insert(&new_right, "i2d");
+                tree_insert(&new_right, ";");
             }
 
             new_expression->var_type = TYPE_DOUBLE;
@@ -345,13 +345,13 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
             if(stack->next->next->items.var_type == TYPE_INT){
                 if(stack->next->next->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-                tree_insert(&new_left, "i2d");
+                tree_insert(&new_left, ";");
             }
             
             if(stack->items.var_type == TYPE_INT){
                 if(stack->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-                tree_insert(&new_right, "i2d");
+                tree_insert(&new_right, ";");
             }
         }
 
@@ -388,13 +388,13 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
             if(stack->next->next->items.var_type == TYPE_INT){
                 if(stack->next->next->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-                tree_insert(&new_left, "i2d");
+                tree_insert(&new_left, ";");
             }
             
             if(stack->items.var_type == TYPE_INT){
                 if(stack->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-                tree_insert(&new_right, "i2d");
+                tree_insert(&new_right, ";");
             }
         }
 
