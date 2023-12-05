@@ -45,24 +45,6 @@ bool rule3(prec_stack_t *stack, valid_itmes_t rule);
 void stack_merge(prec_stack_t **stack, valid_itmes_t new_expression);
 void stack_dispose(prec_stack_t **stack);
 
-// #define POSTFIX_CHUNK 10
-// typedef struct postix_array
-// {
-//     char* array;
-//     int size;
-//     int capacity;
-// } postix_array_t;
-
-// void add_postfix (postix_array_t *postfix ,char * name);
-// void front_init(prec_stack_t **front);
-// void front_front(prec_stack_t **front, valid_itmes_t *item);
-// bool front_top(prec_stack_t *front, valid_itmes_t *dst);
-// void front_pop(prec_stack_t **front);
-// bool front_one(prec_stack_t *front);
-
-
-
-char* alloc_str(char* str);
 void tree_init(ast_t **tree);
 void tree_link(ast_t **parent, ast_t *left, ast_t *right);
 void tree_insert(ast_t **tree, char *data);
