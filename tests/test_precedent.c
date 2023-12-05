@@ -98,7 +98,7 @@ SymtableInit(table);
 SymtableStackPush(stack, table);
 data_t testdata[] = 
 {
-    {TYPE_INT, true, false, false, 0,NULL, NULL, NULL, 0, false, NULL, 0.0, false, 0}
+    {TYPE_DOUBLE, true, false, false, 0,NULL, NULL, NULL, 0, false, NULL, 0.0, false, 0}
 };
 while(token.kind != COMMA)
 {   
