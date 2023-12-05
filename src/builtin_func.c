@@ -252,11 +252,11 @@ void eval_not_equals(Generator *g){
                             "PUSHFRAME\n"        
                             "POPS GF@!tmp1\n"                               // must be pushed before call
                             "POPS GF@!tmp2\n"                               // must be pushed before call
-                            "JUMPIFNEQ $equals_true GF@!tmp1 GF@!tmp2\n"     // tmps must be already stored
+                            "JUMPIFNEQ $not_equals_true GF@!tmp1 GF@!tmp2\n"     // tmps must be already stored
                             "PUSHS bool@false\n"
                             "POPFRAME\n"
                             "RETURN\n"
-                            "LABEL $equals_true\n"
+                            "LABEL $not_equals_true\n"
                             "PUSHS bool@true\n"
                             "POPFRAME\n"
                             "RETURN\n");
