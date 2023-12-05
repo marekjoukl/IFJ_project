@@ -7,6 +7,9 @@
 #include "parser.h"
 #include "generator.h"
 
+int if_exp_counter2 = 0;
+int if_exp_counter = 0;
+
 data_t *CreateData(bool function, int line) {
     data_t *data = malloc(sizeof(data_t));
     if (data == NULL) {
@@ -377,6 +380,9 @@ bool Sequence(Lexeme *token, symtable_stack_t *stack) {
 
     // <SEQUENCE> -> IF <IF_EXP> LEFT_BRACKET <SEQUENCE_N> RIGHT_BRACKET <ELSE_STAT>
     else if (token->kind == IF) {
+        int current_if_stat = if_exp_counter2;
+        if_exp_counter = if_exp_counter2;
+        if_exp_counter2++;
         symtable_item_t *variable = NULL;
         GETTOKEN()
         if (!IfExp(token, stack, &variable))
@@ -412,8 +418,28 @@ bool Sequence(Lexeme *token, symtable_stack_t *stack) {
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
         GETTOKEN()
 
+        char buffer[11];
+        sprintf(buffer, "%d", current_if_stat);
+
+        add_to_str(&g.instructions, "POPFRAME\n");
+        add_to_str(&g.instructions, "JUMP $else_end");
+        add_to_str(&g.instructions, buffer);
+        add_to_str(&g.instructions, "\n");
+        add_to_str(&g.instructions, "LABEL $else");
+        add_to_str(&g.instructions, buffer);
+        add_to_str(&g.instructions, "\n");
+        add_to_str(&g.instructions, "CREATEFRAME\n");
+        add_to_str(&g.instructions, "PUSHFRAME\n");
+
+
         if (!ElseStat(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
+
+        add_to_str(&g.instructions, "POPFRAME\n");
+        add_to_str(&g.instructions, "LABEL $else_end");
+        add_to_str(&g.instructions, buffer);
+        add_to_str(&g.instructions, "\n");
+
 
         return true;
     }
@@ -1315,7 +1341,7 @@ bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, b
         assign_var_1(&g, item->key, stack, asttree, true, NULL);
     }
     if (is_while_or_if) {
-        if_stat(&g, asttree, stack);
+        if_stat(&g, asttree, stack, if_exp_counter);
     }
     if (is_return) {
         return_func_exp(&g, asttree, stack, item->key);

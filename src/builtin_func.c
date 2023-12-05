@@ -8,14 +8,14 @@
 void builtin_write(Generator *g){
     add_to_str(&g->header,  "LABEL $write\n"
                             "CREATEFRAME\n"
+                            "DEFVAR TF@count\n"             // count of terms to print
+                            "POPS TF@count\n"               // TODO: find out how to push number of terms to print
+                            "DEFVAR TF@tmp\n"               // TODO: find out how to push term to print
                             "PUSHFRAME\n"
-                            "DEFVAR LF@count\n"             // count of terms to print
-                            "DEFVAR LF@tmp\n"               // term to be printed
-                            "POPS LF@count\n"               // TODO: find out how to push number of terms to print
                             "LABEL $write_loop\n"
                             "JUMPIFEQ $write_end LF@count int@0\n"
                             "SUB LF@count LF@count int@1\n"
-                            "POPS LF@tmp\n"                 // TODO: find out how to push term to print
+                            "POPS LF@tmp\n"
                             "WRITE LF@tmp\n"
                             "JUMP $write_loop\n"
                             "LABEL $write_end\n"

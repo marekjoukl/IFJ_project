@@ -87,7 +87,7 @@ void cleanup_generator(Generator *g);
 /**
  * @brief Generate label for if statement
  */
-void if_stat(Generator *g, ast_t *asttree, symtable_stack_t *stack);
+void if_stat(Generator *g, ast_t *asttree, symtable_stack_t *stack, int if_counter);
 /**
  * @brief Generate label for else statement
  */

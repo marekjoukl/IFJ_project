@@ -7,6 +7,7 @@
 #include "generator.h"
 #include "builtin_func.h"
 
+
 void StartGenerator(Generator *g){
     str_init(&g->header);
     str_init(&g->instructions);
@@ -101,8 +102,8 @@ void print_header(Generator *g){
     // VARIABLES
     add_to_str(&g->header, "DEFVAR GF@!TYPE1\n");
     add_to_str(&g->header, "DEFVAR GF@!TYPE2\n");
-    add_to_str(&g->header, "DEFVAR GF@!var1\n");
-    add_to_str(&g->header, "DEFVAR GF@!var2\n");
+    add_to_str(&g->header, "DEFVAR GF@!tmp1\n");
+    add_to_str(&g->header, "DEFVAR GF@!tmp2\n");
     add_to_str(&g->header, "DEFVAR GF@!var3\n");
     add_to_str(&g->header, "DEFVAR GF@!stack_var\n");
     add_to_str(&g->header, "JUMP $main\n");
@@ -143,12 +144,16 @@ void print_footer(Generator *g){
                             "EXIT int@4\n");
 }
 
-void if_stat(Generator *g, ast_t *asttree, symtable_stack_t *stack){
+void if_stat(Generator *g, ast_t *asttree, symtable_stack_t *stack, int if_counter){
     exp_postfix(g, asttree, stack);
     add_to_str(&g->instructions, "CALL $eval_bool\n"
-                                 "JUMPIFEQS $else GF@!tmp1 bool@false\n");       // if false, jump to else
-
-
+                                 "JUMPIFEQS $else");       // if false, jump to else
+    char buffer[11];
+    sprintf(buffer, "%d", if_counter);
+    add_to_str(&g->instructions, buffer);
+    add_to_str(&g->instructions, "\n");
+    add_to_str(&g->instructions, "CREATEFRAME\n");
+    add_to_str(&g->instructions, "PUSHFRAME\n");
 }
 
 void else_stat(Generator *g){
