@@ -47,8 +47,9 @@ typedef enum stack_rules{
 extern const stack_rules_t prec_table[TERMINAL_CNT_T][TERMINAL_CNT_T];
 
 stack_rules_t give_stack_rule(prec_stack_t *stack, prec_terminal_t input);
-valid_itmes_t convert_lex_term(Lexeme lex, symtable_stack_t *sym_stack);
-bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme *token, postix_array_t *postfix, prec_stack_t **postfix_front);
-data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack);
+valid_itmes_t convert_lex_term(Lexeme lex);
+void modify_terminal(valid_itmes_t *item, Lexeme lex, symtable_stack_t *sym_stack);
+bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme *token);
+data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack, ast_t **asttree);
 
 #endif // PRECEDENT_H

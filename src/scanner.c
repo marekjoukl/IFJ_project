@@ -309,6 +309,9 @@ Lexeme make_lexeme(AutomatState current, char *str)
         case BlockComment:
             lexeme.kind = BLOCK_COMMENT;
             break;
+        case InvalidInt:
+            lexeme.kind = ERROR;
+            break;
         default:
             lexeme.kind = ERROR;
             break;
