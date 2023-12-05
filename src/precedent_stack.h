@@ -13,6 +13,7 @@
 
 typedef struct ast{
     char *data;
+    data_type_t type;
     struct ast *left;
     struct ast *right;
 } ast_t;
@@ -49,6 +50,7 @@ void tree_init(ast_t **tree);
 void tree_link(ast_t **parent, ast_t *left, ast_t *right);
 void tree_insert(ast_t **tree, char *data);
 void tree_postorder(ast_t *tree);
+void tree_dispose(ast_t **tree);
 
 
 #endif

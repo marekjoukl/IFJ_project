@@ -110,8 +110,10 @@ token = get_next_non_whitespace_lexeme();
 data_type_t valid = precedent_analysys(&token, stack, &astree);
 
 tree_postorder(astree);
-printf("\nPASS, data_type = %d, next token = %d", valid, token.kind);
 
+printf("\nPASS, data_type = %d, next token = %d; tree type = %d", valid, token.kind, astree->type);
+
+tree_dispose(&astree);
 SymtableStackPop(stack);
 SymtableStackDispose(stack);
 ENDTEST
