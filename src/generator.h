@@ -34,6 +34,7 @@ typedef struct{
 typedef struct {
     char *key;
     int frame_num;
+    int unique;
 } item_for_distribution_t;
 
 typedef struct{
@@ -156,5 +157,9 @@ void exp_postfix(Generator *g, ast_t *tree, symtable_stack_t *stack);
 void return_func_exp(Generator *g, ast_t *tree, symtable_stack_t *stack, char *key_func, bool is_expression);
 void distribute_vars(Generator *g);
 void preserve_vars(Generator *g);
+void builtin_int2double(Generator *g);
+void builtin_double2int(Generator *g);
+void concat(Generator *g);
+void builtin_substr(Generator *g);
 
 #endif //GENERATOR_H

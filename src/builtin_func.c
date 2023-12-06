@@ -166,7 +166,7 @@ void builtin_substr(Generator *g){
                             "CONCAT TF@res TF@res TF@tmp\n"                     // append char to result
                             "ADD TF@i TF@i int@1\n"                     // i++
                             "JUMP $substr_loop\n"
-                            "LABEL $substr_loop_end"
+                            "LABEL $substr_loop_end\n"
                             "PUSHS TF@res\n"
                             "JUMP $substr_end\n"
                             "LABEL $substrError_end\n"
