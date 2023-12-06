@@ -320,7 +320,7 @@ bool Sequence(Lexeme *token, symtable_stack_t *stack) {
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
         if (token->kind != IDENTIFIER)
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
-        define_var(&g, token, stack);
+        define_var(&g, token, stack, stack->size - 1);
 
         item = SymtableSearch(stack->array[stack->size - 1], token->extra_data.string);
         if (item != NULL) {

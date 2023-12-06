@@ -22,11 +22,27 @@ typedef struct{
     int alloc_size; // allocated size of string
 } String;
 
+
+
 typedef struct{
     String *variables;
     int alloc_size;
     int how_deep;
 } Variables_to_distribute;
+
+
+typedef struct {
+    char *key;
+    int frame_num;
+} item_for_distribution_t;
+
+typedef struct{
+    item_for_distribution_t *items;
+    int alloc_size;
+    int size;
+    int how_deep;
+} Items_for_distribution;
+
 
 // Structure of generator
 typedef struct{
@@ -37,7 +53,7 @@ typedef struct{
     String function_call_tmps;  // tmps for function call
     String vars;                // global variables
     String function_definitions;// function definitions
-    Variables_to_distribute vars_to_distribute;
+    Items_for_distribution items_to_distribute;
     char **parameters;          // parameters of function
     int parameters_count;       // count of parameters
 
@@ -134,10 +150,11 @@ void function_gen(Generator *g, Lexeme *token, symtable_item_t *function);
 void function_call_gen_prep(Generator *g, char *key_func, int param_count);
 void func_load_params(Generator *g, Lexeme *token, symtable_item_t *item, symtable_stack_t *stack);
 void func_call(Generator *g);
-void define_var(Generator *g, Lexeme *token, symtable_stack_t *stack);
+void define_var(Generator *g, Lexeme *token, symtable_stack_t *stack, int what_frame_num);
 void assign_var_0(Generator *g, Lexeme *token, symtable_stack_t *stack);
 void exp_postfix(Generator *g, ast_t *tree, symtable_stack_t *stack);
 void return_func_exp(Generator *g, ast_t *tree, symtable_stack_t *stack, char *key_func, bool is_expression);
 void distribute_vars(Generator *g);
+void preserve_vars(Generator *g);
 
 #endif //GENERATOR_H

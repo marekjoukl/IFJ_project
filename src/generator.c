@@ -140,10 +140,11 @@ void print_header(Generator *g){
     add_to_str(&g->header, "\n");
     add_to_str(&g->header, "LABEL $main\n");
     add_to_str(&g->header, "CREATEFRAME\n");
-    g->vars_to_distribute.how_deep = 0;
-    g->vars_to_distribute.alloc_size = 10;
-    g->vars_to_distribute.variables = malloc(sizeof(String) *10);
-    str_init(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep]);
+
+    g->items_to_distribute.size = 0;
+    g->items_to_distribute.how_deep = 0;
+    g->items_to_distribute.alloc_size = 10;
+    g->items_to_distribute.items = malloc(sizeof(item_for_distribution_t) * 10);
 }
 
 void print_footer(Generator *g){  
@@ -172,7 +173,7 @@ void else_stat(Generator *g, bool is_else_start, int else_counter){
     char buffer[11];
     sprintf(buffer, "%d", else_counter);
     if (is_else_start) {
-        g->vars_to_distribute.how_deep--;
+        preserve_vars(g);
         add_to_str(&g->instructions, "POPFRAME\n");
         add_to_str(&g->instructions, "JUMP $else_end");
         add_to_str(&g->instructions, buffer);
@@ -185,6 +186,7 @@ void else_stat(Generator *g, bool is_else_start, int else_counter){
         distribute_vars(g);
     }
     else {
+        preserve_vars(g);
         add_to_str(&g->instructions, "POPFRAME\n");
         add_to_str(&g->instructions, "LABEL $else_end");
         add_to_str(&g->instructions, buffer);
@@ -417,7 +419,7 @@ void exp_postfix(Generator *g, ast_t *tree, symtable_stack_t *stack){
 
 
 
-void define_var(Generator *g, Lexeme *token, symtable_stack_t *stack){
+void define_var(Generator *g, Lexeme *token, symtable_stack_t *stack, int what_frame_num){
     if (stack->size == 1) {
         add_to_str(&g->instructions, "DEFVAR GF@");
     } else {
@@ -426,18 +428,45 @@ void define_var(Generator *g, Lexeme *token, symtable_stack_t *stack){
     add_to_str(&g->instructions, token->extra_data.string);
     add_to_str(&g->instructions, "\n");
 
-    add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], "DEFVAR TF@");
-    add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], token->extra_data.string);
-    add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], "\n");
-    add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], "MOVE TF@");
-    add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], token->extra_data.string);
-    if (stack->size == 1) {
-        add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], " GF@");
-    } else {
-        add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], " LF@");
+//    add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], "DEFVAR TF@");
+//    add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], token->extra_data.string);
+//    add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], "\n");
+//    add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], "MOVE TF@");
+//    add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], token->extra_data.string);
+//
+//    if (stack->size == 1) {
+//        add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], " GF@");
+//    } else {
+//        add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], " LF@");
+//    }
+//    add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], token->extra_data.string);
+//    add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], "\n");
+//
+//    //=====================================================================================================
+//    if (stack->size == 1) {
+//        add_to_str(&g->vars_to_put_back.variables[g->vars_to_put_back.how_deep], "MOVE GF@");
+//    }
+//    else {
+//        add_to_str(&g->vars_to_put_back.variables[g->vars_to_put_back.how_deep], "MOVE LF@");
+//    }
+//    add_to_str(&g->vars_to_put_back.variables[g->vars_to_put_back.how_deep], token->extra_data.string);
+//    add_to_str(&g->vars_to_put_back.variables[g->vars_to_put_back.how_deep], " TF@");
+//    add_to_str(&g->vars_to_put_back.variables[g->vars_to_put_back.how_deep], token->extra_data.string);
+//    add_to_str(&g->vars_to_put_back.variables[g->vars_to_put_back.how_deep], "\n");
+
+    //g->lexemes_to_distribute.lexemes[g->lexemes_to_distribute.how_deep][g->lexemes_to_distribute.index[g->lexemes_to_distribute.how_deep]] = token;
+
+    g->items_to_distribute.items[g->items_to_distribute.size].key = token->extra_data.string;
+    g->items_to_distribute.items[g->items_to_distribute.size].frame_num = what_frame_num;
+    g->items_to_distribute.size++;
+    if (g->items_to_distribute.size >= g->items_to_distribute.alloc_size) {
+        g->items_to_distribute.alloc_size *= 2;
+        g->items_to_distribute.items = realloc(g->items_to_distribute.items, sizeof(item_for_distribution_t) * g->items_to_distribute.alloc_size);
+        if (g->items_to_distribute.items == NULL) {
+            fprintf(stderr, "Error: generator.c - define_var() - realloc failed\n");
+            exit(99);
+        }
     }
-    add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], token->extra_data.string);
-    add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], "\n");
 }
 
 void assign_var_0(Generator *g, Lexeme *token, symtable_stack_t *stack){
@@ -527,14 +556,7 @@ void function_gen(Generator *g, Lexeme *token, symtable_item_t *function){
         add_to_str(&g->instructions, "DEFVAR TF@");
         add_to_str(&g->instructions, function->params[i]->key);
         add_to_str(&g->instructions, "\n");
-        add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], "DEFVAR TF@");
-        add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], token->extra_data.string);
-        add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], "\n");
-        add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], "MOVE TF@");
-        add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], token->extra_data.string);
-        add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], " LF@");
-        add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], token->extra_data.string);
-        add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], "\n");
+
     }
 //    add_to_str(&g->instructions, "PUSHFRAME\n");
     for (int i = 0; i < function->data->param_count; i++) {
@@ -559,7 +581,6 @@ void return_func_exp(Generator *g, ast_t *tree, symtable_stack_t *stack, char *k
     add_to_str(&g->instructions, "_end\n");
 
     //free(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep]);
-    g->vars_to_distribute.how_deep--;
 }
 
 void function_call_gen_prep(Generator *g, char *key_func, int params_count){
@@ -601,18 +622,42 @@ void func_load_params(Generator *g, Lexeme *token, symtable_item_t *item, symtab
     extract_value(g, token, item, stack);
 }
 
-void distribute_vars(Generator *g){
-    str_init(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep+1]);
-    add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep+1], g->vars_to_distribute.variables[g->vars_to_distribute.how_deep].str);
-    add_to_str(&g->instructions, g->vars_to_distribute.variables[g->vars_to_distribute.how_deep].str);
+void preserve_vars(Generator *g) {
+    for (int i = 0; i < g->items_to_distribute.size; i++) {
+        if (g->items_to_distribute.items[i].frame_num < g->items_to_distribute.how_deep && g->items_to_distribute.items[i].key != NULL) {
+            if (g->items_to_distribute.how_deep <= 1) {
+                add_to_str(&g->instructions, "MOVE GF@");
+            } else {
+                add_to_str(&g->instructions, "MOVE LF@");
+            }
+            add_to_str(&g->instructions, g->items_to_distribute.items[i].key);
+            add_to_str(&g->instructions, " TF@");
+            add_to_str(&g->instructions, g->items_to_distribute.items[i].key);
+            add_to_str(&g->instructions, "\n");
+        }
+        else {
+            g->items_to_distribute.items[i].key = NULL;
+        }
+    }
+    g->items_to_distribute.how_deep--;
+}
 
-    g->vars_to_distribute.how_deep++;
-    if (g->vars_to_distribute.how_deep >= g->vars_to_distribute.alloc_size - 1) {
-        g->vars_to_distribute.alloc_size *= 2;
-        g->vars_to_distribute.variables = realloc(g->vars_to_distribute.variables, g->vars_to_distribute.alloc_size * sizeof(String));
-        if (g->vars_to_distribute.variables == NULL) {
-            fprintf(stderr, "Error: generator.c - distribute_vars() - realloc failed\n");
-            exit(99);
+void distribute_vars(Generator *g){
+    g->items_to_distribute.how_deep++;
+    for (int i = 0; i < g->items_to_distribute.size; i++) {
+        if (g->items_to_distribute.items[i].key != NULL) {
+            add_to_str(&g->instructions, "DEFVAR TF@");
+            add_to_str(&g->instructions, g->items_to_distribute.items[i].key);
+            add_to_str(&g->instructions, "\n");
+            add_to_str(&g->instructions, "MOVE TF@");
+            add_to_str(&g->instructions, g->items_to_distribute.items[i].key);
+            if (g->items_to_distribute.how_deep <= 1) {
+                add_to_str(&g->instructions, " GF@");
+            } else {
+                add_to_str(&g->instructions, " LF@");
+            }
+            add_to_str(&g->instructions, g->items_to_distribute.items[i].key);
+            add_to_str(&g->instructions, "\n");
         }
     }
 }
