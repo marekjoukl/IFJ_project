@@ -193,7 +193,7 @@ void while_loop_gen(Generator *g, symtable_stack_t *stack, ast_t *asttree, int w
     add_to_str(&g->instructions, buffer);
     add_to_str(&g->instructions, "\n");
     exp_postfix(g, asttree, stack);
-    add_to_str(&g->instructions, "CALL $eval_bool\n");
+    add_to_str(&g->instructions, "PUSHS bool@true\n");
     add_to_str(&g->instructions, "JUMPIFNEQS $end_while");
     add_to_str(&g->instructions, buffer);
     add_to_str(&g->instructions, "\n");
