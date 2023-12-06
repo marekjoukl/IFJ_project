@@ -111,11 +111,11 @@ data_type_t valid = precedent_analysys(&token, stack, &astree);
 
 tree_postorder(astree);
 
-printf("\nPASS, data_type = %d, next token = %d; tree type = %d", valid, token.kind, astree->type);
+printf("\nPASS, data_type = %d, next token = %d; tree type = %d, is lit = %d", valid, token.kind, astree->type, astree->is_lit);
 
 tree_dispose(&astree);
-SymtableStackPop(stack);
-SymtableStackDispose(stack);
+// SymtableStackPop(stack);
+// SymtableStackDispose(stack);
 ENDTEST
 
 int main(void)

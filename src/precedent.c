@@ -181,6 +181,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         tree_insert(&new_parent, "*");
         tree_link(&new_parent, new_left, new_right);
         new_parent->type = new_expression->var_type;
+        new_parent->is_lit = new_expression->is_lit;
         new_expression->tree = new_parent;
 
         break;
@@ -216,6 +217,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         tree_insert(&new_parent, "/");
         tree_link(&new_parent, new_left, new_right);
         new_parent->type = new_expression->var_type;
+        new_parent->is_lit = new_expression->is_lit;
         new_expression->tree = new_parent;
 
         break;
@@ -270,6 +272,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         tree_insert(&new_parent, "+");
         tree_link(&new_parent, new_left, new_right);
         new_parent->type = new_expression->var_type;
+        new_parent->is_lit = new_expression->is_lit;
         new_expression->tree = new_parent;
         break;
     
@@ -320,6 +323,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         tree_insert(&new_parent, "-");
         tree_link(&new_parent, new_left, new_right);
         new_parent->type = new_expression->var_type;
+        new_parent->is_lit = new_expression->is_lit;
         new_expression->tree = new_parent;
         break;
     
@@ -363,6 +367,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         tree_insert(&new_parent, "==");
         tree_link(&new_parent, new_left, new_right);
         new_parent->type = new_expression->var_type;
+        new_parent->is_lit = new_expression->is_lit;
         new_expression->tree = new_parent;
 
         new_expression->can_be_nil = false;
@@ -408,6 +413,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         tree_insert(&new_parent, "!=");
         tree_link(&new_parent, new_left, new_right);
         new_parent->type = new_expression->var_type;
+        new_parent->is_lit = new_expression->is_lit;
         new_expression->tree = new_parent;
         break;
     
@@ -452,6 +458,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         tree_insert(&new_parent, "<");
         tree_link(&new_parent, new_left, new_right);
         new_parent->type = new_expression->var_type;
+        new_parent->is_lit = new_expression->is_lit;
         new_expression->tree = new_parent;
         new_expression->can_be_nil = false;
         break;
@@ -496,6 +503,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         tree_insert(&new_parent, ">");
         tree_link(&new_parent, new_left, new_right);
         new_parent->type = new_expression->var_type;
+        new_parent->is_lit = new_expression->is_lit;
         new_expression->tree = new_parent;
         new_expression->can_be_nil = false;
         break;
@@ -584,6 +592,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         tree_insert(&new_parent, ">=");
         tree_link(&new_parent, new_left, new_right);
         new_parent->type = new_expression->var_type;
+        new_parent->is_lit = new_expression->is_lit;
         new_expression->tree = new_parent;
         new_expression->can_be_nil = false;
         break;
@@ -609,6 +618,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         tree_insert(&new_parent, "??");
         tree_link(&new_parent, new_left, new_right);
         new_parent->type = new_expression->var_type;
+        new_parent->is_lit = new_expression->is_lit;
         new_expression->tree = new_parent;
         new_expression->can_be_nil = false;
         new_expression->var_type = stack->items.var_type;
@@ -627,6 +637,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         tree_insert(&new_parent, "!");
         tree_link(&new_parent, new_left, NULL);
         new_parent->type = new_expression->var_type;
+        new_parent->is_lit = new_expression->is_lit;
         new_expression->tree = new_parent;
         break;
     
@@ -647,6 +658,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         // puts("\nTERM"); //debug
         tree_insert(&new_parent, stack->items.posfix_name);
         new_parent->type = new_expression->var_type;
+        new_parent->is_lit = new_expression->is_lit;
         new_expression->tree = new_parent;
         // printf("new_term = %s\n", new_expression->posfix_name); //debug
         break;  

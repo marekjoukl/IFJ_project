@@ -14,6 +14,7 @@
 typedef struct ast{
     char *data;
     data_type_t type;
+    bool is_lit;
     struct ast *left;
     struct ast *right;
 } ast_t;
