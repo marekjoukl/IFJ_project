@@ -34,7 +34,6 @@ typedef struct data {
     data_type_t item_type;
     bool can_be_nil;
     bool value_is_nil;
-    //bool is_defined;
     bool is_modifiable;
     int param_count;
     char **param_names;

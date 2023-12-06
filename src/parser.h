@@ -1,4 +1,5 @@
 /**
+ * Implementace překladače imperativního jazyka IFJ23.
  * @file parser.h
  * @author Marek Joukl (xjoukl00), Ondrej Kožányi (xkozan01)
  * @brief Header for parser
