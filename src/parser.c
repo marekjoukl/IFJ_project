@@ -964,7 +964,7 @@ bool IdOrLit(Lexeme *token, symtable_stack_t *stack, symtable_item_t *function) 
         return true;
     }
     if (token->kind ==  INTEGER_LIT) {
-        if (function->data->param_types[function->data->param_count_current] != TYPE_INT && function->data->param_types[function->data->param_count_current] != TYPE_INT_NIL  && function->data->param_types[function->data->param_count_current] != TYPE_DOUBLE && function->data->param_types[function->data->param_count_current] != TYPE_DOUBLE_NIL) {
+        if (function->data->param_types[function->data->param_count_current] != TYPE_INT && function->data->param_types[function->data->param_count_current] != TYPE_INT_NIL && function->data->param_types[function->data->param_count_current] != TYPE_DOUBLE && function->data->param_types[function->data->param_count_current] != TYPE_DOUBLE_NIL) {
             ERROR_HANDLE(PARAMETER_TYPE_ERROR, token)
         }
         func_load_params(&g, token, NULL, stack);
@@ -1281,7 +1281,6 @@ bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, b
     data_type_t expression_type;
     //TODO: pridat stack do precedencnej + poslat tam item funkcie/premennej na kontrolu tipov pri return funkcie/priradenie do premennej
     expression_type = precedent_analysys(token, stack, &asttree);
-
     if (is_while || is_if) {
         if (expression_type != TYPE_BOOL) {
             ERROR_HANDLE(TYPE_ERROR, token) //TODO: find out what error code to use
@@ -1292,7 +1291,7 @@ bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, b
             ERROR_HANDLE(TYPE_ERROR, token) //TODO: find out what error code to use
         }
         else if (is_return) {
-            if (!FuncReturnTypeCheck(expression_type, item->data->item_type)) {
+            if (!FuncReturnTypeCheck(expression_type, item->data->item_type, asttree->is_lit)) {
                 ERROR_HANDLE(PARAMETER_TYPE_ERROR, token) //TODO: find out what error code to use
             }
         }
@@ -1303,7 +1302,7 @@ bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, b
         }
         else if (expression_type != item->data->item_type) { //TODO: moze sa stat ze sa mi vrati typ napr TYPE_INT_NIL?
             if (item->data->item_type == TYPE_DOUBLE) {
-                if (expression_type == TYPE_INT) {
+                if (expression_type == TYPE_INT && asttree->is_lit) {
                     return true;
                 }
             }
@@ -1369,7 +1368,7 @@ bool TypeCheck(symtable_item_t *item1, symtable_item_t *item2, int param_index, 
 
         case TYPE_DOUBLE:
                 if (param_handle) {
-                    if (item2->data->item_type == TYPE_DOUBLE || item2->data->item_type == TYPE_INT) {
+                    if (item2->data->item_type == TYPE_DOUBLE) {
                         if (!item2->data->can_be_nil) {
                             return true;
                         }
@@ -1414,7 +1413,7 @@ bool TypeCheck(symtable_item_t *item1, symtable_item_t *item2, int param_index, 
 
         case TYPE_DOUBLE_NIL:
             if (param_handle) {
-                if (item2->data->item_type == TYPE_DOUBLE || item2->data->item_type == TYPE_INT) {
+                if (item2->data->item_type == TYPE_DOUBLE) {
                     return true;
                 }
             }
@@ -1448,7 +1447,7 @@ bool TypeCheck(symtable_item_t *item1, symtable_item_t *item2, int param_index, 
     return false;
 }
 
-bool FuncReturnTypeCheck(data_type_t return_expression_type, data_type_t function_type) {
+bool FuncReturnTypeCheck(data_type_t return_expression_type, data_type_t function_type, bool is_lit) {
     switch (function_type) {
         case TYPE_INT:
             if (return_expression_type == TYPE_INT) {
@@ -1457,7 +1456,7 @@ bool FuncReturnTypeCheck(data_type_t return_expression_type, data_type_t functio
             break;
 
         case TYPE_DOUBLE:
-            if (return_expression_type == TYPE_DOUBLE || return_expression_type == TYPE_INT) {
+            if (return_expression_type == TYPE_DOUBLE || (return_expression_type == TYPE_INT && is_lit)) {
                 return true;
             }
             break;
@@ -1475,7 +1474,7 @@ bool FuncReturnTypeCheck(data_type_t return_expression_type, data_type_t functio
             break;
 
         case TYPE_DOUBLE_NIL:
-            if (return_expression_type == TYPE_DOUBLE || return_expression_type == TYPE_INT || return_expression_type == TYPE_NIL) {
+            if (return_expression_type == TYPE_DOUBLE || return_expression_type == TYPE_NIL || (return_expression_type == TYPE_INT && is_lit)) {
                 return true;
             }
             break;
