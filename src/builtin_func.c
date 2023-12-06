@@ -7,16 +7,16 @@
 
 void builtin_write(Generator *g){
     add_to_str(&g->header,  "LABEL $write\n"
+                            "PUSHFRAME\n"
                             "CREATEFRAME\n"
                             "DEFVAR TF@count\n"             // count of terms to print
                             "POPS TF@count\n"               // TODO: find out how to push number of terms to print
                             "DEFVAR TF@tmp\n"               // TODO: find out how to push term to print
-                            "PUSHFRAME\n"
                             "LABEL $write_loop\n"
-                            "JUMPIFEQ $write_end LF@count int@0\n"
-                            "SUB LF@count LF@count int@1\n"
-                            "POPS LF@tmp\n"
-                            "WRITE LF@tmp\n"
+                            "JUMPIFEQ $write_end TF@count int@0\n"
+                            "SUB TF@count TF@count int@1\n"
+                            "POPS TF@tmp\n"
+                            "WRITE TF@tmp\n"
                             "JUMP $write_loop\n"
                             "LABEL $write_end\n"
                             "PUSHS nil@nil\n"
@@ -26,14 +26,14 @@ void builtin_write(Generator *g){
 
 void builtin_readInt(Generator *g){
     add_to_str(&g->header,  "LABEL $readInt\n"
-                            "CREATEFRAME\n"
                             "PUSHFRAME\n"
-                            "DEFVAR LF@tmp\n"
-                            "READ LF@tmp int\n"                                         // READ from stdin
-                            "DEFVAR LF@?type\n"
-                            "TYPE LF@?type LF@tmp\n"                                    // get ?type of read value
-                            "JUMPIFNEQ $readIntError_end LF@?type string@int\n"            // if ?type != int, jump to ERROR                         
-                            "PUSHS LF@tmp\n"                                            // TODO: find out how to push read Int
+                            "CREATEFRAME\n"
+                            "DEFVAR TF@tmp\n"
+                            "READ TF@tmp int\n"                                         // READ from stdin
+                            "DEFVAR TF@?type\n"
+                            "TYPE TF@?type TF@tmp\n"                                    // get ?type of read value
+                            "JUMPIFNEQ $readIntError_end TF@?type string@int\n"            // if ?type != int, jump to ERROR
+                            "PUSHS TF@tmp\n"                                            // TODO: find out how to push read Int
                             "JUMP $readInt_end\n"
                             "LABEL $readIntError_end\n"
                             "PUSHS nil@nil\n"
@@ -44,14 +44,14 @@ void builtin_readInt(Generator *g){
 
 void builtin_readString(Generator *g){
     add_to_str(&g->header,  "LABEL $readString\n"
-                            "CREATEFRAME\n"
                             "PUSHFRAME\n"
-                            "DEFVAR LF@tmp\n"
-                            "READ LF@tmp string\n"                                      // READ from stdin
-                            "DEFVAR LF@?type\n"
-                            "TYPE LF@?type LF@tmp\n"                                    // get ?type of read value
-                            "JUMPIFNEQ $readStringError_end LF@!type string@string\n"   // if ?type != string, jump to ERROR                         
-                            "PUSHS LF@tmp\n"                                            // TODO: find out how to push read string
+                            "CREATEFRAME\n"
+                            "DEFVAR TF@tmp\n"
+                            "READ TF@tmp string\n"                                      // READ from stdin
+                            "DEFVAR TF@?type\n"
+                            "TYPE TF@?type TF@tmp\n"                                    // get ?type of read value
+                            "JUMPIFNEQ $readStringError_end TF@!type string@string\n"   // if ?type != string, jump to ERROR
+                            "PUSHS TF@tmp\n"                                            // TODO: find out how to push read string
                             "JUMP $readString_end\n"
                             "LABEL $readStringError_end\n"
                             "PUSHS nil@nil\n"
@@ -62,14 +62,14 @@ void builtin_readString(Generator *g){
 
 void builtin_readDouble(Generator *g){
     add_to_str(&g->header,  "LABEL $readDouble\n"
-                            "CREATEFRAME\n"
                             "PUSHFRAME\n"
-                            "DEFVAR LF@tmp\n"
-                            "READ LF@tmp float\n"                                       // READ from stdin
-                            "DEFVAR LF@?type\n"
-                            "TYPE LF@?type LF@tmp\n"                                    // get ?type of read value
-                            "JUMPIFNEQ $readDoubleError_end LF@?type string@float\n"     // if ?type != double, jump to ERROR                         
-                            "PUSHS LF@tmp\n"                                            // TODO: find out how to push read Int
+                            "CREATEFRAME\n"
+                            "DEFVAR TF@tmp\n"
+                            "READ TF@tmp float\n"                                       // READ from stdin
+                            "DEFVAR TF@?type\n"
+                            "TYPE TF@?type TF@tmp\n"                                    // get ?type of read value
+                            "JUMPIFNEQ $readDoubleError_end TF@?type string@float\n"     // if ?type != double, jump to ERROR
+                            "PUSHS TF@tmp\n"                                            // TODO: find out how to push read Int
                             "JUMP $readDouble_end\n"
                             "LABEL $readDoubleError_end\n"
                             "PUSHS nil@nil\n"
@@ -80,46 +80,46 @@ void builtin_readDouble(Generator *g){
 
 void builtin_length(Generator *g){
     add_to_str(&g->header,  "LABEL $length\n"
-                            "CREATEFRAME\n"
                             "PUSHFRAME\n"
-                            "DEFVAR LF@str\n"
-                            "POPS LF@str\n"                 // find out how to store string to stack
-                            "DEFVAR LF@?type\n"
-                            "TYPE LF@?type LF@str\n"
-                            "JUMPIFNEQ !ERROR!CALL!FUNC LF@?type string@string\n"
-                            "STRLEN LF@str LF@str\n"        // stores length of string to LF@str
-                            "PUSHS LF@str\n"
+                            "CREATEFRAME\n"
+                            "DEFVAR TF@str\n"
+                            "POPS TF@str\n"                 // find out how to store string to stack
+                            "DEFVAR TF@?type\n"
+                            "TYPE TF@?type TF@str\n"
+                            "JUMPIFNEQ !ERROR!CALL!FUNC TF@?type string@string\n"
+                            "STRLEN TF@str TF@str\n"        // stores length of string to LF@str
+                            "PUSHS TF@str\n"
                             "POPFRAME\n"
                             "RETURN\n");
 }
 
 void builtin_chr(Generator *g){
     add_to_str(&g->header,  "LABEL $chr\n"
-                            "CREATEFRAME\n"
                             "PUSHFRAME\n"
-                            "DEFVAR LF@int\n"
-                            "POPS LF@int\n"                 // find out how to store int to stack
-                            "DEFVAR LF@?type\n"
-                            "TYPE LF@?type LF@int\n"
-                            "JUMPIFNEQ !ERROR!CALL!FUNC LF@?type string@int\n"     // if not int, ERROR
-                            "INT2CHAR LF@int LF@int\n"      // Convert
-                            "PUSHS LF@int\n"
+                            "CREATEFRAME\n"
+                            "DEFVAR TF@int\n"
+                            "POPS TF@int\n"                 // find out how to store int to stack
+                            "DEFVAR TF@?type\n"
+                            "TYPE TF@?type TF@int\n"
+                            "JUMPIFNEQ !ERROR!CALL!FUNC TF@?type string@int\n"     // if not int, ERROR
+                            "INT2CHAR TF@int TF@int\n"      // Convert
+                            "PUSHS TF@int\n"
                             "POPFRAME\n"
                             "RETURN\n");
 }
 
 void builtin_ord(Generator *g){
     add_to_str(&g->header,  "LABEL $ord\n"
-                            "CREATEFRAME\n"
                             "PUSHFRAME\n"
-                            "DEFVAR LF@str\n"
-                            "POPS LF@str\n"                         // find out how to store string to stack
-                            "DEFVAR LF@?type\n"
-                            "TYPE LF@?type LF@str\n"
-                            "JUMPIFNEQ $ordError_end LF@?type string@string\n"        // TODO: find out how to return 58, now just returns 0
-                            "JUMPIFEQ $ordError_end LF@str string@\n"                 // if empty string, return 0
-                            "STRI2INT LF@str LF@str int@0\n"          // Finds value of first char in string
-                            "PUSHS LF@str\n"
+                            "CREATEFRAME\n"
+                            "DEFVAR TF@str\n"
+                            "POPS TF@str\n"                         // find out how to store string to stack
+                            "DEFVAR TF@?type\n"
+                            "TYPE TF@?type TF@str\n"
+                            "JUMPIFNEQ $ordError_end TF@?type string@string\n"        // TODO: find out how to return 58, now just returns 0
+                            "JUMPIFEQ $ordError_end TF@str string@\n"                 // if empty string, return 0
+                            "STRI2INT TF@str TF@str int@0\n"          // Finds value of first char in string
+                            "PUSHS TF@str\n"
                             "JUMP $ord_end\n"
                             "LABEL $ordError_end\n"
                             "PUSHS int@0\n"
@@ -130,8 +130,8 @@ void builtin_ord(Generator *g){
 
 void eval_bool(Generator *g){
     add_to_str(&g->header,  "LABEL $eval_bool\n"
-                            "CREATEFRAME\n"
                             "PUSHFRAME\n"
+                            "CREATEFRAME\n"
                             "TYPE GF@!TYPE1 GF@!tmp1\n"             // must be pushed before call
                             "JUMPIFEQ $bool_string GF@!TYPE1 string@string\n"
                             "JUMPIFEQ $bool_int GF@!TYPE1 string@int\n"
@@ -158,8 +158,8 @@ void eval_bool(Generator *g){
 
 void eval_equals(Generator *g){
     add_to_str(&g->header,  "LABEL $eval_equals\n"
+                            "PUSHFRAME\n"
                             "CREATEFRAME\n"
-                            "PUSHFRAME\n"        
                             "POPS GF@!tmp1\n"                               // must be pushed before call
                             "POPS GF@!tmp2\n"                               // must be pushed before call
                             "JUMPIFEQ $equals_true GF@!tmp1 GF@!tmp2\n"     // tmps must be already stored
@@ -174,14 +174,14 @@ void eval_equals(Generator *g){
 
 void eval_greater_equal(Generator *g){
     add_to_str(&g->header,  "LABEL $eval_greater_equal\n"
+                            "PUSHFRAME\n"
                             "CREATEFRAME\n"
-                            "PUSHFRAME\n"        
                             "POPS GF@!tmp1\n"                                      // must be pushed before call
                             "POPS GF@!tmp2\n"                                      // must be pushed before call
                             "JUMPIFEQ $greater_equal_true GF@!tmp1 GF@!tmp2\n"     // tmps must be already stored
-                            "DEFVAR LF@?type1\n"
-                            "GT LF@?type1 GF@!tmp1 GF@!tmp2\n"                       // if tmp1 > tmp2, return true
-                            "JUMPIFNEQ $greater_equal_true LF@?type1 bool@true\n"
+                            "DEFVAR TF@?type1\n"
+                            "GT TF@?type1 GF@!tmp1 GF@!tmp2\n"                       // if tmp1 > tmp2, return true
+                            "JUMPIFNEQ $greater_equal_true TF@?type1 bool@true\n"
                             "PUSHS bool@false\n"
                             "POPFRAME\n"
                             "RETURN\n"
@@ -193,13 +193,13 @@ void eval_greater_equal(Generator *g){
 
 void eval_greater(Generator *g){
     add_to_str(&g->header,  "LABEL $eval_greater\n"
+                            "PUSHFRAME\n"
                             "CREATEFRAME\n"
-                            "PUSHFRAME\n"        
                             "POPS GF@!tmp1\n"                                      // must be pushed before call
                             "POPS GF@!tmp2\n"                                      // must be pushed before call
-                            "DEFVAR LF@?type1\n"
-                            "GT LF@?type1 GF@!tmp1 GF@!tmp2\n"                       // if tmp1 > tmp2, return true
-                            "JUMPIFNEQ $greater_true LF@?type1 bool@true\n"
+                            "DEFVAR TF@?type1\n"
+                            "GT TF@?type1 GF@!tmp1 GF@!tmp2\n"                       // if tmp1 > tmp2, return true
+                            "JUMPIFNEQ $greater_true TF@?type1 bool@true\n"
                             "PUSHS bool@false\n"
                             "POPFRAME\n"
                             "RETURN\n"
@@ -211,14 +211,14 @@ void eval_greater(Generator *g){
 
 void eval_less_equal(Generator *g){
     add_to_str(&g->header,  "LABEL $eval_less_equal\n"
+                            "PUSHFRAME\n"
                             "CREATEFRAME\n"
-                            "PUSHFRAME\n"        
                             "POPS GF@!tmp1\n"                                      // must be pushed before call
                             "POPS GF@!tmp2\n"                                      // must be pushed before call
                             "JUMPIFEQ $greater_less_true GF@!tmp1 GF@!tmp2\n"     // tmps must be already stored
-                            "DEFVAR LF@?type1\n"
-                            "LT LF@?type1 GF@!tmp1 GF@!tmp2\n"                       // if tmp1 > tmp2, return true
-                            "JUMPIFNEQ $greater_less_true LF@?type1 bool@true\n"
+                            "DEFVAR TF@?type1\n"
+                            "LT TF@?type1 GF@!tmp1 GF@!tmp2\n"                       // if tmp1 > tmp2, return true
+                            "JUMPIFNEQ $greater_less_true TF@?type1 bool@true\n"
                             "PUSHS bool@false\n"
                             "POPFRAME\n"
                             "RETURN\n"
@@ -230,13 +230,13 @@ void eval_less_equal(Generator *g){
 
 void eval_less(Generator *g){
     add_to_str(&g->header,  "LABEL $eval_less\n"
+                            "PUSHFRAME\n"
                             "CREATEFRAME\n"
-                            "PUSHFRAME\n"        
                             "POPS GF@!tmp1\n"                                      // must be pushed before call
                             "POPS GF@!tmp2\n"                                      // must be pushed before call
-                            "DEFVAR LF@?type1\n"
-                            "LT LF@?type1 GF@!tmp1 GF@!tmp2\n"                       // if tmp1 > tmp2, return true
-                            "JUMPIFNEQ $less_true LF@?type1 bool@true\n"
+                            "DEFVAR TF@?type1\n"
+                            "LT TF@?type1 GF@!tmp1 GF@!tmp2\n"                       // if tmp1 > tmp2, return true
+                            "JUMPIFNEQ $less_true TF@?type1 bool@true\n"
                             "PUSHS bool@false\n"
                             "POPFRAME\n"
                             "RETURN\n"
@@ -248,8 +248,8 @@ void eval_less(Generator *g){
 
 void eval_not_equals(Generator *g){
     add_to_str(&g->header,  "LABEL $eval_not_equals\n"
+                            "PUSHFRAME\n"
                             "CREATEFRAME\n"
-                            "PUSHFRAME\n"        
                             "POPS GF@!tmp1\n"                               // must be pushed before call
                             "POPS GF@!tmp2\n"                               // must be pushed before call
                             "JUMPIFNEQ $not_equals_true GF@!tmp1 GF@!tmp2\n"     // tmps must be already stored

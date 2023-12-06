@@ -259,7 +259,6 @@ bool Prog(Lexeme *token, symtable_stack_t *stack, bool is_first_analysis) {
         if (is_first_analysis) {
 
             if (token->kind != IDENTIFIER) { ERROR_HANDLE(SYNTAX_ERROR, token) }
-            Lexeme temp_token = *token;
             item = SymtableSearchAll(stack, token->extra_data.string);
             if (item != NULL) {
                 ERROR_HANDLE(DEFINITION_ERROR, token) //TODO: find out what error code to use
@@ -280,12 +279,13 @@ bool Prog(Lexeme *token, symtable_stack_t *stack, bool is_first_analysis) {
             if (!FirstParamDef(token, stack, item)) {
                 ERROR_HANDLE(SYNTAX_ERROR, token)
             }
-            function_gen(&g, &temp_token, item);
+
 
             SymtableStackPop(stack);
         }
         if (!is_first_analysis) {
             if (token->kind != IDENTIFIER) { ERROR_HANDLE(SYNTAX_ERROR, token) }
+            Lexeme temp_token = *token;
             item = SymtableSearchAll(stack, token->extra_data.string);
             if (item == NULL) {
                 ERROR_HANDLE(UNDEFINED_VAR_ERROR, token)
@@ -293,6 +293,7 @@ bool Prog(Lexeme *token, symtable_stack_t *stack, bool is_first_analysis) {
             while (token->kind != LEFT_BRACKET) {
                 GETTOKEN()
             }
+            function_gen(&g, &temp_token, item);
         }
 
         if (!DefFunction(token, stack, item, is_first_analysis)) {
@@ -550,6 +551,10 @@ bool DefFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *temp_t
 
         if (!ReturnFunction(token, stack, temp_token))
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
+
+        if (temp_token->data->item_type == TYPE_UNDEFINED) {
+            return_func_exp(&g, NULL, stack, temp_token->key, false);
+        }
 
         if (!SequenceN(token, stack))
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
@@ -1330,7 +1335,7 @@ bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, b
         while_loop_gen(&g, stack, asttree, while_exp_counter);
     }
     if (is_return) {
-        return_func_exp(&g, asttree, stack, item->key);
+        return_func_exp(&g, asttree, stack, item->key, true);
     }
     return true;
 }
