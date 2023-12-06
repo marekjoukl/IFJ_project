@@ -995,6 +995,7 @@ bool IfExp(Lexeme *token, symtable_stack_t *stack, symtable_item_t **variable) {
             if ((*variable)->data->is_modifiable) {
                 ERROR_HANDLE(OTHER_SEMANTIC_ERROR, token) //TODO: find out what error code to use
             }
+            if_stat_let_exp(&g, token, if_exp_counter);
             GETTOKEN()
             return true;
         }
@@ -1090,6 +1091,9 @@ bool AssignVar(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item) {
     }
         // <ASSIGN_VAR> -> ε
     else if (token->kind == IDENTIFIER || token->kind == LEX_EOF || token->kind == FUNC || token->kind == IF || token->kind == LET || token->kind == WHILE || token->kind == VAR || token->kind == RIGHT_BRACKET || token->kind == RETURN) {
+        if (item->data->can_be_nil) {
+            assign_var_1(&g, item->key, stack, NULL, false, NULL, true);
+        }
         return true;
     }
     return false;
@@ -1270,7 +1274,7 @@ bool CallFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item,
 
         if (!FirstParam(token, stack, item))
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
-        assign_var_1(&g, item_to_assign->key, stack, NULL, false, item->key);
+        assign_var_1(&g, item_to_assign->key, stack, NULL, false, item->key, false);
         return true;
     }
     return false;
@@ -1328,7 +1332,7 @@ bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, b
     }
 
     if (!is_while && !is_return && !is_if) {
-        assign_var_1(&g, item->key, stack, asttree, true, NULL);
+        assign_var_1(&g, item->key, stack, asttree, true, NULL, false);
     }
     if (is_if) {
         if_stat(&g, asttree, stack, if_exp_counter);

@@ -192,7 +192,26 @@ void else_stat(Generator *g, bool is_else_start, int else_counter){
         add_to_str(&g->instructions, buffer);
         add_to_str(&g->instructions, "\n");
     }
+}
 
+void if_stat_let_exp(Generator *g, Lexeme *token, int if_counter) {
+    add_to_str(&g->instructions, "PUSHS nil@nil\n");       // if false, jump to else
+    if (g->items_to_distribute.how_deep == 0) {
+        add_to_str(&g->instructions, "PUSHS GF@");
+    }
+    else {
+        add_to_str(&g->instructions, "PUSHS TF@");
+    }
+    add_to_str(&g->instructions, token->extra_data.string);
+    add_to_str(&g->instructions, "\n");
+    add_to_str(&g->instructions, "JUMPIFEQS $else");       // if false, jump to else
+    char buffer[11];
+    sprintf(buffer, "%d", if_counter);
+    add_to_str(&g->instructions, buffer);
+    add_to_str(&g->instructions, "\n");
+    add_to_str(&g->instructions, "PUSHFRAME\n");
+    add_to_str(&g->instructions, "CREATEFRAME\n");
+    distribute_vars(g);
 }
 
 void while_loop_gen(Generator *g, symtable_stack_t *stack, ast_t *asttree, int while_counter){
@@ -397,13 +416,36 @@ void exp_postfix(Generator *g, ast_t *tree, symtable_stack_t *stack){
             } else {
                 add_to_str(&g->instructions, "PUSHS TF@");
             }
-            //add_to_str(&g->instructions, "PUSHS TF@");
         }
         else if (tree->type == TYPE_INT) {
             add_to_str(&g->instructions, "PUSHS int@");
         }
         else if (tree->type == TYPE_DOUBLE) {
-            add_to_str(&g->instructions, "PUSHS float@");
+            add_to_str(&g->instructions, "PUSHS float@0x");
+            int i = 0;
+            bool found_mantis = false;
+            while (tree->data[i] != '\0') {
+                if (tree->data[i] == 'e' || tree->data[i] == 'E') {
+                    found_mantis = true;
+                    add_chr_to_str(&g->instructions, 'p');
+                    i++;
+                    if (tree->data[i] == '-' || tree->data[i] == '+') {
+                        add_chr_to_str(&g->instructions, tree->data[i]);
+                        i++;
+                    }
+                    else {
+                        add_chr_to_str(&g->instructions, '+');
+                    }
+                    continue;
+                }
+                add_chr_to_str(&g->instructions, tree->data[i]);
+                i++;
+            }
+            if (!found_mantis) {
+                add_to_str(&g->instructions, "p+0");
+            }
+            add_to_str(&g->instructions, "\n");
+            return;
         }
         else if (tree->type == TYPE_STRING) {
             add_to_str(&g->instructions, "PUSHS string@");
@@ -523,21 +565,24 @@ void assign_var_0(Generator *g, Lexeme *token, symtable_stack_t *stack){
 //    }
 //}
 
-void assign_var_1(Generator *g, char *key, symtable_stack_t *stack, ast_t *tree, bool is_expression, char *key_func){
+void assign_var_1(Generator *g, char *key, symtable_stack_t *stack, ast_t *tree, bool is_expression, char *key_func, bool init_with_nil){
     if (is_expression){
         exp_postfix(g, tree, stack);
-    } else {
+    } else if (!is_expression && !init_with_nil){
         function_call_gen_prep(g, key_func, g->parameters_count);
         add_to_str(&g->instructions, "CALL $");
         add_to_str(&g->instructions, key_func);
         add_to_str(&g->instructions, "\n");
     }
+    else {
+        add_to_str(&g->instructions, "PUSHS nil@nil\n");
+    }
+
     if (stack->size == 1){
         add_to_str(&g->instructions, "POPS GF@");
     } else {
         add_to_str(&g->instructions, "POPS TF@");
     }
-    //add_to_str(&g->instructions, "POPS TF@");
     add_to_str(&g->instructions, key);
     add_to_str(&g->instructions, "\n");
 }
