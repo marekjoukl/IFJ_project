@@ -241,6 +241,8 @@ AutomatState transition(AutomatState current, char edge)
         //##############################
         case FirstHex:
             if (isxdigit(edge)) return SecondHex;
+            if (edge == '}') return StringLit;
+            
             return Error;
 
         case MltLnStringStartEnd:
