@@ -1,4 +1,4 @@
-/**
+/** Implementace překladače imperativního jazyka IFJ23
  * @file generator.h
  * @author Marek Joukl (xjoukl00)
  * @brief Header for code generator
@@ -34,6 +34,7 @@ typedef struct{
 typedef struct {
     char *key;
     int frame_num;
+    int unique;
 } item_for_distribution_t;
 
 typedef struct{
@@ -56,9 +57,6 @@ typedef struct{
     Items_for_distribution items_to_distribute;
     char **parameters;          // parameters of function
     int parameters_count;       // count of parameters
-
-
-
     String temp_string;         // temporary string for one param
 } Generator;
 
@@ -146,6 +144,7 @@ void assign_var_1(Generator *g, char* key, symtable_stack_t *stack, ast_t *tree,
  * @param token 
  */
 void function_gen(Generator *g, Lexeme *token, symtable_item_t *function);
+
 void if_stat_let_exp(Generator *g, Lexeme *token, int if_counter);
 void function_call_gen_prep(Generator *g, char *key_func, int param_count);
 void func_load_params(Generator *g, Lexeme *token, symtable_item_t *item, symtable_stack_t *stack);
@@ -156,5 +155,9 @@ void exp_postfix(Generator *g, ast_t *tree, symtable_stack_t *stack);
 void return_func_exp(Generator *g, ast_t *tree, symtable_stack_t *stack, char *key_func, bool is_expression);
 void distribute_vars(Generator *g);
 void preserve_vars(Generator *g);
+void builtin_int2double(Generator *g);
+void builtin_double2int(Generator *g);
+void concat(Generator *g);
+void builtin_substr(Generator *g);
 
 #endif //GENERATOR_H

@@ -2,8 +2,14 @@
 #include <stdio.h>
 
 int main(void){
-    StartParser();
-    fprintf(stdout, ".IFJcode23\n");
-    fprintf(stdout, "WRITE string@Hello\\032world!\\010");
+    symtable_stack_t *stack = SymtableStackInit();
+
+    CREATE_FRAME()
+    StartParser(true, stack);
+    StartParser(false, stack);
+
+    SymtableStackPop(stack);
+    SymtableStackDispose(stack);
+
     return 0;
 }

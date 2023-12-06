@@ -1,4 +1,4 @@
-/**
+/** Implementace překladače imperativního jazyka IFJ23
  * @file builtin_func.c
  * @author Marek Joukl (xjoukl00)
  * @brief Builtin functions for code generator
@@ -166,7 +166,7 @@ void builtin_substr(Generator *g){
                             "CONCAT TF@res TF@res TF@tmp\n"                     // append char to result
                             "ADD TF@i TF@i int@1\n"                     // i++
                             "JUMP $substr_loop\n"
-                            "LABEL $substr_loop_end"
+                            "LABEL $substr_loop_end\n"
                             "PUSHS TF@res\n"
                             "JUMP $substr_end\n"
                             "LABEL $substrError_end\n"
@@ -177,7 +177,7 @@ void builtin_substr(Generator *g){
 }
 
 void builtin_int2double(Generator *g){
-    add_to_str(&g->header,  "LABEL $int2double\n"
+    add_to_str(&g->header,  "LABEL $Int2Double\n"
                             "PUSHFRAME\n"
                             "CREATEFRAME\n"
                             "INT2FLOATS\n"
@@ -186,7 +186,7 @@ void builtin_int2double(Generator *g){
 }
 
 void builtin_double2int(Generator *g){
-    add_to_str(&g->header,  "LABEL $double2int\n"
+    add_to_str(&g->header,  "LABEL $Double2Int\n"
                             "PUSHFRAME\n"
                             "CREATEFRAME\n"
                             "FLOAT2INTS\n"

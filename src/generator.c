@@ -1,4 +1,4 @@
-/**
+/** Implementace překladače imperativního jazyka IFJ23
  * @file generator.c
  * @author Marek Joukl (xjoukl00)
  * @brief Code generator
@@ -7,6 +7,7 @@
 #include "generator.h"
 #include "builtin_func.h"
 
+int var_shadow_handler = 1;
 
 void StartGenerator(Generator *g){
     str_init(&g->header);
@@ -17,7 +18,6 @@ void StartGenerator(Generator *g){
     str_init(&g->function_call_tmps);
     str_init(&g->temp_string);
     g->parameters_count = 0;
-    //str_init(&g->parameters);
     print_header(g);
     print_footer(g);
 }
@@ -92,7 +92,8 @@ void cleanup_generator(Generator *g){
     str_dtor(&g->footer);
     str_dtor(&g->stack_values);
     str_dtor(&g->vars);
-    //str_dtor(&g->parameters);
+    str_dtor(&g->temp_string);
+    str_dtor(&g->function_call_tmps);
 }
 
 /************** FUNCTIONS FOR GENERATOR **************/
@@ -138,6 +139,15 @@ void print_header(Generator *g){
     add_to_str(&g->header, "\n");
     eval_not_equals(g);
     add_to_str(&g->header, "\n");
+    builtin_substr(g);
+    add_to_str(&g->header, "\n");
+    concat(g);
+    add_to_str(&g->header, "\n");
+    builtin_double2int(g);
+    add_to_str(&g->header, "\n");
+    builtin_int2double(g);
+    add_to_str(&g->header, "\n");
+
     add_to_str(&g->header, "LABEL $main\n");
     add_to_str(&g->header, "CREATEFRAME\n");
 
@@ -337,8 +347,20 @@ void extract_value(Generator *g, Lexeme *token, symtable_item_t *item, symtable_
         } else {
             add_to_str(&g->temp_string, "PUSHS TF@");
         }
-
         add_to_str(&g->temp_string, token->extra_data.string);
+        for (int i = g->items_to_distribute.size - 1; i >= 0; i--) {
+            if (g->items_to_distribute.items[i].key != NULL) {
+                if (strcmp(g->items_to_distribute.items[i].key, token->extra_data.string) == 0) {
+                    if (g->items_to_distribute.items[i].unique >= 1) {
+                        add_to_str(&g->temp_string, "$");
+                        char buffer[11];
+                        sprintf(buffer, "%d", g->items_to_distribute.items[i].unique);
+                        add_to_str(&g->temp_string, buffer);
+                        break;
+                    }
+                }
+            }
+        }
         add_to_str(&g->temp_string, "\n");
         g->parameters[g->parameters_count-1] = malloc(sizeof(char) * (g->temp_string.length+1));
         strcpy(g->parameters[g->parameters_count-1], g->temp_string.str);
@@ -365,10 +387,10 @@ void exp_postfix(Generator *g, ast_t *tree, symtable_stack_t *stack){
     exp_postfix(g, tree->left, stack);
     exp_postfix(g, tree->right, stack);
 
-    if (strcmp(tree->data, "+") == 0){
+    if (strcmp(tree->data, "+") == 0 && tree->right->type != TYPE_STRING){
         add_to_str(&g->instructions, "ADDS\n");
-    } else if (strcmp(tree->data, "+") == 0){
-        add_to_str(&g->instructions, "CALL $concat_prep\n");    // TODO
+    } else if (strcmp(tree->data, "+") == 0 && tree->right->type == TYPE_STRING){
+        add_to_str(&g->instructions, "CALL $concat\n");    // TODO
     }
     else if (strcmp(tree->data, "-") == 0)
     {
@@ -461,44 +483,28 @@ void exp_postfix(Generator *g, ast_t *tree, symtable_stack_t *stack){
     }
 }
 
-
-
-void define_var(Generator *g, Lexeme *token, symtable_stack_t *stack, int what_frame_num){
+void define_var(Generator *g, Lexeme *token, symtable_stack_t *stack, int what_frame_num) {
+    char buffer[11];
+    sprintf(buffer, "%d", var_shadow_handler);
+    g->items_to_distribute.items[g->items_to_distribute.size].unique = 0;
     if (stack->size == 1) {
         add_to_str(&g->instructions, "DEFVAR GF@");
     } else {
         add_to_str(&g->instructions, "DEFVAR TF@");
     }
     add_to_str(&g->instructions, token->extra_data.string);
+    for (int i = 0; i < g->items_to_distribute.size; i++) {
+        if (g->items_to_distribute.items[i].key != NULL) {
+            if (strcmp(g->items_to_distribute.items[i].key, token->extra_data.string) == 0) {
+                add_to_str(&g->instructions, "$");
+                add_to_str(&g->instructions, buffer);
+                g->items_to_distribute.items[g->items_to_distribute.size].unique = var_shadow_handler;
+                var_shadow_handler++;
+                break;
+            }
+        }
+    }
     add_to_str(&g->instructions, "\n");
-
-//    add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], "DEFVAR TF@");
-//    add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], token->extra_data.string);
-//    add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], "\n");
-//    add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], "MOVE TF@");
-//    add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], token->extra_data.string);
-//
-//    if (stack->size == 1) {
-//        add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], " GF@");
-//    } else {
-//        add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], " LF@");
-//    }
-//    add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], token->extra_data.string);
-//    add_to_str(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep], "\n");
-//
-//    //=====================================================================================================
-//    if (stack->size == 1) {
-//        add_to_str(&g->vars_to_put_back.variables[g->vars_to_put_back.how_deep], "MOVE GF@");
-//    }
-//    else {
-//        add_to_str(&g->vars_to_put_back.variables[g->vars_to_put_back.how_deep], "MOVE LF@");
-//    }
-//    add_to_str(&g->vars_to_put_back.variables[g->vars_to_put_back.how_deep], token->extra_data.string);
-//    add_to_str(&g->vars_to_put_back.variables[g->vars_to_put_back.how_deep], " TF@");
-//    add_to_str(&g->vars_to_put_back.variables[g->vars_to_put_back.how_deep], token->extra_data.string);
-//    add_to_str(&g->vars_to_put_back.variables[g->vars_to_put_back.how_deep], "\n");
-
-    //g->lexemes_to_distribute.lexemes[g->lexemes_to_distribute.how_deep][g->lexemes_to_distribute.index[g->lexemes_to_distribute.how_deep]] = token;
 
     g->items_to_distribute.items[g->items_to_distribute.size].key = token->extra_data.string;
     g->items_to_distribute.items[g->items_to_distribute.size].frame_num = what_frame_num;
@@ -539,32 +545,6 @@ void assign_var_0(Generator *g, Lexeme *token, symtable_stack_t *stack){
     }
 }
 
-//void if_handle(Generator *g, Lexeme *token, symtable_stack_t *stack){
-//    if (stack->size == 1) {
-//        // We are in global frame
-//        add_to_str(&g->instructions, "MOVE GF@");
-//    } else {
-//        add_to_str(&g->instructions, "MOVE LF@");
-//    }
-//    add_to_str(&g->instructions, token->extra_data.string);
-//    add_to_str(&g->instructions, " ");
-//    symtable_item_t *item = SymtableSearchAll(stack, token->extra_data.string);
-//    switch (item->data->item_type)
-//    {
-//    case TYPE_INT:
-//        add_to_str(&g->instructions, "int@");
-//        break;
-//    case TYPE_DOUBLE:
-//        add_to_str(&g->instructions, "float@");
-//        break;
-//    case TYPE_STRING:
-//        add_to_str(&g->instructions, "string@!stack_var");
-//        break;
-//    default:
-//        break;
-//    }
-//}
-
 void assign_var_1(Generator *g, char *key, symtable_stack_t *stack, ast_t *tree, bool is_expression, char *key_func, bool init_with_nil){
     if (is_expression){
         exp_postfix(g, tree, stack);
@@ -584,10 +564,24 @@ void assign_var_1(Generator *g, char *key, symtable_stack_t *stack, ast_t *tree,
         add_to_str(&g->instructions, "POPS TF@");
     }
     add_to_str(&g->instructions, key);
+    for (int i = g->items_to_distribute.size-1; i >= 0 ; i--) {
+        if (g->items_to_distribute.items[i].key != NULL) {
+            if (strcmp(g->items_to_distribute.items[i].key, key) == 0) {
+                if (g->items_to_distribute.items[i].unique >= 1) {
+                    char buffer[11];
+                    sprintf(buffer, "%d", g->items_to_distribute.items[i].unique);
+                    add_to_str(&g->instructions, "$");
+                    add_to_str(&g->instructions, buffer);
+                }
+                break;
+            }
+        }
+    }
     add_to_str(&g->instructions, "\n");
 }
 
 void function_gen(Generator *g, Lexeme *token, symtable_item_t *function){
+    bool is_unique = true;
     add_to_str(&g->instructions, "JUMP $");
     add_to_str(&g->instructions, token->extra_data.string);
     add_to_str(&g->instructions, "_end");
@@ -602,16 +596,48 @@ void function_gen(Generator *g, Lexeme *token, symtable_item_t *function){
     for (int i = 0; i < function->data->param_count; i++) {
         if (function->params[i] != NULL) {
             add_to_str(&g->instructions, "DEFVAR TF@");
+
             add_to_str(&g->instructions, function->params[i]->key);
+
+            g->items_to_distribute.items[g->items_to_distribute.size].unique = 0;
+            for (int j = g->items_to_distribute.size-1; j >= 0 ; j--) {
+                if (g->items_to_distribute.items[j].key != NULL) {
+                    if (strcmp(g->items_to_distribute.items[i].key, function->params[i]->key) == 0) {
+                        is_unique = false;
+                        char buffer[11];
+                        sprintf(buffer, "%d", var_shadow_handler);
+                        add_to_str(&g->instructions, "$");
+                        add_to_str(&g->instructions, buffer);
+                        g->items_to_distribute.items[g->items_to_distribute.size].unique = var_shadow_handler;
+                        var_shadow_handler++;
+                        add_to_str(&g->instructions, "\n");
+                        add_to_str(&g->instructions, "POPS TF@");
+                        add_to_str(&g->instructions, function->params[i]->key);
+                        add_to_str(&g->instructions, "$");
+                        add_to_str(&g->instructions, buffer);
+                        break;
+                    }
+                }
+            }
+            if (is_unique) {
+                add_to_str(&g->instructions, "\n");
+                add_to_str(&g->instructions, "POPS TF@");
+                add_to_str(&g->instructions, function->params[i]->key);
+            }
             add_to_str(&g->instructions, "\n");
-        }
-    }
-//    add_to_str(&g->instructions, "PUSHFRAME\n");
-    for (int i = 0; i < function->data->param_count; i++) {
-        if (function->params[i] != NULL) {
-            add_to_str(&g->instructions, "POPS TF@");
-            add_to_str(&g->instructions, function->params[i]->key);
-            add_to_str(&g->instructions, "\n");
+
+
+            g->items_to_distribute.items[g->items_to_distribute.size].key = function->params[i]->key;
+            g->items_to_distribute.items[g->items_to_distribute.size].frame_num = 1;
+            g->items_to_distribute.size++;
+            if (g->items_to_distribute.size >= g->items_to_distribute.alloc_size) {
+                g->items_to_distribute.alloc_size *= 2;
+                g->items_to_distribute.items = realloc(g->items_to_distribute.items, sizeof(item_for_distribution_t) * g->items_to_distribute.alloc_size);
+                if (g->items_to_distribute.items == NULL) {
+                    fprintf(stderr, "Error: generator.c - define_var() - realloc failed\n");
+                    exit(99);
+                }
+            }
         }
     }
 
@@ -623,19 +649,33 @@ void return_func_exp(Generator *g, ast_t *tree, symtable_stack_t *stack, char *k
     if (is_expression) {
         exp_postfix(g, tree, stack);
     }
-    //add_to_str(&g->instructions, "POPS LF@!retval\n");
+    preserve_vars(g);
     add_to_str(&g->instructions, "POPFRAME\n");
     add_to_str(&g->instructions, "RETURN\n");
     add_to_str(&g->instructions, "LABEL $");
     add_to_str(&g->instructions, key_func);
     add_to_str(&g->instructions, "_end\n");
-
-    //free(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep]);
 }
 
 void function_call_gen_prep(Generator *g, char *key_func, int params_count){
+    bool is_unique = true;
     for (int i = g->parameters_count-1; i >= 0; i--) {
-        add_to_str(&g->instructions, g->parameters[i]);
+        is_unique = true;
+        for (int j = g->items_to_distribute.size-1; j >= 0; j--) {
+            if (g->items_to_distribute.items[j].key != NULL) {
+                if (strcmp(g->items_to_distribute.items[j].key, g->parameters[i]) == 0) {
+                    add_to_str(&g->instructions, g->parameters[i]);
+                    char buffer[11];
+                    sprintf(buffer, "%d", g->items_to_distribute.items[j].unique);
+                    add_to_str(&g->instructions, "$");
+                    add_to_str(&g->instructions, buffer);
+                    is_unique = false;
+                }
+            }
+        }
+        if (is_unique) {
+            add_to_str(&g->instructions, g->parameters[i]);
+        }
     }
     
     // CALL WRITE FUNC
@@ -644,7 +684,6 @@ void function_call_gen_prep(Generator *g, char *key_func, int params_count){
         char buffer[16];
         sprintf(buffer, "%d", params_count);
         add_to_str(&g->instructions, buffer);     
-        // TODO: PUSH NUMBER OF PARAMETERS TO WRITE
         add_to_str(&g->instructions, "\n");
     }
 
@@ -660,7 +699,6 @@ void function_call_gen_prep(Generator *g, char *key_func, int params_count){
 }
 
 void func_call(Generator *g){
-    add_to_str(&g->instructions, g->stack_values.str);
     str_clear(&g->stack_values);
     add_to_str(&g->instructions, g->function_call_tmps.str);
     str_clear(&g->function_call_tmps);
@@ -681,8 +719,20 @@ void preserve_vars(Generator *g) {
                 add_to_str(&g->instructions, "MOVE LF@");
             }
             add_to_str(&g->instructions, g->items_to_distribute.items[i].key);
+            if (g->items_to_distribute.items[i].unique >= 1) {
+                char buffer[11];
+                sprintf(buffer, "%d", g->items_to_distribute.items[i].unique);
+                add_to_str(&g->instructions, "$");
+                add_to_str(&g->instructions, buffer);
+            }
             add_to_str(&g->instructions, " TF@");
             add_to_str(&g->instructions, g->items_to_distribute.items[i].key);
+            if (g->items_to_distribute.items[i].unique >= 1) {
+                char buffer[11];
+                sprintf(buffer, "%d", g->items_to_distribute.items[i].unique);
+                add_to_str(&g->instructions, "$");
+                add_to_str(&g->instructions, buffer);
+            }
             add_to_str(&g->instructions, "\n");
         }
         else {
@@ -698,15 +748,33 @@ void distribute_vars(Generator *g){
         if (g->items_to_distribute.items[i].key != NULL) {
             add_to_str(&g->instructions, "DEFVAR TF@");
             add_to_str(&g->instructions, g->items_to_distribute.items[i].key);
+            if (g->items_to_distribute.items[i].unique >= 1) {
+                char buffer[11];
+                sprintf(buffer, "%d", g->items_to_distribute.items[i].unique);
+                add_to_str(&g->instructions, "$");
+                add_to_str(&g->instructions, buffer);
+            }
             add_to_str(&g->instructions, "\n");
             add_to_str(&g->instructions, "MOVE TF@");
             add_to_str(&g->instructions, g->items_to_distribute.items[i].key);
+            if (g->items_to_distribute.items[i].unique >= 1) {
+                char buffer[11];
+                sprintf(buffer, "%d", g->items_to_distribute.items[i].unique);
+                add_to_str(&g->instructions, "$");
+                add_to_str(&g->instructions, buffer);
+            }
             if (g->items_to_distribute.how_deep <= 1) {
                 add_to_str(&g->instructions, " GF@");
             } else {
                 add_to_str(&g->instructions, " LF@");
             }
             add_to_str(&g->instructions, g->items_to_distribute.items[i].key);
+            if (g->items_to_distribute.items[i].unique >= 1) {
+                char buffer[11];
+                sprintf(buffer, "%d", g->items_to_distribute.items[i].unique);
+                add_to_str(&g->instructions, "$");
+                add_to_str(&g->instructions, buffer);
+            }
             add_to_str(&g->instructions, "\n");
         }
     }
