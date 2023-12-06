@@ -390,7 +390,7 @@ void exp_postfix(Generator *g, ast_t *tree, symtable_stack_t *stack){
     if (strcmp(tree->data, "+") == 0 && tree->right->type != TYPE_STRING){
         add_to_str(&g->instructions, "ADDS\n");
     } else if (strcmp(tree->data, "+") == 0 && tree->right->type == TYPE_STRING){
-        add_to_str(&g->instructions, "CALL $concat\n");    // TODO
+        add_to_str(&g->instructions, "CALL $concat\n");    
     }
     else if (strcmp(tree->data, "-") == 0)
     {
@@ -412,22 +412,22 @@ void exp_postfix(Generator *g, ast_t *tree, symtable_stack_t *stack){
         add_to_str(&g->instructions, "CALL $eval_greater\n");
     } else if (strcmp(tree->data, "<=") == 0)
     {
-        add_to_str(&g->instructions, "CALL $eval_less_equal\n");   // TODO
+        add_to_str(&g->instructions, "CALL $eval_less_equal\n");   
     } else if (strcmp(tree->data, "<") == 0)
     {
-        add_to_str(&g->instructions, "CALL $eval_less\n");   // TODO
+        add_to_str(&g->instructions, "CALL $eval_less\n");   
     } else if (strcmp(tree->data, "==") == 0)
     {
         add_to_str(&g->instructions, "CALL $eval_equals\n");
     } else if (strcmp(tree->data, "!=") == 0)
     {
-        add_to_str(&g->instructions, "CALL $eval_not_equals\n");   // TODO
+        add_to_str(&g->instructions, "CALL $eval_not_equals\n");   
     } else if(strcmp(tree->data, ";") == 0){
         add_to_str(&g->instructions, "INT2FLOATS\n");
     } else if(strcmp(tree->data, "??") == 0){
-        add_to_str(&g->instructions, "CALL $double_questmark\n");   // TODO
+        add_to_str(&g->instructions, "CALL $double_questmark\n");   
     } else if(strcmp(tree->data, "!") == 0){
-        add_to_str(&g->instructions, "CALL $not_nil\n");   // TODO
+        add_to_str(&g->instructions, "CALL $not_nil\n");   
     }
     else {
         symtable_item_t *item = SymtableSearchAll(stack, tree->data);
@@ -641,7 +641,7 @@ void function_gen(Generator *g, Lexeme *token, symtable_item_t *function){
         }
     }
 
-    // TODO
+    
 }
 
 
@@ -695,7 +695,7 @@ void function_call_gen_prep(Generator *g, char *key_func, int params_count){
         free(g->parameters[i]);
     }
     g->parameters_count = 0;
-    // TODO 
+     
 }
 
 void func_call(Generator *g){

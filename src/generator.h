@@ -144,7 +144,6 @@ void assign_var_1(Generator *g, char* key, symtable_stack_t *stack, ast_t *tree,
  * @param token 
  */
 void function_gen(Generator *g, Lexeme *token, symtable_item_t *function);
-
 void if_stat_let_exp(Generator *g, Lexeme *token, int if_counter);
 void function_call_gen_prep(Generator *g, char *key_func, int param_count);
 void func_load_params(Generator *g, Lexeme *token, symtable_item_t *item, symtable_stack_t *stack);

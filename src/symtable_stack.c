@@ -1,4 +1,5 @@
 /**
+ * Implementace překladače imperativního jazyka IFJ23.
  * @file symtable.c
  * @author Ondrej Kožányi (xkozan01)
  * @brief stack to store symtables

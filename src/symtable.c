@@ -1,6 +1,6 @@
 /**
- * @file symtable.c
- * @author
+ * Implementace překladače imperativního jazyka IFJ23. * @file symtable.c
+ * @author Ondrej Kozanyi (xkozan01)
  * @brief Parser using recursive descent
  */
 
@@ -95,8 +95,6 @@ void SymtableDeleteItem(Symtable *table, char *key) {
 void SymtableDeleteAll(Symtable *table) {
     for (size_t i = 0; i < MAX_HT_SIZE; i++) {
         if ((*table)[i] != NULL) {
-            //printf("index : %zu string : %s\n", i, (*table)[i]->key);
-            //printf("Deleting item with key: %s\n", (*table)[i]->key);
             if ((*table)[i]->key != NULL) {
                 free((*table)[i]->key);
                 (*table)[i]->key = NULL;
@@ -128,11 +126,6 @@ void SymtableDeleteAll(Symtable *table) {
                 free((*table)[i]->data->param_types);
                 (*table)[i]->data->param_types = NULL;
             }
-
-//            if ((*table)[i]->data->string_value != NULL) {
-//                //free((*table)[i]->data->string_value);
-//                (*table)[i]->data->string_value = NULL;
-//            }
 
             free((*table)[i]->data);
             (*table)[i]->data = NULL;
