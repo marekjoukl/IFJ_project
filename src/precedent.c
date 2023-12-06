@@ -142,13 +142,13 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         new_expression->can_be_nil = false;
 
 
-        printf("right: %s:%d\n", stack->items.posfix_name, stack->items.is_lit); //debug
+        // printf("right: %s:%d\n", stack->items.posfix_name, stack->items.is_lit); //debug
         if(stack->items.posfix_name != NULL)
             tree_insert(&new_right, stack->items.posfix_name);
         else
             new_right = stack->items.tree;
         
-        printf("left: %s:%d\n", stack->next->next->items.posfix_name, stack->next->next->items.is_lit); //debug
+        // printf("left: %s:%d\n", stack->next->next->items.posfix_name, stack->next->next->items.is_lit); //debug
         if(stack->next->next->items.posfix_name != NULL)
             tree_insert(&new_left, stack->next->next->items.posfix_name);
         else
