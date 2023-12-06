@@ -250,7 +250,7 @@ void extract_value(Generator *g, Lexeme *token, symtable_item_t *item, symtable_
                 add_to_str(&g->temp_string, "\\");
                 sprintf(buffer, "%03d", c);
                 add_to_str(&g->temp_string, buffer);
-            } else if(c == 92){
+            } else if(c == 92 && !token->is_multiline_comment){
                 if (token->extra_data.string[i+1] == 'n')
                 {
                     add_to_str(&g->temp_string, "\\010");
@@ -291,6 +291,9 @@ void extract_value(Generator *g, Lexeme *token, symtable_item_t *item, symtable_
                     // This shouldn't happen
                     add_to_str(&g->temp_string, "\\092");
                 }
+            } else if(c == 92 && token->extra_data.string[i+1] == '\\'){
+                add_to_str(&g->temp_string, "\\092");
+                i++;
             }
             else {
                 buffer[0] = c;
