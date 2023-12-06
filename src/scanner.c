@@ -258,14 +258,17 @@ Lexeme make_lexeme(AutomatState current, char *str)
         case EndStringLit:
             lexeme.kind = STRING_LIT;
             lexeme.extra_data.string = str;
+            lexeme.is_multiline_comment = false;
             break;
         case EmptyString:
             lexeme.kind = STRING_LIT;
             lexeme.extra_data.string = str;
+            lexeme.is_multiline_comment = false;
             break;
         case EndMltLnStringLit:
             lexeme.kind = STRING_LIT;
             lexeme.extra_data.string = str;
+            lexeme.is_multiline_comment = true;
             break;
         case IntLit:
             lexeme.kind = INTEGER_LIT;
