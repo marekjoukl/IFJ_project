@@ -128,6 +128,88 @@ void builtin_ord(Generator *g){
                             "RETURN\n");
 }
 
+void builtin_substr(Generator *g){
+    add_to_str(&g->header,  "LABEL $substr\n"
+                            "PUSHFRAME\n"
+                            "CREATEFRAME\n"
+                            "DEFVAR TF@str\n"
+                            "DEFVAR TF@i\n"             // (i)
+                            "DEFVAR TF@j\n"             // (j)
+                            "DEFVAR TF@tmp\n"
+                            "DEFVAR TF@len\n"
+                            "DEFVAR TF@res\n"
+                            "POPS TF@str\n"                 // get string
+                            "DEFVAR TF@?type\n"
+                            "TYPE TF@?type TF@str\n"
+                            "JUMPIFNEQ $substrError_end TF@?type string@string\n"
+                            "STRLEN TF@len TF@str\n"
+                            "POPS TF@i\n"               // get i
+                            "TYPE TF@?type TF@i\n"
+                            "JUMPIFNEQ $substrError_end TF@?type string@int\n"
+                            "POPS TF@j\n"              // get j
+                            "TYPE TF@?type TF@j\n"
+                            "JUMPIFNEQ $substrError_end TF@?type string@int\n"
+                            "LT GF@!tmp1 TF@i int@0\n"  // if i < 0
+                            "JUMPIFEQ $substrError_end GF@!tmp1 bool@true\n"
+                            "LT GF@!tmp1 TF@j int@0\n" // if j < 0
+                            "JUMPIFEQ $substrError_end GF@!tmp1 bool@true\n"
+                            "GT GF@!tmp1 TF@i TF@len\n" // if i > len
+                            "JUMPIFEQ $substrError_end GF@!tmp1 bool@true\n"
+                            "GT GF@!tmp1 TF@i TF@j\n"// if j > len
+                            "JUMPIFEQ $substrError_end GF@!tmp1 bool@true\n"
+                            "GT GF@!tmp1 TF@i TF@j\n" // if i > j
+                            "JUMPIFEQ $substrError_end GF@!tmp1 bool@true\n"
+                            "MOVE TF@res string@\n"
+                            "LABEL $substr_loop\n"
+                            "JUMPIFEQ $substr_loop_end TF@i TF@j\n"    // if i == j, jump to end
+                            "GETCHAR TF@tmp TF@str TF@i\n"                  // get char at i
+                            "CONCAT TF@res TF@res TF@tmp\n"                     // append char to result
+                            "ADD TF@i TF@i int@1\n"                     // i++
+                            "JUMP $substr_loop\n"
+                            "LABEL $substr_loop_end"
+                            "PUSHS TF@res\n"
+                            "JUMP $substr_end\n"
+                            "LABEL $substrError_end\n"
+                            "PUSHS nil@nil\n"
+                            "LABEL $substr_end\n"
+                            "POPFRAME\n"
+                            "RETURN\n");
+}
+
+void builtin_int2double(Generator *g){
+    add_to_str(&g->header,  "LABEL $int2double\n"
+                            "PUSHFRAME\n"
+                            "CREATEFRAME\n"
+                            "INT2FLOATS\n"
+                            "POPFRAME\n"
+                            "RETURN\n");
+}
+
+void builtin_double2int(Generator *g){
+    add_to_str(&g->header,  "LABEL $double2int\n"
+                            "PUSHFRAME\n"
+                            "CREATEFRAME\n"
+                            "FLOAT2INTS\n"
+                            "POPFRAME\n"
+                            "RETURN\n");
+}
+
+void concat(Generator *g){
+    add_to_str(&g->header,  "LABEL $concat\n"
+                            "PUSHFRAME\n"
+                            "CREATEFRAME\n"
+                            "DEFVAR TF@tmp1\n"
+                            "DEFVAR TF@tmp2\n"
+                            "DEFVAR TF@tmp3\n"
+                            "POPS TF@tmp1\n"
+                            "POPS TF@tmp2\n"
+                            "CONCAT TF@tmp3 TF@tmp2 TF@tmp1\n"
+                            "PUSHS TF@tmp3\n"
+                            "POPFRAME\n"
+                            "RETURN\n"
+    );
+}
+
 void eval_bool(Generator *g){
     add_to_str(&g->header,  "LABEL $eval_bool\n"
                             "PUSHFRAME\n"
