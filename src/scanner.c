@@ -1,3 +1,7 @@
+/** 
+ * Implementace překladače imperativního jazyka IFJ23
+ * xzelen29  Jakub Zelenay
+*/
 #include "scanner.h"
 
 #define STRING_CHUNK 10   // how much new space to allocate when reallocating space for a string

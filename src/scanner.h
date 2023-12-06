@@ -1,3 +1,7 @@
+/** 
+ * Implementace překladače imperativního jazyka IFJ23
+ * xzelen29  Jakub Zelenay
+*/
 #ifndef SCANNER_H
 #define SCANNER_H
 

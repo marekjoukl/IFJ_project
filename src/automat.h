@@ -1,3 +1,7 @@
+/** 
+ * Implementace překladače imperativního jazyka IFJ23
+ * xzelen29  Jakub Zelenay
+*/
 #ifndef AUTOMAT_H
 #define AUTOMAT_H
 

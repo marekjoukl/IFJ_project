@@ -1,3 +1,7 @@
+/** 
+ * Implementace překladače imperativního jazyka IFJ23
+ * xzelen29  Jakub Zelenay
+*/
 #include "automat.h"
 
 AutomatState transition(AutomatState current, char edge)
