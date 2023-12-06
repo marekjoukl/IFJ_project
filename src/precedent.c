@@ -348,15 +348,16 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         if(stack->items.var_type != stack->next->next->items.var_type)
         {
             if(stack->items.var_type == TYPE_STRING || stack->next->next->items.var_type == TYPE_STRING)
+                if(stack->items.var_type != TYPE_NIL && stack->next->next->items.var_type != TYPE_NIL)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
 
-            if(stack->next->next->items.var_type == TYPE_INT){
+            if(stack->next->next->items.var_type == TYPE_INT && stack->items.var_type == TYPE_DOUBLE){
                 if(stack->next->next->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
                 tree_insert(&new_left, ";");
             }
             
-            if(stack->items.var_type == TYPE_INT){
+            if(stack->items.var_type == TYPE_INT && stack->next->next->items.var_type == TYPE_DOUBLE){
                 if(stack->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
                 tree_insert(&new_right, ";");
@@ -393,15 +394,16 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         if(stack->items.var_type != stack->next->next->items.var_type)
         {
             if(stack->items.var_type == TYPE_STRING || stack->next->next->items.var_type == TYPE_STRING)
-                {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
+                if(stack->items.var_type != TYPE_NIL && stack->next->next->items.var_type != TYPE_NIL)
+                    {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
 
-            if(stack->next->next->items.var_type == TYPE_INT){
+            if(stack->next->next->items.var_type == TYPE_INT && stack->items.var_type == TYPE_DOUBLE){
                 if(stack->next->next->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
                 tree_insert(&new_left, ";");
             }
             
-            if(stack->items.var_type == TYPE_INT){
+            if(stack->items.var_type == TYPE_INT && stack->next->next->items.var_type == TYPE_DOUBLE){
                 if(stack->items.is_lit == false)
                     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
                 tree_insert(&new_right, ";");
