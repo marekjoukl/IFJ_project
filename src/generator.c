@@ -246,13 +246,56 @@ void extract_value(Generator *g, Lexeme *token, symtable_item_t *item, symtable_
         for (unsigned long i = 0; i < strlen(token->extra_data.string); i++) {
             char c = token->extra_data.string[i];
             char buffer[5];
-            if ((c >= 0 && c <= 32) || c == 35 || c == 92) {
+            if ((c >= 0 && c <= 32) || c == 35) {
                 add_to_str(&g->temp_string, "\\");
                 sprintf(buffer, "%03d", c);
                 add_to_str(&g->temp_string, buffer);
+            } else if(c == 92){
+                if (token->extra_data.string[i+1] == 'n')
+                {
+                    add_to_str(&g->temp_string, "\\010");
+                    i++;
+                } else if(token->extra_data.string[i+1] == 'r'){
+                    add_to_str(&g->temp_string, "\\010");
+                    i++;
+                } else if(token->extra_data.string[i+1] == 't'){
+                    add_to_str(&g->temp_string, "\\009");
+                    i++;
+                } else if(token->extra_data.string[i+1] == '"'){
+                    add_to_str(&g->temp_string, "\"");
+                    i++;
+                } else if(token->extra_data.string[i+1] == '\\'){
+                    add_to_str(&g->temp_string, "\\092");
+                    i++;
+                } else if((token->extra_data.string[i+1] == 'u') && (token->extra_data.string[i+2] == '{')){
+                    int tmp_i;
+                    if (token->extra_data.string[i+4] == '}')
+                    {
+                        tmp_i = strtol(&token->extra_data.string[i+3], NULL, 16);
+                        sprintf(buffer, "%c", (char) tmp_i);
+                        i = i + 4;
+                    } else {
+                        char tmp[2];
+                        tmp[0] = token->extra_data.string[i+3];
+                        tmp[1] = token->extra_data.string[i+4];
+                        tmp_i = strtol(tmp, NULL, 16);
+                        sprintf(buffer, "%c", (char) tmp_i);
+                        i = i + 5;
+                    }
+                    if ((tmp_i >= 0 && tmp_i <= 32) || tmp_i == 35) {
+                            add_to_str(&g->temp_string, "\\");
+                            sprintf(buffer, "%03d", tmp_i);
+                        }
+                    add_to_str(&g->temp_string, buffer);
+                } else {
+                    // This shouldn't happen
+                    add_to_str(&g->temp_string, "\\092");
+                }
             }
             else {
-                add_chr_to_str(&g->temp_string, c);
+                buffer[0] = c;
+                buffer[1] = '\0';
+                add_to_str(&g->temp_string, buffer);
             }
         }
         add_to_str(&g->temp_string, "\n");
