@@ -66,6 +66,7 @@ typedef struct Lexeme
 
     unsigned int line;
     bool nil_type;
+    bool is_multiline_comment;
 } Lexeme;
 
 typedef struct Buffer 
