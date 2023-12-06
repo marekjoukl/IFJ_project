@@ -198,8 +198,10 @@ void eval_greater(Generator *g){
                             "POPS GF@!tmp1\n"                                      // must be pushed before call
                             "POPS GF@!tmp2\n"                                      // must be pushed before call
                             "DEFVAR TF@?type1\n"
+                            "JUMPIFEQ $greater_false GF@!tmp1 GF@!tmp2\n"     // tmps must be already stored
                             "GT TF@?type1 GF@!tmp1 GF@!tmp2\n"                       // if tmp1 > tmp2, return true
                             "JUMPIFNEQ $greater_true TF@?type1 bool@true\n"
+                            "LABEL $greater_false\n"
                             "PUSHS bool@false\n"
                             "POPFRAME\n"
                             "RETURN\n"
@@ -235,8 +237,10 @@ void eval_less(Generator *g){
                             "POPS GF@!tmp1\n"                                      // must be pushed before call
                             "POPS GF@!tmp2\n"                                      // must be pushed before call
                             "DEFVAR TF@?type1\n"
+                            "JUMPIFEQ $less_false GF@!tmp1 GF@!tmp2\n"              // tmps must be already stored
                             "LT TF@?type1 GF@!tmp1 GF@!tmp2\n"                       // if tmp1 > tmp2, return true
                             "JUMPIFNEQ $less_true TF@?type1 bool@true\n"
+                            "LABEL $less_false\n"
                             "PUSHS bool@false\n"
                             "POPFRAME\n"
                             "RETURN\n"
