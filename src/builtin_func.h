@@ -1,4 +1,4 @@
-/**
+/** Implementace překladače imperativního jazyka IFJ23
  * @file builtin_func.h
  * @author Marek Joukl (xjoukl00)
  * @brief Header for builtin functions for code generator

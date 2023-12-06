@@ -1,3 +1,11 @@
+/** 
+ * Implementace překladače imperativního jazyka IFJ23
+ * xputis00 Daniel Puts
+ * xzelen29  Jakub Zelenay
+ * xjoukl00 Marek Joukul
+ * xkozan01 Ondrej Kožanyi
+*/
+
 #ifndef PRECEDENT_H
 #define PRECEDENT_H
 
@@ -21,17 +29,13 @@ typedef enum {
     LESS_T,
     GREATER_T,
     LESS_EQUAL_T,
-    GREATER_EQUAL_T,        //
-    DOUBLE_QUESTION_MARK_T, //
-    EXCLAMATION_POINT_T,    //
-    LEFT_PAR_T,             // 
+    GREATER_EQUAL_T,        
+    DOUBLE_QUESTION_MARK_T, 
+    EXCLAMATION_POINT_T,    
+    LEFT_PAR_T,              
     RIGHT_PAR_T,
-    TERM_T,                 //
-//    IDENTIFIER_T,
-//    STRING_LIT_T,
-//    INTEGER_LIT_T,
-//    DOUBLE_LIT_T,
-    DOLLAR_T,               //
+    TERM_T,                 
+    DOLLAR_T,               
     TERMINAL_CNT_T,
     EXPRESSION_T,   // not a terminal
     STOPPAGE_T      // not a terminal (stoppage in stack <)

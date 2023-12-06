@@ -1,7 +1,14 @@
+/** 
+ * Implementace překladače imperativního jazyka IFJ23
+ * xputis00 Daniel Puts
+ * xzelen29  Jakub Zelenay
+ * xjoukl00 Marek Joukul
+ * xkozan01 Ondrej Kožanyi
+*/
+
 #ifndef PRECEDENT_STACK_H
 #define PRECEDENT_STACK_H
 
-//#include "precedent.h"
 #include "symtable.h"
 #include "symtable_stack.h"
 #include <stdbool.h>
@@ -9,7 +16,6 @@
 #define ERROR_HANDLE_PREC_STACK(exit_code) \
     fprintf(stderr, "Error: precedent_stack.c - error code %d\n", exit_code); \
     exit(exit_code);
-
 
 typedef struct ast{
     char *data;
@@ -52,6 +58,5 @@ void tree_link(ast_t **parent, ast_t *left, ast_t *right);
 void tree_insert(ast_t **tree, char *data);
 void tree_postorder(ast_t *tree);
 void tree_dispose(ast_t **tree);
-
 
 #endif

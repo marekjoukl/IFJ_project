@@ -1,4 +1,4 @@
-/**
+/** Implementace překladače imperativního jazyka IFJ23
  * @file generator.c
  * @author Marek Joukl (xjoukl00)
  * @brief Code generator
@@ -18,7 +18,6 @@ void StartGenerator(Generator *g){
     str_init(&g->function_call_tmps);
     str_init(&g->temp_string);
     g->parameters_count = 0;
-    //str_init(&g->parameters);
     print_header(g);
     print_footer(g);
 }
@@ -93,7 +92,8 @@ void cleanup_generator(Generator *g){
     str_dtor(&g->footer);
     str_dtor(&g->stack_values);
     str_dtor(&g->vars);
-    //str_dtor(&g->parameters);
+    str_dtor(&g->temp_string);
+    str_dtor(&g->function_call_tmps);
 }
 
 /************** FUNCTIONS FOR GENERATOR **************/
@@ -390,7 +390,7 @@ void exp_postfix(Generator *g, ast_t *tree, symtable_stack_t *stack){
     if (strcmp(tree->data, "+") == 0 && tree->right->type != TYPE_STRING){
         add_to_str(&g->instructions, "ADDS\n");
     } else if (strcmp(tree->data, "+") == 0 && tree->right->type == TYPE_STRING){
-        add_to_str(&g->instructions, "CALL $concat\n");    // TODO
+        add_to_str(&g->instructions, "CALL $concat\n");    
     }
     else if (strcmp(tree->data, "-") == 0)
     {
@@ -412,22 +412,22 @@ void exp_postfix(Generator *g, ast_t *tree, symtable_stack_t *stack){
         add_to_str(&g->instructions, "CALL $eval_greater\n");
     } else if (strcmp(tree->data, "<=") == 0)
     {
-        add_to_str(&g->instructions, "CALL $eval_less_equal\n");   // TODO
+        add_to_str(&g->instructions, "CALL $eval_less_equal\n");   
     } else if (strcmp(tree->data, "<") == 0)
     {
-        add_to_str(&g->instructions, "CALL $eval_less\n");   // TODO
+        add_to_str(&g->instructions, "CALL $eval_less\n");   
     } else if (strcmp(tree->data, "==") == 0)
     {
         add_to_str(&g->instructions, "CALL $eval_equals\n");
     } else if (strcmp(tree->data, "!=") == 0)
     {
-        add_to_str(&g->instructions, "CALL $eval_not_equals\n");   // TODO
+        add_to_str(&g->instructions, "CALL $eval_not_equals\n");   
     } else if(strcmp(tree->data, ";") == 0){
         add_to_str(&g->instructions, "INT2FLOATS\n");
     } else if(strcmp(tree->data, "??") == 0){
-        add_to_str(&g->instructions, "CALL $double_questmark\n");   // TODO
+        add_to_str(&g->instructions, "CALL $double_questmark\n");   
     } else if(strcmp(tree->data, "!") == 0){
-        add_to_str(&g->instructions, "CALL $not_nil\n");   // TODO
+        add_to_str(&g->instructions, "CALL $not_nil\n");   
     }
     else {
         symtable_item_t *item = SymtableSearchAll(stack, tree->data);
@@ -507,18 +507,6 @@ void define_var(Generator *g, Lexeme *token, symtable_stack_t *stack, int what_f
     add_to_str(&g->instructions, "\n");
 
     g->items_to_distribute.items[g->items_to_distribute.size].key = token->extra_data.string;
-//    if (!is_unique) {
-//        int str_len = strlen(token->extra_data.string)+1;
-//        str_len += strlen(buffer);
-//        char *tmp = realloc(g->items_to_distribute.items[g->items_to_distribute.size].key, sizeof(char) * str_len);
-//        if (tmp == NULL) {
-//            fprintf(stderr, "Error: generator.c - define_var() - realloc failed\n");
-//            exit(99);
-//        }
-//        g->items_to_distribute.items[g->items_to_distribute.size].key = tmp;
-//        strcat(g->items_to_distribute.items[g->items_to_distribute.size].key, buffer);
-//    }
-
     g->items_to_distribute.items[g->items_to_distribute.size].frame_num = what_frame_num;
     g->items_to_distribute.size++;
     if (g->items_to_distribute.size >= g->items_to_distribute.alloc_size) {
@@ -556,32 +544,6 @@ void assign_var_0(Generator *g, Lexeme *token, symtable_stack_t *stack){
         break;
     }
 }
-
-//void if_handle(Generator *g, Lexeme *token, symtable_stack_t *stack){
-//    if (stack->size == 1) {
-//        // We are in global frame
-//        add_to_str(&g->instructions, "MOVE GF@");
-//    } else {
-//        add_to_str(&g->instructions, "MOVE LF@");
-//    }
-//    add_to_str(&g->instructions, token->extra_data.string);
-//    add_to_str(&g->instructions, " ");
-//    symtable_item_t *item = SymtableSearchAll(stack, token->extra_data.string);
-//    switch (item->data->item_type)
-//    {
-//    case TYPE_INT:
-//        add_to_str(&g->instructions, "int@");
-//        break;
-//    case TYPE_DOUBLE:
-//        add_to_str(&g->instructions, "float@");
-//        break;
-//    case TYPE_STRING:
-//        add_to_str(&g->instructions, "string@!stack_var");
-//        break;
-//    default:
-//        break;
-//    }
-//}
 
 void assign_var_1(Generator *g, char *key, symtable_stack_t *stack, ast_t *tree, bool is_expression, char *key_func, bool init_with_nil){
     if (is_expression){
@@ -679,7 +641,7 @@ void function_gen(Generator *g, Lexeme *token, symtable_item_t *function){
         }
     }
 
-    // TODO
+    
 }
 
 
@@ -687,15 +649,12 @@ void return_func_exp(Generator *g, ast_t *tree, symtable_stack_t *stack, char *k
     if (is_expression) {
         exp_postfix(g, tree, stack);
     }
-    //add_to_str(&g->instructions, "POPS LF@!retval\n");
     preserve_vars(g);
     add_to_str(&g->instructions, "POPFRAME\n");
     add_to_str(&g->instructions, "RETURN\n");
     add_to_str(&g->instructions, "LABEL $");
     add_to_str(&g->instructions, key_func);
     add_to_str(&g->instructions, "_end\n");
-
-    //free(&g->vars_to_distribute.variables[g->vars_to_distribute.how_deep]);
 }
 
 void function_call_gen_prep(Generator *g, char *key_func, int params_count){
@@ -725,7 +684,6 @@ void function_call_gen_prep(Generator *g, char *key_func, int params_count){
         char buffer[16];
         sprintf(buffer, "%d", params_count);
         add_to_str(&g->instructions, buffer);     
-        // TODO: PUSH NUMBER OF PARAMETERS TO WRITE
         add_to_str(&g->instructions, "\n");
     }
 
@@ -737,15 +695,11 @@ void function_call_gen_prep(Generator *g, char *key_func, int params_count){
         free(g->parameters[i]);
     }
     g->parameters_count = 0;
-    // TODO 
+     
 }
 
 void func_call(Generator *g){
-//    fprintf(stderr, "%s\n", g->stack_values.str);
-//    add_to_str(&g->instructions, g->stack_values.str);
-
     str_clear(&g->stack_values);
-
     add_to_str(&g->instructions, g->function_call_tmps.str);
     str_clear(&g->function_call_tmps);
 }

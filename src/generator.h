@@ -1,4 +1,4 @@
-/**
+/** Implementace překladače imperativního jazyka IFJ23
  * @file generator.h
  * @author Marek Joukl (xjoukl00)
  * @brief Header for code generator
@@ -57,9 +57,6 @@ typedef struct{
     Items_for_distribution items_to_distribute;
     char **parameters;          // parameters of function
     int parameters_count;       // count of parameters
-
-
-
     String temp_string;         // temporary string for one param
 } Generator;
 
