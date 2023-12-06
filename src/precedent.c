@@ -1,3 +1,11 @@
+/** 
+ * Implementace překladače imperativního jazyka IFJ23
+ * xputis00 Daniel Puts
+ * xzelen29  Jakub Zelenay
+ * xjoukl00 Marek Joukul
+ * xkozan01 Ondrej Kožanyi
+*/
+
 #include "precedent.h"
 #include "scanner.h"
 
@@ -111,13 +119,6 @@ stack_rules_t give_stack_rule(prec_stack_t *stack, prec_terminal_t input)
 
 bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme *token)
 {
-    // printf("\n ====NEW===== \ntree1: \n");
-    //     tree_postorder(*asttree1);
-    //     puts("\ntree2:");
-    //     tree_postorder(*asttree2);
-    //     puts("");
-
-
     valid_itmes_t rule;
     
     ast_t *new_parent = NULL;
@@ -142,20 +143,17 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         new_expression->can_be_nil = false;
 
 
-        // printf("right: %s:%d\n", stack->items.posfix_name, stack->items.is_lit); //debug
         if(stack->items.posfix_name != NULL)
             tree_insert(&new_right, stack->items.posfix_name);
         else
             new_right = stack->items.tree;
         
-        // printf("left: %s:%d\n", stack->next->next->items.posfix_name, stack->next->next->items.is_lit); //debug
         if(stack->next->next->items.posfix_name != NULL)
             tree_insert(&new_left, stack->next->next->items.posfix_name);
         else
             new_left = stack->next->next->items.tree;
-
-
-        // Int2Double
+        
+        //Int2Double
         if(stack->items.var_type != stack->next->next->items.var_type)
         {
             if(stack->next->next->items.var_type == TYPE_INT){
@@ -427,23 +425,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
 
         if(stack->items.var_type != stack->next->next->items.var_type)
-        {
-            // if(stack->items.var_type == TYPE_STRING || stack->next->next->items.var_type == TYPE_STRING)
-            //     {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-
-            // if(stack->items.var_type == TYPE_INT){
-            //     if(stack->items.is_lit == false)
-            //         {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-            //     // int2double TODO
-            // }
-            
-            // if(stack->next->next->items.var_type == TYPE_INT){
-            //     if(stack->next->next->items.is_lit == false)
-            //         {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-            //     // int2double TODO
-            // }
-            ERROR_HANDLE_PREC(TYPE_ERROR, token);
-        }
+            {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
 
         if(stack->items.can_be_nil == true || stack->next->next->items.can_be_nil == true)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
@@ -473,22 +455,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
             
         if(stack->items.var_type != stack->next->next->items.var_type)
-        {
-            // if(stack->items.var_type == TYPE_STRING || stack->next->next->items.var_type == TYPE_STRING)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-
-            // if(stack->items.var_type == TYPE_INT){
-            //     if(stack->items.is_lit == false)
-            //         {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-            //     // int2double TODO
-            // }
-            
-            // if(stack->next->next->items.var_type == TYPE_INT){
-            //     if(stack->next->next->items.is_lit == false)
-            //         {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-            //     // int2double TODO
-            // }
-        }
 
         if(stack->items.can_be_nil == true || stack->next->next->items.can_be_nil == true)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
@@ -518,22 +485,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
 
         if(stack->items.var_type != stack->next->next->items.var_type)
-        {
-            // if(stack->items.var_type == TYPE_STRING || stack->next->next->items.var_type == TYPE_STRING)
                 {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-
-            // if(stack->items.var_type == TYPE_INT){
-            //     if(stack->items.is_lit == false)
-            //         {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-            //     // int2double TODO
-            // }
-            
-            // if(stack->next->next->items.var_type == TYPE_INT){
-            //     if(stack->next->next->items.is_lit == false)
-            //         {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-            //     // int2double TODO
-            // }
-        }
 
         if(stack->items.can_be_nil == true || stack->next->next->items.can_be_nil == true)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
@@ -562,22 +514,7 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
 
         if(stack->items.var_type != stack->next->next->items.var_type)
-        {
-            // if(stack->items.var_type == TYPE_STRING || stack->next->next->items.var_type == TYPE_STRING)
                 {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-
-            // if(stack->items.var_type == TYPE_INT){
-            //     if(stack->items.is_lit == false)
-            //         {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-            //     // int2double TODO
-            // }
-            
-            // if(stack->next->next->items.var_type == TYPE_INT){
-            //     if(stack->next->next->items.is_lit == false)
-            //         {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
-            //     // int2double TODO
-            // }
-        }
 
         if(stack->items.can_be_nil == true || stack->next->next->items.can_be_nil == true)
             {ERROR_HANDLE_PREC(TYPE_ERROR, token);}
@@ -658,12 +595,10 @@ bool check_prec_rule(prec_stack_t *stack, valid_itmes_t *new_expression, Lexeme 
         new_expression->can_be_nil = stack->items.can_be_nil;
         new_expression->var_type = stack->items.var_type;
         new_expression->is_lit = stack->items.is_lit;
-        // puts("\nTERM"); //debug
         tree_insert(&new_parent, stack->items.posfix_name);
         new_parent->type = new_expression->var_type;
         new_parent->is_lit = new_expression->is_lit;
         new_expression->tree = new_parent;
-        // printf("new_term = %s\n", new_expression->posfix_name); //debug
         break;  
     
     default:
@@ -684,6 +619,7 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack, ast_
     symtable_item_t *variable;
     valid_itmes_t new_expression;
 
+    // chceck if var was declered
     if(lexeme->kind == IDENTIFIER)
     {
         variable = SymtableSearchAll(sym_stack, lexeme->extra_data.string);
@@ -695,14 +631,6 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack, ast_
     
     while(valid)
     {
-        //check if variable was defined
-        // if(lexeme->kind == IDENTIFIER)
-        // {
-        //     variable = SymtableSearchAll(sym_stack, lexeme->extra_data.string);
-        //     if(variable == NULL)
-        //         {ERROR_HANDLE_PREC(UNDEFINED_VAR_ERROR, lexeme);}
-        // }
-
         stack_rule = give_stack_rule(stack, input.type);
 
         switch (stack_rule)
@@ -714,7 +642,6 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack, ast_
             input = convert_lex_term(*lexeme);
             break;
         case STOPPAGE_R:
-            // puts("stop"); //debug
             modify_terminal(&input, *lexeme, sym_stack);
             stack_push_stoppage(&stack);
             stack_push(&stack, &input);
@@ -722,9 +649,7 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack, ast_
             input = convert_lex_term(*lexeme);
             break;
         case MERGE_R:
-            // puts("merge");
             if(check_prec_rule(stack, &new_expression, lexeme)){
-                // printf("new_e:%s\n\n\n", new_expression.posfix_name); //debug
                 stack_merge(&stack, new_expression);}
             else
                 {ERROR_HANDLE_PREC(SYNTAX_ERROR, lexeme);}
@@ -739,8 +664,7 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack, ast_
         }
     }
 
-    // puts("2nd"); //debug
-    // second traverse with input = $
+    // second traverse
     input.type = DOLLAR_T;
     while(cont == true)
     {
@@ -755,14 +679,10 @@ data_type_t precedent_analysys(Lexeme *lexeme, symtable_stack_t *sym_stack, ast_
             cont = false;
     }
     
-    // check if all syntax operations valid
-        if(!stack_empty(stack))
+    // chceck is end is valid
+    if(!stack_empty(stack))
         {ERROR_HANDLE_PREC(SYNTAX_ERROR, lexeme);}
 
-    // puts("");
-    // tree_postorder(stack->items.tree);
-    // puts("\n");
-    
     *asttree = stack->items.tree;
     data_type_t exit_data_type = stack->items.var_type;
     stack_dispose(&stack); 

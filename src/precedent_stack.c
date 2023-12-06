@@ -1,3 +1,11 @@
+/** 
+ * Implementace překladače imperativního jazyka IFJ23
+ * xputis00 Daniel Puts
+ * xzelen29  Jakub Zelenay
+ * xjoukl00 Marek Joukul
+ * xkozan01 Ondrej Kožanyi
+*/
+
 #include "precedent.h"
 
 // ====================================================
@@ -151,20 +159,9 @@ void tree_link(ast_t **parent, ast_t *left, ast_t *right)
         exit(INTERNAL_ERROR);
     }
 
-    // puts("link left");
-    // tree_postorder(left);
-    // puts("");
-
-    // puts("link right");
-    // tree_postorder(right);
-    // puts("");
-
     (*parent)->left = left;
     (*parent)->right = right;
 
-    // puts("link");
-    // tree_postorder(*parent);
-    // puts("");
 }
 
 void tree_insert(ast_t **tree, char *data)
@@ -188,11 +185,9 @@ void tree_postorder(ast_t *tree)
     tree_postorder(tree->left);
     tree_postorder(tree->right);
 
-    //TODO
     printf("%s,", tree->data);
 }
 
-//TODO
 void tree_dispose(ast_t **tree)
 {
     if(*tree == NULL)
