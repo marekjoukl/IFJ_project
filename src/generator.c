@@ -198,8 +198,6 @@ void else_stat(Generator *g, bool is_else_start, int else_counter){
 void while_loop_gen(Generator *g, symtable_stack_t *stack, ast_t *asttree, int while_counter){
     char buffer[11];
     sprintf(buffer, "%d", while_counter);
-    add_to_str(&g->instructions, "CREATEFRAME\n");
-    add_to_str(&g->instructions, "PUSHFRAME\n");
     add_to_str(&g->instructions, "LABEL $while");
     add_to_str(&g->instructions, buffer);
     add_to_str(&g->instructions, "\n");
@@ -208,18 +206,22 @@ void while_loop_gen(Generator *g, symtable_stack_t *stack, ast_t *asttree, int w
     add_to_str(&g->instructions, "JUMPIFNEQS $end_while");
     add_to_str(&g->instructions, buffer);
     add_to_str(&g->instructions, "\n");
+    add_to_str(&g->instructions, "PUSHFRAME\n");
+    add_to_str(&g->instructions, "CREATEFRAME\n");
+    distribute_vars(g);
 }
 
 void while_loop_end(Generator *g, int while_counter){
     char buffer[11];
     sprintf(buffer, "%d", while_counter);
+    preserve_vars(g);
+    add_to_str(&g->instructions, "POPFRAME\n");
     add_to_str(&g->instructions, "JUMP $while");
     add_to_str(&g->instructions, buffer);
     add_to_str(&g->instructions, "\n");
     add_to_str(&g->instructions, "LABEL $end_while");
     add_to_str(&g->instructions, buffer);
     add_to_str(&g->instructions, "\n");
-    add_to_str(&g->instructions, "POPFRAME\n");
 }
 
 void extract_value(Generator *g, Lexeme *token, symtable_item_t *item, symtable_stack_t *stack){
@@ -553,16 +555,19 @@ void function_gen(Generator *g, Lexeme *token, symtable_item_t *function){
     distribute_vars(g);
 
     for (int i = 0; i < function->data->param_count; i++) {
-        add_to_str(&g->instructions, "DEFVAR TF@");
-        add_to_str(&g->instructions, function->params[i]->key);
-        add_to_str(&g->instructions, "\n");
-
+        if (function->params[i] != NULL) {
+            add_to_str(&g->instructions, "DEFVAR TF@");
+            add_to_str(&g->instructions, function->params[i]->key);
+            add_to_str(&g->instructions, "\n");
+        }
     }
 //    add_to_str(&g->instructions, "PUSHFRAME\n");
     for (int i = 0; i < function->data->param_count; i++) {
-        add_to_str(&g->instructions, "POPS TF@");
-        add_to_str(&g->instructions, function->params[i]->key);
-        add_to_str(&g->instructions, "\n");
+        if (function->params[i] != NULL) {
+            add_to_str(&g->instructions, "POPS TF@");
+            add_to_str(&g->instructions, function->params[i]->key);
+            add_to_str(&g->instructions, "\n");
+        }
     }
 
     // TODO

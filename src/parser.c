@@ -1335,6 +1335,7 @@ bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, b
     }
     if (is_while) {
         while_loop_gen(&g, stack, asttree, while_exp_counter);
+        while_exp_counter++;
     }
     if (is_return) {
         return_func_exp(&g, asttree, stack, item->key, true);
