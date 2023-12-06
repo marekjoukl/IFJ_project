@@ -9,6 +9,7 @@
 
 int if_exp_counter2 = 0;
 int if_exp_counter = 0;
+int while_exp_counter = 0;
 
 data_t *CreateData(bool function, int line) {
     data_t *data = malloc(sizeof(data_t));
@@ -367,10 +368,6 @@ bool Sequence(Lexeme *token, symtable_stack_t *stack) {
             }
         }
 
-        if (!item->data->is_function) {
-            assign_var_0(&g, token, stack);
-        }
-
         GETTOKEN()
         if (!AssignOrFunction(token, stack, item, &temp_token))
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
@@ -429,8 +426,9 @@ bool Sequence(Lexeme *token, symtable_stack_t *stack) {
     }
     // <SEQUENCE> -> WHILE <EXPRESSION> LEFT_BRACKET <SEQUENCE_N> RIGHT_BRACKET
     else if (token->kind == WHILE) {
+        int current_while_stat = while_exp_counter;
         GETTOKEN()
-        if (!Expression(token, stack, NULL, true, false, false))
+        if (!Expression(token, stack, NULL, true, false, false, false))
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
 
         if (token->kind != LEFT_BRACKET)
@@ -445,6 +443,8 @@ bool Sequence(Lexeme *token, symtable_stack_t *stack) {
 
         //deleting assigned frame
         SymtableStackPop(stack);
+
+        while_loop_end(&g, current_while_stat);
 
         if(token->kind != RIGHT_BRACKET)
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
@@ -616,7 +616,7 @@ bool ReturnFunctionN(Lexeme *token, symtable_stack_t *stack, symtable_item_t *te
 
     // <RETURN_FUNCTION_N> -> <EXPRESSION>
     if (token->kind == IDENTIFIER || token->kind == INTEGER_LIT || token->kind == DOUBLE_LIT || token->kind == STRING_LIT || token->kind == LEFT_PAR || token->kind == NIL) {
-        if (!Expression(token, stack, temp_token, false, true, true))
+        if (!Expression(token, stack, temp_token, false, true, true, false))
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
         return true;
     }
@@ -994,7 +994,7 @@ bool IfExp(Lexeme *token, symtable_stack_t *stack, symtable_item_t **variable) {
     }
     // <IF_EXP> -> <EXPRESSION>
     if (token->kind == IDENTIFIER || token->kind == INTEGER_LIT || token->kind == DOUBLE_LIT || token->kind == STRING_LIT || token->kind == LEFT_PAR || token->kind == NIL) {
-        if (!Expression(token, stack, NULL, true, false, false))
+        if (!Expression(token, stack, NULL, false, false, false, true))
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
 
         return true;
@@ -1243,7 +1243,7 @@ bool ExpOrCall(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item_to_
     // <EXP_OR_CALL> -> <EXPRESSION>
     else if (token->kind == IDENTIFIER || token->kind == INTEGER_LIT || token->kind == DOUBLE_LIT || token->kind == STRING_LIT || token->kind == LEFT_PAR || token->kind == NIL) {
         
-        if (!Expression(token, stack, item_to_assign, false, false, type_was_defined))
+        if (!Expression(token, stack, item_to_assign, false, false, type_was_defined, false))
             { ERROR_HANDLE(SYNTAX_ERROR, token) }
         return true;
     }
@@ -1268,13 +1268,13 @@ bool CallFunction(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item,
     return false;
 }
 
-bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, bool is_while_or_if, bool is_return, bool type_was_defined) {
+bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, bool is_while, bool is_return, bool type_was_defined, bool is_if) {
     ast_t *asttree = NULL;
     data_type_t expression_type;
     //TODO: pridat stack do precedencnej + poslat tam item funkcie/premennej na kontrolu tipov pri return funkcie/priradenie do premennej
     expression_type = precedent_analysys(token, stack, &asttree);
 
-    if (is_while_or_if) {
+    if (is_while || is_if) {
         if (expression_type != TYPE_BOOL) {
             ERROR_HANDLE(TYPE_ERROR, token) //TODO: find out what error code to use
         }
@@ -1320,11 +1320,14 @@ bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, b
         }
     }
 
-    if (!is_while_or_if && !is_return) {
+    if (!is_while && !is_return && !is_if) {
         assign_var_1(&g, item->key, stack, asttree, true, NULL);
     }
-    if (is_while_or_if) {
+    if (is_if) {
         if_stat(&g, asttree, stack, if_exp_counter);
+    }
+    if (is_while) {
+        while_loop_gen(&g, stack, asttree, while_exp_counter);
     }
     if (is_return) {
         return_func_exp(&g, asttree, stack, item->key);

@@ -95,11 +95,11 @@ void else_stat(Generator *g, bool is_else_start, int else_counter);
 /**
  * @brief Generate label for while loop
  */
-void while_loop_gen(Generator *g);
+void while_loop_gen(Generator *g, symtable_stack_t *stack, ast_t *asttree, int while_counter);
 /**
  * @brief Generate label for while loop end
  */
-void while_loop_end(Generator *g);
+void while_loop_end(Generator *g, int while_counter);
 /**
  * @brief Function that extracts value from token given by parser
  * @param g 

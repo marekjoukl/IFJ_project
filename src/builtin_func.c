@@ -181,7 +181,7 @@ void eval_greater_equal(Generator *g){
                             "JUMPIFEQ $greater_equal_true GF@!tmp1 GF@!tmp2\n"     // tmps must be already stored
                             "DEFVAR LF@?type1\n"
                             "GT LF@?type1 GF@!tmp1 GF@!tmp2\n"                       // if tmp1 > tmp2, return true
-                            "JUMPIFEQ $greater_equal_true LF@?type1 bool@true\n"
+                            "JUMPIFNEQ $greater_equal_true LF@?type1 bool@true\n"
                             "PUSHS bool@false\n"
                             "POPFRAME\n"
                             "RETURN\n"
@@ -199,7 +199,7 @@ void eval_greater(Generator *g){
                             "POPS GF@!tmp2\n"                                      // must be pushed before call
                             "DEFVAR LF@?type1\n"
                             "GT LF@?type1 GF@!tmp1 GF@!tmp2\n"                       // if tmp1 > tmp2, return true
-                            "JUMPIFEQ $greater_true LF@?type1 bool@true\n"
+                            "JUMPIFNEQ $greater_true LF@?type1 bool@true\n"
                             "PUSHS bool@false\n"
                             "POPFRAME\n"
                             "RETURN\n"
@@ -218,7 +218,7 @@ void eval_less_equal(Generator *g){
                             "JUMPIFEQ $greater_less_true GF@!tmp1 GF@!tmp2\n"     // tmps must be already stored
                             "DEFVAR LF@?type1\n"
                             "LT LF@?type1 GF@!tmp1 GF@!tmp2\n"                       // if tmp1 > tmp2, return true
-                            "JUMPIFEQ $greater_less_true LF@?type1 bool@true\n"
+                            "JUMPIFNEQ $greater_less_true LF@?type1 bool@true\n"
                             "PUSHS bool@false\n"
                             "POPFRAME\n"
                             "RETURN\n"
@@ -236,7 +236,7 @@ void eval_less(Generator *g){
                             "POPS GF@!tmp2\n"                                      // must be pushed before call
                             "DEFVAR LF@?type1\n"
                             "LT LF@?type1 GF@!tmp1 GF@!tmp2\n"                       // if tmp1 > tmp2, return true
-                            "JUMPIFEQ $less_true LF@?type1 bool@true\n"
+                            "JUMPIFNEQ $less_true LF@?type1 bool@true\n"
                             "PUSHS bool@false\n"
                             "POPFRAME\n"
                             "RETURN\n"

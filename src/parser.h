@@ -65,7 +65,7 @@ bool FuncReturnTypeCheck(data_type_t return_expression_type, data_type_t functio
 bool WriteFunc(Lexeme *token, symtable_stack_t *stack, int *counter);
 
 //TODO: find out how to call precendencnu analyzu
-bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, bool is_while_or_if, bool is_return, bool type_was_defined);
+bool Expression(Lexeme *token, symtable_stack_t *stack, symtable_item_t *item, bool is_while, bool is_return, bool type_was_defined, bool is_if);
 
 #endif
 

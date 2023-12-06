@@ -184,15 +184,31 @@ void else_stat(Generator *g, bool is_else_start, int else_counter){
     }
 }
 
-void while_loop_gen(Generator *g){
-    add_to_str(&g->instructions, "LABEL $while\n"
-                                 "CALL $eval_bool\n"
-                                 "JUMPIFEQ $end_while GF@!tmp1 bool@false\n");       // if false, jump to end_while
+void while_loop_gen(Generator *g, symtable_stack_t *stack, ast_t *asttree, int while_counter){
+    char buffer[11];
+    sprintf(buffer, "%d", while_counter);
+    add_to_str(&g->instructions, "CREATEFRAME\n");
+    add_to_str(&g->instructions, "PUSHFRAME\n");
+    add_to_str(&g->instructions, "LABEL $while");
+    add_to_str(&g->instructions, buffer);
+    add_to_str(&g->instructions, "\n");
+    exp_postfix(g, asttree, stack);
+    add_to_str(&g->instructions, "CALL $eval_bool\n");
+    add_to_str(&g->instructions, "JUMPIFNEQS $end_while");
+    add_to_str(&g->instructions, buffer);
+    add_to_str(&g->instructions, "\n");
 }
 
-void while_loop_end(Generator *g){
-    add_to_str(&g->instructions, "JUMP $while\n"
-                                 "LABEL $end_while\n");
+void while_loop_end(Generator *g, int while_counter){
+    char buffer[11];
+    sprintf(buffer, "%d", while_counter);
+    add_to_str(&g->instructions, "JUMP $while");
+    add_to_str(&g->instructions, buffer);
+    add_to_str(&g->instructions, "\n");
+    add_to_str(&g->instructions, "LABEL $end_while");
+    add_to_str(&g->instructions, buffer);
+    add_to_str(&g->instructions, "\n");
+    add_to_str(&g->instructions, "POPFRAME\n");
 }
 
 void extract_value(Generator *g, Lexeme *token, symtable_item_t *item, symtable_stack_t *stack){
@@ -256,8 +272,8 @@ void exp_postfix(Generator *g, ast_t *tree, symtable_stack_t *stack){
     if(tree == NULL){
         return;
     }
-    exp_postfix(g, tree->right, stack);
     exp_postfix(g, tree->left, stack);
+    exp_postfix(g, tree->right, stack);
 
     if (strcmp(tree->data, "+") == 0){
         add_to_str(&g->instructions, "ADDS\n");
@@ -272,7 +288,10 @@ void exp_postfix(Generator *g, ast_t *tree, symtable_stack_t *stack){
         add_to_str(&g->instructions, "MULS\n");
     } else if (strcmp(tree->data, "/") == 0)
     {
-        add_to_str(&g->instructions, "DIVS\n");
+        if (tree->right->type == TYPE_INT)
+            add_to_str(&g->instructions, "IDIVS\n");
+        else
+            add_to_str(&g->instructions, "DIVS\n");
     } else if (strcmp(tree->data, ">=") == 0)
     {
         add_to_str(&g->instructions, "CALL $eval_greater_equal\n");
