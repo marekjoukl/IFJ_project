@@ -152,7 +152,7 @@ void print_footer(Generator *g){
 
 void if_stat(Generator *g, ast_t *asttree, symtable_stack_t *stack, int if_counter){
     exp_postfix(g, asttree, stack);
-    add_to_str(&g->instructions, "CALL $eval_bool\n"
+    add_to_str(&g->instructions, "PUSHS bool@true\n"
                                  "JUMPIFNEQS $else");       // if false, jump to else
     char buffer[11];
     sprintf(buffer, "%d", if_counter);
