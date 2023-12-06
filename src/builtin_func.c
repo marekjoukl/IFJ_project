@@ -177,7 +177,7 @@ void builtin_substr(Generator *g){
 }
 
 void builtin_int2double(Generator *g){
-    add_to_str(&g->header,  "LABEL $int2double\n"
+    add_to_str(&g->header,  "LABEL $Int2Double\n"
                             "PUSHFRAME\n"
                             "CREATEFRAME\n"
                             "INT2FLOATS\n"
@@ -186,7 +186,7 @@ void builtin_int2double(Generator *g){
 }
 
 void builtin_double2int(Generator *g){
-    add_to_str(&g->header,  "LABEL $double2int\n"
+    add_to_str(&g->header,  "LABEL $Double2Int\n"
                             "PUSHFRAME\n"
                             "CREATEFRAME\n"
                             "FLOAT2INTS\n"
